@@ -304,13 +304,6 @@ const gallery: Gallery = {
       orientation: "horizontal",
       category: "UI Design (Roblox)",
     },
-    {
-      type: "model",
-      src: "/models/cartonbox.glb",
-      alt: "Modèle 3D d'un carton",
-      orientation: "horizontal",
-      category: "Model 3D",
-    },
 
   ],
 };

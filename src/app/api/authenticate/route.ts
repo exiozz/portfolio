@@ -4,10 +4,10 @@ import * as cookie from "cookie";
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const { password } = body;
-  const correctPassword = process.env.PAGE_ACCESS_PASSWORD;
+  const correctPassword = process.env.NEXT_PUBLIC_PAGE_ACCESS_PASSWORD;
 
   if (!correctPassword) {
-    console.error("PAGE_ACCESS_PASSWORD environment variable is not set");
+    console.error("NEXT_PUBLIC_PAGE_ACCESS_PASSWORD environment variable is not set");
     return NextResponse.json({ message: "Internal server error" }, { status: 500 });
   }
 

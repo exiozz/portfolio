@@ -7,6 +7,8 @@ import { zones } from "tzdata";
  */
 export type IANATimeZone = Extract<keyof typeof zones, string>; // Narrow to string keys for React usage
 
+
+
 /**
  * Represents a person featured in the portfolio.
  */
@@ -233,14 +235,14 @@ export interface Work extends BasePageConfig {}
  * Gallery page configuration.
  * @description Configuration for the Gallery page, including metadata, navigation label, and image list.
  */
+export interface GalleryItem {
+  type: "image" | "model"; // On ajoute un type pour différencier
+  src: string;
+  alt: string;
+  orientation?: string; // Utilisé seulement pour les images
+  category?: string;
+}
+
 export interface Gallery extends BasePageConfig {
-  /** List of images in the gallery */
-  images: Array<{
-    /** Image source path */
-    src: string;
-    /** Image alt text */
-    alt: string;
-    /** Image orientation (horizontal/vertical) */
-    orientation: string;
-  }>;
+  images: GalleryItem[];
 }

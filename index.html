@@ -853,25 +853,48 @@ const io = new IntersectionObserver((entries) => {
 }, { threshold: 0.15 });
 document.querySelectorAll('.reveal, .stagger').forEach(el => io.observe(el));
 
-/* DISCORD OAUTH FLOW
+/* DISCORD OAUTH FLOW + COMPTE PERSISTANT
    1) Clic -> redirection Discord authorize
    2) Discord redirige vers ton backend (server.js) avec un "code"
    3) Le backend échange le code, récupère le profil, redirige ici avec
       ?discord_id=...&discord_user=...&discord_avatar=...
+   4) On sauvegarde ce profil dans localStorage : tu restes connecté
+      même après avoir fermé/rouvert la page (vrai système de compte).
+   NOTE: localStorage ne fonctionne pas dans l'aperçu Claude Artifacts,
+   mais fonctionne normalement une fois le site hébergé sur ton domaine.
 */
+const SESSION_KEY = 'exiozz_discord_session';
 const params = new URLSearchParams(window.location.search);
 let currentUser = null;
+
 if (params.get('discord_id')) {
   currentUser = { id: params.get('discord_id'), name: params.get('discord_user'), avatar: params.get('discord_avatar') };
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser)); } catch(e) {}
   window.history.replaceState({}, '', window.location.pathname);
+} else {
+  try {
+    const saved = localStorage.getItem(SESSION_KEY);
+    if (saved) currentUser = JSON.parse(saved);
+  } catch(e) {}
 }
+
 const statusEl = document.getElementById('discord-status');
 const connectBtn = document.getElementById('discord-connect-btn');
 const reviewForm = document.getElementById('review-form');
+
 function renderConnectionState() {
   if (currentUser) {
-    statusEl.textContent = `Connecté en tant que ${currentUser.name}. Tu peux laisser ton avis ci-dessous.`;
-    connectBtn.style.display = 'none'; reviewForm.classList.add('active');
+    statusEl.innerHTML = `Connecté en tant que <b>${currentUser.name}</b>. Tu peux laisser ton avis ci-dessous. <a href="#" id="logout-link" style="color:var(--orange);text-decoration:underline;">Se déconnecter</a>`;
+    connectBtn.style.display = 'none';
+    reviewForm.classList.add('active');
+    document.getElementById('logout-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      currentUser = null;
+      try { localStorage.removeItem(SESSION_KEY); } catch(err) {}
+      connectBtn.style.display = 'inline-flex';
+      reviewForm.classList.remove('active');
+      statusEl.textContent = "Aucune connexion active — nécessite le backend OAuth (voir server.js fourni).";
+    });
   } else {
     statusEl.textContent = "Aucune connexion active — nécessite le backend OAuth (voir server.js fourni).";
   }
@@ -895,21 +918,29 @@ document.querySelectorAll('#star-picker span').forEach(star => {
   });
 });
 
-/* REVIEWS STORAGE */
+/* REVIEWS: stockés via le backend (base de données Replit) */
 async function loadReviews() {
   const grid = document.getElementById('reviews-grid');
+  if (DATA.discord.backendAuthUrl.includes('TON-BACKEND')) {
+    grid.innerHTML = '<div class="empty-note">Aucun avis pour le moment. Sois le premier à en laisser un !</div>';
+    return;
+  }
+  const apiBase = DATA.discord.backendAuthUrl.replace('/auth/discord', '');
   try {
-    const list = await window.storage.list('review:', true);
-    if (!list || !list.keys || list.keys.length === 0) { grid.innerHTML = '<div class="empty-note">Aucun avis pour le moment. Sois le premier à en laisser un !</div>'; return; }
-    const reviews = [];
-    for (const key of list.keys) { try { const r = await window.storage.get(key, true); if (r) reviews.push(JSON.parse(r.value)); } catch (e) {} }
-    reviews.sort((a, b) => b.timestamp - a.timestamp);
+    const res = await fetch(`${apiBase}/api/reviews`);
+    const reviews = await res.json();
+    if (!reviews || reviews.length === 0) {
+      grid.innerHTML = '<div class="empty-note">Aucun avis pour le moment. Sois le premier à en laisser un !</div>';
+      return;
+    }
     grid.innerHTML = reviews.map(r => `
       <div class="review-card"><div class="review-head">
         <div class="review-avatar">${r.avatar ? `<img src="${r.avatar}" alt="">` : r.name.slice(0,2).toUpperCase()}</div>
         <div><div class="review-name">${r.name}</div><div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div></div>
       </div><p>${r.text}</p></div>`).join('');
-  } catch (e) { grid.innerHTML = '<div class="empty-note">Aucun avis pour le moment. Sois le premier à en laisser un !</div>'; }
+  } catch (e) {
+    grid.innerHTML = '<div class="empty-note">Impossible de charger les avis pour le moment.</div>';
+  }
 }
 loadReviews();
 document.getElementById('submit-review').addEventListener('click', async () => {
@@ -917,13 +948,28 @@ document.getElementById('submit-review').addEventListener('click', async () => {
   if (!currentUser) return;
   if (!text) { alert('Écris un avis avant de publier.'); return; }
   if (selectedRating === 0) { alert('Choisis une note.'); return; }
-  const review = { name: currentUser.name, avatar: currentUser.avatar, text, rating: selectedRating, timestamp: Date.now() };
+  const apiBase = DATA.discord.backendAuthUrl.replace('/auth/discord', '');
   try {
-    await window.storage.set('review:' + currentUser.id, JSON.stringify(review), true);
+    const res = await fetch(`${apiBase}/api/reviews`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        discordId: currentUser.id, name: currentUser.name, avatar: currentUser.avatar,
+        rating: selectedRating, text
+      })
+    });
+    let data = {};
+    try { data = await res.json(); } catch(e) {}
+    if (!res.ok) {
+      alert(`Erreur serveur (${res.status}) : ${data.error || 'raison inconnue'}. Vérifie que ton backend Replit est bien redéployé avec le dernier code et que @replit/database est bien installé.`);
+      return;
+    }
     document.getElementById('review-text').value = ''; selectedRating = 0;
     document.querySelectorAll('#star-picker span').forEach(s => s.classList.remove('active'));
     loadReviews();
-  } catch (e) { alert("Erreur lors de l'envoi de l'avis."); }
+  } catch (e) {
+    alert(`Impossible de contacter le serveur (${e.message}). Vérifie l'URL du backend et que le CORS est bien activé.`);
+  }
 });
 </script>
 </body>

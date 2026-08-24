@@ -55,6 +55,9 @@
   .nav-btn.cart .cart-count{position:absolute;top:-6px;right:-6px;background:var(--orange);color:#000;border-radius:50%;width:20px;height:20px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono';}
   @media (max-width:600px){.nav-buttons .nav-btn span.label{display:none;}}
 
+  /* Masquer les éléments liés au panier quand non connecté */
+  .hidden-if-not-logged { display: none !important; }
+
   .marquee-wrap{border-bottom:1px solid var(--line);overflow:hidden;background:var(--panel);position:relative;z-index:1;}
   .marquee{display:flex;white-space:nowrap;animation:marquee 26s linear infinite;}
   .marquee span{font-family:'JetBrains Mono';font-size:12px;color:var(--muted);padding:12px 26px;border-right:1px solid var(--line);display:inline-flex;align-items:center;gap:8px;}
@@ -191,10 +194,6 @@
   .service-card .btn-group{display:flex;gap:8px;width:100%;margin-top:4px;}
   .service-card .btn-group .btn{flex:1;justify-content:center;}
 
-  #cart-button{position:fixed;bottom:90px;right:26px;z-index:60;width:56px;height:56px;border-radius:50%;background:var(--panel);border:1px solid var(--line);color:var(--text);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.35);transition:all .3s ease;opacity:0;transform:translateY(16px) scale(.8);pointer-events:none;}
-  #cart-button.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
-  #cart-button:hover{border-color:var(--blue);transform:translateY(-3px) scale(1.05);}
-  #cart-count{position:absolute;top:-6px;right:-6px;background:var(--orange);color:#000;border-radius:50%;width:22px;height:22px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono';}
   .cart-modal{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);display:none;justify-content:center;align-items:center;padding:20px;}
   .cart-modal.active{display:flex;}
   .cart-panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);max-width:600px;width:100%;max-height:80vh;overflow-y:auto;padding:28px;position:relative;animation:modalIn .3s ease;}
@@ -279,7 +278,8 @@
   .stars span:hover{transform:scale(1.2);}
   .stars span.active{color:var(--orange);}
   .reviews-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;}
-  .review-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px;transition:transform .25s ease, border-color .25s ease;position:relative;}
+  .review-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:32px 22px 22px 22px;transition:transform .25s ease, border-color .25s ease;position:relative;overflow:visible;}
+  .review-card .top-badge{position:absolute;top:4px;left:16px;background:var(--blue);color:#000;font-family:'JetBrains Mono';font-size:10px;font-weight:700;padding:3px 10px;border-radius:999px;}
 
   .reviews-carousel{display:flex;align-items:center;gap:14px;}
   .carousel-viewport{overflow:hidden;flex:1;}
@@ -287,7 +287,6 @@
   .reviews-track .review-card{flex:0 0 calc(33.333% - 12px);min-width:260px;}
   @media (max-width:900px){.reviews-track .review-card{flex:0 0 calc(50% - 9px);}}
   @media (max-width:640px){.reviews-track .review-card{flex:0 0 100%;}}
-  .review-card .top-badge{position:absolute;top:-10px;left:16px;background:var(--blue);color:#000;font-family:'JetBrains Mono';font-size:10px;font-weight:700;padding:3px 10px;border-radius:999px;}
   .carousel-arrow{background:var(--panel);border:1px solid var(--line);color:var(--text);width:38px;height:38px;border-radius:50%;font-size:20px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s ease;}
   .carousel-arrow:hover{border-color:var(--blue);color:var(--blue);transform:scale(1.08);}
   .carousel-dots{display:flex;justify-content:center;gap:7px;margin-top:20px;}
@@ -591,12 +590,12 @@
         <div class="dropdown" id="nav-discord-dropdown">
           <div class="dropdown-header" id="dropdown-header"></div>
           <a href="#reviews" id="nav-my-review">✏️ Voir / laisser mon avis</a>
-          <a href="#" id="nav-my-cart-link">🛒 Mon panier</a>
+          <a href="#" id="nav-my-cart-link" class="hidden-if-not-logged">🛒 Mon panier</a>
           <a href="#" id="nav-discord-logout">🚪 Se déconnecter</a>
         </div>
       </div>
-      <!-- Bouton Panier -->
-      <button class="nav-btn cart" id="nav-cart-btn">
+      <!-- Bouton Panier (masqué si non connecté) -->
+      <button class="nav-btn cart hidden-if-not-logged" id="nav-cart-btn">
         🛒
         <span class="label">Panier</span>
         <span class="cart-count" id="nav-cart-count">0</span>
@@ -817,12 +816,6 @@ Joueur<span class="kw">:Connect</span>(<span class="kw">function</span>(player)<
   <a class="fab contact" id="fab-contact" href="#" title="Me contacter">✉️</a>
 </div>
 
-<!-- BOUTON PANIER FLOTTANT -->
-<div id="cart-button" class="show" title="Panier">
-  🛒
-  <span id="cart-count">0</span>
-</div>
-
 <!-- MODALE PANIER -->
 <div class="cart-modal" id="cart-modal">
   <div class="cart-panel">
@@ -1024,7 +1017,6 @@ document.getElementById('pricing-toggle').addEventListener('click', (e) => {
 function renderCart(){
   const count = cart.reduce((sum, item) => sum + item.qty, 0);
   document.getElementById('nav-cart-count').textContent = count;
-  document.getElementById('cart-count').textContent = count;
   const container = document.getElementById('cart-items');
   const totalSpan = document.querySelector('#cart-total span');
   if(cart.length === 0){
@@ -1110,7 +1102,6 @@ function openCart(){
 }
 function closeCart(){ document.getElementById('cart-modal').classList.remove('active'); }
 document.getElementById('nav-cart-btn').addEventListener('click', openCart);
-document.getElementById('cart-button').addEventListener('click', openCart);
 document.getElementById('cart-close').addEventListener('click', closeCart);
 document.getElementById('cart-modal').addEventListener('click', (e) => {
   if(e.target === document.getElementById('cart-modal')) closeCart();
@@ -1338,6 +1329,17 @@ const navDiscordBtn = document.getElementById('nav-discord-btn');
 const navDiscordLabel = document.getElementById('nav-discord-label');
 const navDiscordDropdown = document.getElementById('nav-discord-dropdown');
 
+function updateCartVisibility() {
+  const cartElements = document.querySelectorAll('.hidden-if-not-logged');
+  cartElements.forEach(el => {
+    if (currentUser) {
+      el.style.display = ''; // rétablir l'affichage (par défaut selon CSS)
+    } else {
+      el.style.display = 'none';
+    }
+  });
+}
+
 function updateNavDiscord() {
   const headerEl = document.getElementById('dropdown-header');
   if (currentUser) {
@@ -1356,6 +1358,7 @@ function updateNavDiscord() {
     navDiscordDropdown.classList.remove('active');
     headerEl.innerHTML = '';
   }
+  updateCartVisibility();
 }
 updateNavDiscord();
 

@@ -46,6 +46,15 @@
   .nav-cta:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(255,255,255,0.4);}
   @media (max-width:860px){nav ul{display:none;}}
 
+  .nav-buttons{display:flex;align-items:center;gap:12px;}
+  .nav-btn{background:transparent;border:1px solid var(--line);color:var(--text);padding:6px 14px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s ease;display:flex;align-items:center;gap:6px;}
+  .nav-btn:hover{border-color:var(--blue);color:var(--blue);}
+  .nav-btn.discord{background:#5865F2;border-color:#5865F2;color:#fff;}
+  .nav-btn.discord:hover{box-shadow:0 4px 16px rgba(88,101,242,0.4);transform:translateY(-2px);}
+  .nav-btn.cart{position:relative;padding:6px 14px;}
+  .nav-btn.cart .cart-count{position:absolute;top:-6px;right:-6px;background:var(--orange);color:#000;border-radius:50%;width:20px;height:20px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono';}
+  @media (max-width:600px){.nav-buttons .nav-btn span.label{display:none;}}
+
   .marquee-wrap{border-bottom:1px solid var(--line);overflow:hidden;background:var(--panel);position:relative;z-index:1;}
   .marquee{display:flex;white-space:nowrap;animation:marquee 26s linear infinite;}
   .marquee span{font-family:'JetBrains Mono';font-size:12px;color:var(--muted);padding:12px 26px;border-right:1px solid var(--line);display:inline-flex;align-items:center;gap:8px;}
@@ -73,12 +82,14 @@
   .btn-ghost:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-3px);}
   .btn-purple{background:var(--purple);color:#000000;}
   .btn-purple:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(255,255,255,0.4);}
+  .btn-cart{background:transparent;border:1px solid var(--line);color:var(--text);padding:8px 16px;font-size:12px;}
+  .btn-cart:hover{border-color:var(--blue);color:var(--blue);}
+  .btn-cart.in-cart{background:var(--orange);color:#000;border-color:var(--orange);}
 
   .hero-stats{display:flex;gap:40px;margin-top:52px;flex-wrap:wrap;opacity:0;animation:fadeUp .8s ease forwards;animation-delay:1.3s;}
   .stat b{font-family:'Space Grotesk';font-size:28px;display:block;font-weight:700;background:linear-gradient(180deg,#fff,var(--blue-2));-webkit-background-clip:text;background-clip:text;color:transparent;}
   .stat span{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
 
-  /* HERO VISUAL — panel + cube 3D décoratif */
   .hero-visual{opacity:0;animation:fadeUp .9s ease forwards;animation-delay:.6s;position:relative;}
   .tilt-wrap{perspective:900px;}
   .studio-panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.4);transition:transform .1s ease-out;transform-style:preserve-3d;}
@@ -119,7 +130,6 @@
   .stagger.visible > *:nth-child(5){transition-delay:.45s;} .stagger.visible > *:nth-child(6){transition-delay:.55s;}
   .stagger.visible > *:nth-child(7){transition-delay:.65s;} .stagger.visible > *:nth-child(8){transition-delay:.75s;}
 
-  /* ABOUT */
   .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:start;}
   @media (max-width:820px){.about-grid{grid-template-columns:1fr;}}
   .about-text p{color:var(--muted);font-size:15.5px;line-height:1.75;margin-bottom:16px;}
@@ -130,7 +140,6 @@
   .highlight h4{font-size:14.5px;margin-bottom:4px;}
   .highlight p{font-size:13px;color:var(--muted);line-height:1.5;}
 
-  /* PROCESS */
   .process-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;position:relative;}
   @media (max-width:900px){.process-steps{grid-template-columns:1fr;}}
   .process-steps::before{content:"";position:absolute;top:26px;left:0;right:0;height:1px;background:var(--line);}
@@ -141,7 +150,6 @@
   .process-step h4{font-size:15px;margin-bottom:8px;}
   .process-step p{font-size:13px;color:var(--muted);line-height:1.55;}
 
-  /* CATEGORY TABS (réutilisés pour compétences ET services) */
   .cat-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:34px;}
   .cat-tab{font-family:'JetBrains Mono';font-size:13px;padding:10px 18px;border-radius:9px;border:1px solid var(--line);color:var(--muted);cursor:pointer;background:var(--panel);transition:all .25s ease;display:flex;align-items:center;gap:8px;}
   .cat-tab:hover{color:var(--text);border-color:var(--blue);}
@@ -158,7 +166,6 @@
   .bar-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);width:40%;animation:shimmer 2.2s infinite;}
   @keyframes shimmer{0%{transform:translateX(-100%);}100%{transform:translateX(350%);}}
 
-  /* PRICING */
   .pricing-toggle{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:30px;gap:4px;}
   .pricing-toggle button{font-family:'JetBrains Mono';font-size:13px;padding:9px 18px;border-radius:7px;border:none;background:transparent;color:var(--muted);cursor:pointer;transition:all .25s ease;display:flex;align-items:center;gap:7px;}
   .pricing-toggle button.active{background:var(--blue);color:#000000;}
@@ -181,7 +188,27 @@
   .feature-list li::before{content:"✓";color:var(--green);font-weight:700;flex-shrink:0;}
   .service-card .btn{width:100%;justify-content:center;}
 
-  /* PROJECTS */
+  .service-card .btn-group{display:flex;gap:8px;width:100%;margin-top:4px;}
+  .service-card .btn-group .btn{flex:1;justify-content:center;}
+
+  #cart-button{position:fixed;bottom:90px;right:26px;z-index:60;width:56px;height:56px;border-radius:50%;background:var(--panel);border:1px solid var(--line);color:var(--text);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.35);transition:all .3s ease;opacity:0;transform:translateY(16px) scale(.8);pointer-events:none;}
+  #cart-button.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
+  #cart-button:hover{border-color:var(--blue);transform:translateY(-3px) scale(1.05);}
+  #cart-count{position:absolute;top:-6px;right:-6px;background:var(--orange);color:#000;border-radius:50%;width:22px;height:22px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono';}
+  .cart-modal{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);display:none;justify-content:center;align-items:center;padding:20px;}
+  .cart-modal.active{display:flex;}
+  .cart-panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);max-width:600px;width:100%;max-height:80vh;overflow-y:auto;padding:28px;position:relative;animation:modalIn .3s ease;}
+  .cart-panel h2{font-size:24px;margin-bottom:16px;}
+  .cart-item{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);align-items:center;}
+  .cart-item .title{font-size:14px;}
+  .cart-item .price{font-family:'JetBrains Mono';font-size:13px;color:var(--blue-2);}
+  .cart-item .remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;transition:color .2s;}
+  .cart-item .remove:hover{color:var(--orange);}
+  .cart-total{display:flex;justify-content:space-between;font-weight:700;font-size:18px;padding:16px 0;border-top:2px solid var(--line);margin-top:8px;}
+  .cart-actions{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;}
+  .cart-actions .btn{flex:1;justify-content:center;}
+  .cart-empty{color:var(--muted);font-size:14px;padding:20px 0;text-align:center;}
+
   .projects-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;}
   .project-card{cursor:pointer;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);background:var(--panel);transition:transform .35s ease, box-shadow .35s ease;}
   .project-card:hover{transform:translateY(-8px);box-shadow:0 18px 36px rgba(0,0,0,.35);}
@@ -195,7 +222,6 @@
   .tag-row{display:flex;gap:6px;flex-wrap:wrap;}
   .tag{font-family:'JetBrains Mono';font-size:11px;color:var(--blue-2);background:rgba(255,255,255,0.1);padding:4px 9px;border-radius:6px;}
 
-  /* MODAL */
   .modal-overlay{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);display:none;justify-content:center;align-items:center;padding:20px;}
   .modal-overlay.active{display:flex;}
   .modal{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);max-width:720px;width:100%;max-height:90vh;overflow-y:auto;padding:28px;position:relative;animation:modalIn .3s ease;}
@@ -231,7 +257,6 @@
   .modal-actions .btn-roblox{background:#00B2FF;color:#fff;border:none;}
   .modal-actions .btn-roblox:hover{box-shadow:0 8px 24px rgba(0,178,255,0.5);}
 
-  /* FAQ */
   .faq-list{max-width:720px;}
   .faq-item{border-bottom:1px solid var(--line);}
   .faq-q{display:flex;justify-content:space-between;align-items:center;padding:22px 4px;cursor:pointer;font-size:15px;font-weight:600;gap:20px;}
@@ -240,7 +265,6 @@
   .faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease;}
   .faq-a p{color:var(--muted);font-size:14px;line-height:1.65;padding:0 4px 22px;}
 
-  /* REVIEWS */
   .discord-box{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:36px;text-align:center;margin-bottom:44px;position:relative;overflow:hidden;}
   .discord-box::before{content:"";position:absolute;inset:0;background:radial-gradient(400px circle at 50% 0%, rgba(88,101,242,.12), transparent 70%);}
   .discord-btn{background:#5865F2;color:#fff;border:none;padding:14px 26px;border-radius:10px;font-weight:600;font-size:14.5px;display:inline-flex;align-items:center;gap:10px;cursor:pointer;transition:transform .25s ease, box-shadow .25s ease;position:relative;z-index:1;}
@@ -255,17 +279,18 @@
   .stars span:hover{transform:scale(1.2);}
   .stars span.active{color:var(--orange);}
   .reviews-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;}
-  .review-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px;transition:transform .25s ease, border-color .25s ease;}
+  .review-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px;transition:transform .25s ease, border-color .25s ease;position:relative;}
   .review-card:hover{transform:translateY(-4px);border-color:var(--blue);}
   .review-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
   .review-avatar{width:38px;height:38px;border-radius:50%;background:var(--panel-2);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-size:13px;color:var(--blue);overflow:hidden;}
   .review-avatar img{width:100%;height:100%;object-fit:cover;}
   .review-name{font-size:14px;font-weight:600;}
   .review-stars{color:var(--orange);font-size:12px;}
-  .review-card p{color:var(--muted);font-size:13.5px;line-height:1.55;}
+  .review-card p{color:var(--muted);font-size:13.5px;line-height:1.55;margin-right:50px;}
+  .review-delete{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;transition:color .2s;padding:4px;}
+  .review-delete:hover{color:var(--orange);}
   .empty-note{color:var(--muted);font-size:13px;font-family:'JetBrains Mono';text-align:center;padding:24px;grid-column:1/-1;}
 
-  /* CTA BAND */
   .cta-band{background:linear-gradient(135deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:24px;padding:60px 40px;text-align:center;position:relative;overflow:hidden;}
   .cta-band::before{content:"";position:absolute;inset:0;background:radial-gradient(500px circle at 50% 0%, rgba(255,255,255,.15), transparent 70%);}
   .cta-band h2{position:relative;z-index:1;font-size:clamp(26px,4vw,36px);margin-bottom:14px;}
@@ -279,12 +304,21 @@
   .footer-links a:hover{color:var(--blue);}
   .footer-bottom{color:var(--muted);font-size:12px;font-family:'JetBrains Mono';}
 
-  /* FLOATING BUTTONS */
   .float-stack{position:fixed;bottom:26px;right:26px;display:flex;flex-direction:column;gap:12px;z-index:60;}
   .fab{width:48px;height:48px;border-radius:50%;background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.35);opacity:0;transform:translateY(16px) scale(.8);pointer-events:none;transition:all .3s cubic-bezier(.2,.9,.25,1);color:var(--text);font-size:18px;}
   .fab.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
   .fab:hover{border-color:var(--blue);transform:translateY(-3px) scale(1.05);}
   .fab.contact{background:var(--blue);color:#000000;border-color:var(--blue);}
+
+  .nav-user-menu{position:relative;}
+  .nav-user-menu .dropdown{display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 0;min-width:220px;z-index:10;box-shadow:0 12px 32px rgba(0,0,0,.5);}
+  .nav-user-menu .dropdown.active{display:block;}
+  .nav-user-menu .dropdown a{display:block;padding:8px 18px;font-size:13px;color:var(--text);transition:background .2s;text-decoration:none;}
+  .nav-user-menu .dropdown a:hover{background:var(--panel-2);}
+  .dropdown-header{display:flex;align-items:center;gap:10px;padding:10px 18px 12px;border-bottom:1px solid var(--line);margin-bottom:6px;}
+  .dropdown-header img{width:32px;height:32px;border-radius:50%;flex-shrink:0;}
+  .dropdown-header .dh-name{font-size:13.5px;font-weight:600;}
+  .dropdown-header .dh-badge{font-family:'JetBrains Mono';font-size:10px;color:#000;background:var(--blue);padding:2px 7px;border-radius:999px;display:inline-block;margin-top:3px;}
 
   @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}}
 </style>
@@ -386,21 +420,21 @@
           "desc": "Un système précis intégré à ton jeu existant : inventaire, combat, économie, quêtes, anti-exploit...",
           "priceFrom": 25, "priceNote": "selon complexité du système",
           "features": ["1 système complet", "Tests & corrections inclus", "Code commenté", "Support 7 jours"],
-          "cta": "Demander un devis", "popular": false
+          "cta": "Ajouter au panier", "popular": false
         },
         {
           "icon": "🎮", "title": "Jeu complet",
           "desc": "Développement d'un jeu Roblox de A à Z : concept, mécaniques, scripts, UI et publication.",
           "priceFrom": 150, "priceNote": "selon ampleur du projet",
           "features": ["Concept & game design", "Scripting complet", "Build & UI inclus", "Suivi jusqu'à publication"],
-          "cta": "Demander un devis", "popular": true
+          "cta": "Ajouter au panier", "popular": true
         },
         {
           "icon": "🛠️", "title": "Maintenance & Support",
           "desc": "Corrections de bugs, optimisation des performances, ajout de fonctionnalités sur un projet existant.",
           "priceFrom": 15, "priceNote": "selon volume de travail",
           "features": ["Diagnostic inclus", "Corrections rapides", "Rapport détaillé", "Facturation à la tâche"],
-          "cta": "Demander un devis", "popular": false
+          "cta": "Ajouter au panier", "popular": false
         }
       ]
     },
@@ -412,21 +446,21 @@
           "desc": "Un visuel de profil soigné pour toi, ta chaîne ou ton groupe Roblox.",
           "priceFrom": 5, "priceNote": "par PFP, révisions incluses",
           "features": ["Format carré HD", "2 révisions incluses", "Livraison rapide"],
-          "cta": "Commander un PFP", "popular": false
+          "cta": "Ajouter au panier", "popular": false
         },
         {
           "icon": "🏳️", "title": "Bannière",
           "desc": "Bannière pour ta chaîne YouTube, ton serveur Discord ou ton groupe Roblox.",
           "priceFrom": 8, "priceNote": "par bannière, aux bonnes dimensions",
           "features": ["Dimensions adaptées à la plateforme", "2 révisions incluses", "Fichier source sur demande"],
-          "cta": "Commander une bannière", "popular": true
+          "cta": "Ajouter au panier", "popular": true
         },
         {
           "icon": "🎬", "title": "Thumbnail",
           "desc": "Miniature accrocheuse pour ton jeu, ta vidéo ou ta page Roblox.",
           "priceFrom": 12, "priceNote": "par thumbnail",
           "features": ["Composition originale", "Optimisée pour le clic", "2 révisions incluses"],
-          "cta": "Commander un thumbnail", "popular": false
+          "cta": "Ajouter au panier", "popular": false
         }
       ]
     },
@@ -438,14 +472,14 @@
           "desc": "Un bot codé pour tes besoins précis : modération, économie, niveaux, commandes custom...",
           "priceFrom": 20, "priceNote": "selon fonctionnalités demandées",
           "features": ["Fonctionnalités sur mesure", "Code source fourni", "Aide à l'hébergement", "Support 7 jours"],
-          "cta": "Demander un devis", "popular": false
+          "cta": "Ajouter au panier", "popular": false
         },
         {
           "icon": "🏗️", "title": "Création de serveur Discord",
           "desc": "Structure complète, salons organisés, rôles, permissions et design cohérent.",
           "priceFrom": 15, "priceNote": "selon taille du serveur",
           "features": ["Structure de salons", "Rôles & permissions", "Design visuel inclus", "Bots de base configurés"],
-          "cta": "Demander un devis", "popular": false
+          "cta": "Ajouter au panier", "popular": false
         }
       ]
     }
@@ -514,7 +548,8 @@
     { "q": "Proposes-tu des révisions ?", "a": "Oui, un nombre de révisions raisonnable est inclus dans chaque devis pour ajuster le résultat." },
     { "q": "Payes-tu / acceptes-tu les Robux ?", "a": "Oui, la plupart des services peuvent être réglés en euros ou en Robux — les deux tarifs sont affichés dans la section Tarifs." }
   ],
-  "contactEmail": "tomokari.pro@gmail.com"
+  "contactEmail": "tomokari.pro@gmail.com",
+  "adminDiscordId": "799725583213920276"
 }
 </script>
 
@@ -533,7 +568,28 @@
       <li><a href="#projects">Projets</a></li>
       <li><a href="#reviews">Avis</a></li>
     </ul>
-    <a href="#services" class="nav-cta">Demander un devis</a>
+    <div class="nav-buttons">
+      <!-- Bouton Connexion Discord -->
+      <div class="nav-user-menu">
+        <button class="nav-btn discord" id="nav-discord-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.099.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.076.076 0 0 0-.04.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.955 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+          <span id="nav-discord-label">Se connecter</span>
+        </button>
+        <div class="dropdown" id="nav-discord-dropdown">
+          <div class="dropdown-header" id="dropdown-header"></div>
+          <a href="#reviews" id="nav-my-review">✏️ Voir / laisser mon avis</a>
+          <a href="#" id="nav-my-cart-link">🛒 Mon panier</a>
+          <a href="#" id="nav-discord-logout">🚪 Se déconnecter</a>
+        </div>
+      </div>
+      <!-- Bouton Panier -->
+      <button class="nav-btn cart" id="nav-cart-btn">
+        🛒
+        <span class="label">Panier</span>
+        <span class="cart-count" id="nav-cart-count">0</span>
+      </button>
+      <a href="#services" class="nav-cta">Devis</a>
+    </div>
   </div>
 </nav>
 
@@ -652,8 +708,6 @@ Joueur<span class="kw">:Connect</span>(<span class="kw">function</span>(player)<
     <h2 id="modal-title"></h2>
     <div class="modal-tags" id="modal-tags"></div>
     <p class="modal-desc" id="modal-desc"></p>
-
-    <!-- DÉTAILS SUPPLÉMENTAIRES -->
     <div class="modal-details" id="modal-details">
       <div class="detail-item">
         <span class="label">Genre</span>
@@ -672,7 +726,6 @@ Joueur<span class="kw">:Connect</span>(<span class="kw">function</span>(player)<
         <div class="creators-list" id="modal-creators"></div>
       </div>
     </div>
-
     <div class="modal-actions" id="modal-actions"></div>
   </div>
 </div>
@@ -707,7 +760,7 @@ Joueur<span class="kw">:Connect</span>(<span class="kw">function</span>(player)<
         <div id="review-debug" style="margin-top:14px;font-family:'JetBrains Mono';font-size:12px;color:var(--muted);white-space:pre-wrap;"></div>
       </div>
     </div>
-    <div class="reviews-grid" id="reviews-grid"><div class="empty-note">Aucun avis pour le moment. Sois le premier à en laisser un !</div></div>
+    <div class="reviews-grid" id="reviews-grid"></div>
   </div>
 </section>
 
@@ -743,10 +796,31 @@ Joueur<span class="kw">:Connect</span>(<span class="kw">function</span>(player)<
   <a class="fab contact" id="fab-contact" href="#" title="Me contacter">✉️</a>
 </div>
 
+<!-- BOUTON PANIER FLOTTANT -->
+<div id="cart-button" class="show" title="Panier">
+  🛒
+  <span id="cart-count">0</span>
+</div>
+
+<!-- MODALE PANIER -->
+<div class="cart-modal" id="cart-modal">
+  <div class="cart-panel">
+    <button class="modal-close" id="cart-close" style="position:absolute;top:12px;right:16px;background:none;border:none;color:var(--muted);font-size:28px;cursor:pointer;">&times;</button>
+    <h2>🛒 Mon panier</h2>
+    <div id="cart-items"></div>
+    <div class="cart-total" id="cart-total">Total : <span>0 €</span></div>
+    <div class="cart-actions">
+      <button class="btn btn-primary" id="cart-order">📧 Commander par email</button>
+      <button class="btn btn-ghost" id="cart-clear">Vider le panier</button>
+    </div>
+  </div>
+</div>
+
 <script>
+// === DONNÉES ===
 const DATA = JSON.parse(document.getElementById('site-data').textContent);
 
-/* SCROLL PROGRESS + FABS */
+// === SCROLL PROGRESS + FABS ===
 const progressBar = document.getElementById('scroll-progress');
 const fabTop = document.getElementById('fab-top');
 const fabContact = document.getElementById('fab-contact');
@@ -759,14 +833,14 @@ window.addEventListener('scroll', () => {
 });
 fabTop.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
 
-/* CURSOR GLOW */
+// === CURSOR GLOW ===
 document.addEventListener('mousemove', (e) => {
   const glow = document.getElementById('glow');
   glow.style.setProperty('--mx', e.clientX + 'px');
   glow.style.setProperty('--my', e.clientY + 'px');
 });
 
-/* HERO PANEL 3D TILT */
+// === HERO PANEL 3D TILT ===
 const tiltPanel = document.getElementById('tilt-panel');
 const tiltWrap = document.querySelector('.tilt-wrap');
 tiltWrap.addEventListener('mousemove', (e) => {
@@ -776,7 +850,7 @@ tiltWrap.addEventListener('mousemove', (e) => {
 });
 tiltWrap.addEventListener('mouseleave', () => { tiltPanel.style.transform = 'rotateX(0) rotateY(0)'; });
 
-/* VOXEL BACKGROUND */
+// === VOXEL BACKGROUND ===
 (function(){
   const canvas = document.getElementById('voxel-canvas');
   const ctx = canvas.getContext('2d');
@@ -799,7 +873,7 @@ tiltWrap.addEventListener('mouseleave', () => { tiltPanel.style.transform = 'rot
   tick();
 })();
 
-/* NAV / FOOTER / CTA LINKS */
+// === NAV / FOOTER / CTA LINKS ===
 document.getElementById('nav-name').textContent = DATA.name;
 document.getElementById('footer-name').textContent = DATA.name;
 document.getElementById('year').textContent = new Date().getFullYear();
@@ -809,11 +883,11 @@ document.getElementById('cta-mail').href = 'mailto:' + DATA.contactEmail;
 document.getElementById('cta-discord').href = DATA.discord.inviteUrl;
 document.getElementById('fab-contact').href = 'mailto:' + DATA.contactEmail;
 
-/* MARQUEE */
+// === MARQUEE ===
 const marqueeItems = [...DATA.marquee, ...DATA.marquee].map(t => `<span>${t}</span>`).join('');
 document.getElementById('marquee').innerHTML = marqueeItems + marqueeItems;
 
-/* HERO NAME */
+// === HERO NAME ===
 const heroName = document.getElementById('hero-name');
 [...DATA.name.toUpperCase()].forEach((ch, i) => {
   const s = document.createElement('span');
@@ -823,7 +897,7 @@ const heroName = document.getElementById('hero-name');
 });
 document.getElementById('hero-tagline').textContent = DATA.tagline;
 
-/* STATS COUNT-UP */
+// === STATS COUNT-UP ===
 const statsEl = document.getElementById('hero-stats');
 DATA.stats.forEach(s => statsEl.insertAdjacentHTML('beforeend', `<div class="stat"><b data-target="${s.value}" data-suffix="${s.suffix}">0${s.suffix}</b><span>${s.label}</span></div>`));
 let statsAnimated = false;
@@ -837,16 +911,16 @@ function animateStats(){
 }
 setTimeout(animateStats, 1500);
 
-/* ABOUT */
+// === ABOUT ===
 document.getElementById('about-text').innerHTML = DATA.about.paragraphs.map(p => `<p>${p}</p>`).join('');
 document.getElementById('about-highlights').innerHTML = DATA.about.highlights.map((h,i) => `
   <div class="highlight"><span class="num">0${i+1}</span><div><h4>${h.title}</h4><p>${h.desc}</p></div></div>`).join('');
 
-/* PROCESS */
+// === PROCESS ===
 document.getElementById('process-steps').innerHTML = DATA.process.map((p,i) => `
   <div class="process-step"><div class="process-num">0${i+1}</div><h4>${p.title}</h4><p>${p.desc}</p></div>`).join('');
 
-/* GENERIC TAB HELPER */
+// === GENERIC TAB HELPER ===
 function buildTabs(tabsEl, panelsEl, items, tabHtml, panelHtml, onActivate){
   items.forEach((item, i) => {
     tabsEl.insertAdjacentHTML('beforeend', tabHtml(item, i));
@@ -864,7 +938,7 @@ function buildTabs(tabsEl, panelsEl, items, tabHtml, panelHtml, onActivate){
   });
 }
 
-/* SKILL TABS */
+// === SKILL TABS ===
 const skillTabs = document.getElementById('skill-tabs');
 const skillPanels = document.getElementById('skill-panels');
 function activateBars(panel){ panel.querySelectorAll('.bar-fill').forEach(b=>{ requestAnimationFrame(()=>{ b.style.width = b.dataset.level+'%'; }); }); }
@@ -876,68 +950,387 @@ buildTabs(skillTabs, skillPanels, DATA.skillCategories,
   activateBars
 );
 
-/* SERVICE TABS + PRICING */
+// === SERVICE TABS + PRICING + PANIER ===
 const serviceTabs = document.getElementById('service-tabs');
 const servicePanels = document.getElementById('service-panels');
-function serviceCardHtml(sv){
+let cart = JSON.parse(localStorage.getItem('exiozz_cart') || '[]');
+const CURRENCY_LABEL = { eur: '€', robux: 'R$' };
+let currentCurrency = 'eur';
+
+function serviceCardHtml(sv, categoryId){
   const robux = Math.round(sv.priceFrom * DATA.robuxRate / 5) * 5;
   const features = sv.features.map(f => `<li>${f}</li>`).join('');
+  const inCart = cart.some(item => item.id === categoryId + '-' + sv.title);
   return `
-    <div class="service-card ${sv.popular ? 'popular' : ''}">
+    <div class="service-card ${sv.popular ? 'popular' : ''}" data-id="${categoryId}-${sv.title}" data-price-eur="${sv.priceFrom}" data-price-robux="${robux}" data-title="${sv.title}">
       ${sv.popular ? '<div class="popular-badge">Le plus demandé</div>' : ''}
       <div class="service-icon">${sv.icon}</div>
       <h3>${sv.title}</h3>
       <p>${sv.desc}</p>
       <div class="price-row"><span class="from">à partir de</span>
-        <div><span class="amount" data-eur="${sv.priceFrom}" data-robux="${robux}">${sv.priceFrom}</span><span class="currency curr-label">€</span></div>
+        <div><span class="amount" data-eur="${sv.priceFrom}" data-robux="${robux}">${sv.priceFrom}</span><span class="currency curr-label">${CURRENCY_LABEL[currentCurrency]}</span></div>
       </div>
       <div class="price-note">${sv.priceNote}</div>
       <ul class="feature-list">${features}</ul>
-      <a href="mailto:${DATA.contactEmail}?subject=Devis - ${encodeURIComponent(sv.title)}" class="btn btn-primary">${sv.cta}</a>
+      <div class="btn-group">
+        <button class="btn btn-primary btn-cart-toggle ${inCart ? 'in-cart' : ''}" data-id="${categoryId}-${sv.title}">${inCart ? '✔ Dans le panier' : 'Ajouter au panier'}</button>
+        <a href="mailto:${DATA.contactEmail}?subject=Devis - ${encodeURIComponent(sv.title)}" class="btn btn-ghost" style="flex:0.5;">Devis</a>
+      </div>
     </div>`;
 }
+
 buildTabs(serviceTabs, servicePanels, DATA.serviceCategories,
   (cat, i) => `<div class="cat-tab ${i===0?'active':''}" data-cat="${cat.id}"><span>${cat.icon}</span> ${cat.label}</div>`,
-  (cat, i) => `<div class="cat-panel ${i===0?'active':''}" data-cat="${cat.id}"><div class="services-grid stagger visible">${cat.services.map(serviceCardHtml).join('')}</div></div>`
+  (cat, i) => `<div class="cat-panel ${i===0?'active':''}" data-cat="${cat.id}"><div class="services-grid stagger visible">${cat.services.map(s => serviceCardHtml(s, cat.id)).join('')}</div></div>`
 );
 
+// === PRICING TOGGLE ===
 document.getElementById('pricing-toggle').addEventListener('click', (e) => {
   const btn = e.target.closest('button'); if(!btn) return;
   document.querySelectorAll('#pricing-toggle button').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  const cur = btn.dataset.currency;
+  currentCurrency = btn.dataset.currency;
   document.querySelectorAll('.amount').forEach(el => {
-    el.textContent = cur === 'robux' ? Number(el.dataset.robux).toLocaleString('fr-FR') : el.dataset.eur;
+    el.textContent = currentCurrency === 'robux' ? Number(el.dataset.robux).toLocaleString('fr-FR') : el.dataset.eur;
   });
-  document.querySelectorAll('.curr-label').forEach(el => { el.textContent = cur === 'robux' ? 'R$' : '€'; });
+  document.querySelectorAll('.curr-label').forEach(el => { el.textContent = CURRENCY_LABEL[currentCurrency]; });
 });
 
-/* attach tilt/magnetic behaviour to dynamically created cards */
-function attachCardEffects(){
-  document.querySelectorAll('.service-card, .project-card, .process-step').forEach(card=>{
-    if(card.dataset.tiltBound) return; card.dataset.tiltBound = '1';
-    card.addEventListener('mousemove', (e)=>{
-      const r = card.getBoundingClientRect();
-      const x = (e.clientX-r.left)/r.width - 0.5, y = (e.clientY-r.top)/r.height - 0.5;
-      card.style.transform = `translateY(-6px) rotateX(${-y*4}deg) rotateY(${x*4}deg)`;
-    });
-    card.addEventListener('mouseleave', ()=>{ card.style.transform = ''; });
+// === GESTION DU PANIER ===
+function renderCart(){
+  const count = cart.reduce((sum, item) => sum + item.qty, 0);
+  document.getElementById('nav-cart-count').textContent = count;
+  document.getElementById('cart-count').textContent = count;
+  const container = document.getElementById('cart-items');
+  const totalSpan = document.querySelector('#cart-total span');
+  if(cart.length === 0){
+    container.innerHTML = '<div class="cart-empty">Le panier est vide.</div>';
+    totalSpan.textContent = '0 ' + CURRENCY_LABEL[currentCurrency];
+    return;
+  }
+  let html = '';
+  let total = 0;
+  cart.forEach((item, idx) => {
+    const price = currentCurrency === 'robux' ? item.priceRobux : item.priceEur;
+    const sub = price * item.qty;
+    total += sub;
+    html += `
+      <div class="cart-item">
+        <span class="title">${item.title}</span>
+        <span class="price">${sub.toLocaleString('fr-FR')} ${CURRENCY_LABEL[currentCurrency]}</span>
+        <button class="remove" data-index="${idx}">&times;</button>
+      </div>
+    `;
   });
-  document.querySelectorAll('.btn-primary, .btn-purple, .discord-btn').forEach(btn=>{
-    if(btn.dataset.magnetBound) return; btn.dataset.magnetBound = '1';
-    btn.addEventListener('mousemove', (e)=>{
-      const r = btn.getBoundingClientRect();
-      const x = e.clientX - r.left - r.width/2, y = e.clientY - r.top - r.height/2;
-      btn.style.transform = `translate(${x*0.15}px, ${y*0.25}px) translateY(-3px)`;
+  container.innerHTML = html;
+  totalSpan.textContent = total.toLocaleString('fr-FR') + ' ' + CURRENCY_LABEL[currentCurrency];
+  document.querySelectorAll('.btn-cart-toggle').forEach(btn => {
+    const id = btn.dataset.id;
+    const inCart = cart.some(item => item.id === id);
+    btn.textContent = inCart ? '✔ Dans le panier' : 'Ajouter au panier';
+    btn.classList.toggle('in-cart', inCart);
+  });
+  localStorage.setItem('exiozz_cart', JSON.stringify(cart));
+}
+
+// Ajout / retrait
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.btn-cart-toggle');
+  if(!btn) return;
+  const id = btn.dataset.id;
+  const card = btn.closest('.service-card');
+  if(!card) return;
+  const title = card.dataset.title;
+  const priceEur = parseInt(card.dataset.priceEur);
+  const priceRobux = parseInt(card.dataset.priceRobux);
+  const existing = cart.find(item => item.id === id);
+  if(existing){
+    cart = cart.filter(item => item.id !== id);
+  } else {
+    cart.push({ id, title, priceEur, priceRobux, qty: 1 });
+  }
+  renderCart();
+  btn.textContent = existing ? 'Ajouter au panier' : '✔ Dans le panier';
+  btn.classList.toggle('in-cart', !existing);
+});
+
+// Supprimer un élément du panier
+document.getElementById('cart-items').addEventListener('click', (e) => {
+  const removeBtn = e.target.closest('.remove');
+  if(!removeBtn) return;
+  const idx = parseInt(removeBtn.dataset.index);
+  cart.splice(idx, 1);
+  renderCart();
+});
+
+// Vider le panier
+document.getElementById('cart-clear').addEventListener('click', () => {
+  if(cart.length === 0) return;
+  if(confirm('Vider le panier ?')) {
+    cart = [];
+    renderCart();
+  }
+});
+
+// Ouvrir / fermer le panier
+function openCart(){ document.getElementById('cart-modal').classList.add('active'); renderCart(); }
+function closeCart(){ document.getElementById('cart-modal').classList.remove('active'); }
+document.getElementById('nav-cart-btn').addEventListener('click', openCart);
+document.getElementById('cart-button').addEventListener('click', openCart);
+document.getElementById('cart-close').addEventListener('click', closeCart);
+document.getElementById('cart-modal').addEventListener('click', (e) => {
+  if(e.target === document.getElementById('cart-modal')) closeCart();
+});
+
+// === COMMANDE PAR EMAIL ===
+document.getElementById('cart-order').addEventListener('click', () => {
+  if(cart.length === 0) {
+    alert('Votre panier est vide.');
+    return;
+  }
+  if(!currentUser) {
+    alert('Connecte-toi avec Discord avant de passer commande.');
+    return;
+  }
+  let lines = ['Bonjour Exiozz,', '', 'Voici ma commande :'];
+  let total = 0;
+  cart.forEach(item => {
+    const price = currentCurrency === 'robux' ? item.priceRobux : item.priceEur;
+    const sub = price * item.qty;
+    total += sub;
+    lines.push(`- ${item.title} : ${sub.toLocaleString('fr-FR')} ${CURRENCY_LABEL[currentCurrency]}`);
+  });
+  lines.push('');
+  lines.push(`Total : ${total.toLocaleString('fr-FR')} ${CURRENCY_LABEL[currentCurrency]}`);
+  lines.push('');
+  lines.push('Client : ' + currentUser.name + ' (Discord)');
+  lines.push('Mon Discord : ' + (currentUser.discordHandle || 'non fourni'));
+  lines.push('');
+  lines.push('Merci !');
+  const message = lines.join('\n');
+  const subject = 'Commande depuis le portfolio - ' + currentUser.name;
+  const mailto = `mailto:${DATA.contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+  window.location.href = mailto;
+});
+
+// === GESTION DES AVIS (localStorage) ===
+const REVIEWS_KEY = 'exiozz_reviews';
+function loadReviewsFromStorage(){
+  try {
+    const data = localStorage.getItem(REVIEWS_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch { return []; }
+}
+function saveReviews(reviews){
+  localStorage.setItem(REVIEWS_KEY, JSON.stringify(reviews));
+}
+
+function renderReviews(){
+  const grid = document.getElementById('reviews-grid');
+  const reviews = loadReviewsFromStorage();
+  if(reviews.length === 0){
+    grid.innerHTML = '<div class="empty-note">Aucun avis pour le moment. Sois le premier à en laisser un !</div>';
+    return;
+  }
+  const isAdmin = currentUser && currentUser.id === DATA.adminDiscordId;
+  grid.innerHTML = reviews.map(r => {
+    const canDelete = (currentUser && r.discordId === currentUser.id) || isAdmin;
+    return `
+      <div class="review-card">
+        <div class="review-head">
+          <div class="review-avatar">${r.avatar ? `<img src="${r.avatar}" alt="">` : r.name.slice(0,2).toUpperCase()}</div>
+          <div><div class="review-name">${r.name}</div><div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div></div>
+        </div>
+        <p>${r.text}</p>
+        ${canDelete ? `<button class="review-delete" data-id="${r.id}" title="Supprimer">🗑️</button>` : ''}
+      </div>
+    `;
+  }).join('');
+
+  grid.querySelectorAll('.review-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      if(confirm('Supprimer cet avis ?')) {
+        let reviews = loadReviewsFromStorage();
+        reviews = reviews.filter(r => r.id !== id);
+        saveReviews(reviews);
+        renderReviews();
+      }
     });
-    btn.addEventListener('mouseleave', ()=>{ btn.style.transform = ''; });
   });
 }
-attachCardEffects();
 
-/* ===== PROJETS : FILTRE ACTIFS ===== */
+// === SUBMIT REVIEW ===
+document.getElementById('submit-review').addEventListener('click', () => {
+  const debugEl = document.getElementById('review-debug');
+  debugEl.textContent = '';
+  const text = document.getElementById('review-text').value.trim();
+  if (!currentUser) { alert('Connecte-toi d\'abord.'); return; }
+  if (!text) { alert('Écris un avis.'); return; }
+  if (selectedRating === 0) { alert('Choisis une note.'); return; }
+  const reviews = loadReviewsFromStorage();
+  const newReview = {
+    id: Date.now().toString(36) + Math.random().toString(36).substr(2,5),
+    discordId: currentUser.id,
+    name: currentUser.name,
+    avatar: currentUser.avatar || '',
+    rating: selectedRating,
+    text: text,
+    timestamp: new Date().toISOString()
+  };
+  reviews.push(newReview);
+  saveReviews(reviews);
+  renderReviews();
+  document.getElementById('review-text').value = '';
+  selectedRating = 0;
+  document.querySelectorAll('#star-picker span').forEach(s => s.classList.remove('active'));
+  debugEl.textContent = '✅ Avis publié !';
+});
+
+// === DISCORD LOGIN (OAuth + fallback) ===
+const SESSION_KEY = 'exiozz_discord_session';
+const params = new URLSearchParams(window.location.search);
+let currentUser = null;
+
+if (params.get('discord_id')) {
+  currentUser = {
+    id: params.get('discord_id'),
+    name: params.get('discord_user'),
+    avatar: params.get('discord_avatar'),
+    discordHandle: params.get('discord_user')
+  };
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser)); } catch(e) {}
+  window.history.replaceState({}, '', window.location.pathname);
+} else {
+  try {
+    const saved = localStorage.getItem(SESSION_KEY);
+    if (saved) currentUser = JSON.parse(saved);
+  } catch(e) {}
+}
+
+// === AFFICHAGE DANS LE NAV ===
+const navDiscordBtn = document.getElementById('nav-discord-btn');
+const navDiscordLabel = document.getElementById('nav-discord-label');
+const navDiscordDropdown = document.getElementById('nav-discord-dropdown');
+
+function updateNavDiscord() {
+  const headerEl = document.getElementById('dropdown-header');
+  if (currentUser) {
+    navDiscordLabel.textContent = currentUser.name;
+    navDiscordDropdown.classList.add('active');
+    const isAdminUser = currentUser.id === DATA.adminDiscordId;
+    const avatarSrc = currentUser.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
+    headerEl.innerHTML = `
+      <img src="${avatarSrc}" alt="">
+      <div>
+        <div class="dh-name">${currentUser.name}</div>
+        ${isAdminUser ? '<span class="dh-badge">👑 Admin</span>' : ''}
+      </div>`;
+  } else {
+    navDiscordLabel.textContent = 'Se connecter';
+    navDiscordDropdown.classList.remove('active');
+    headerEl.innerHTML = '';
+  }
+}
+updateNavDiscord();
+
+document.getElementById('nav-my-cart-link').addEventListener('click', (e) => {
+  e.preventDefault();
+  navDiscordDropdown.classList.remove('active');
+  openCart();
+});
+
+navDiscordBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (currentUser) {
+    navDiscordDropdown.classList.toggle('active');
+  } else {
+    if (!DATA.discord.clientId || DATA.discord.clientId === 'TON_CLIENT_ID') {
+      const name = prompt('Entrez votre pseudo Discord (pour tester) :', 'zo7q');
+      if(name && name.trim()) {
+        currentUser = { id: 'test_'+Date.now(), name: name.trim(), avatar: '', discordHandle: name.trim() };
+        try { localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser)); } catch(e) {}
+        updateNavDiscord();
+        renderConnectionState();
+        renderReviews();
+      }
+      return;
+    }
+    const redirect = encodeURIComponent(DATA.discord.backendAuthUrl);
+    window.location.href = `https://discord.com/oauth2/authorize?client_id=${DATA.discord.clientId}&redirect_uri=${redirect}&response_type=code&scope=identify`;
+  }
+});
+
+document.getElementById('nav-discord-logout').addEventListener('click', (e) => {
+  e.preventDefault();
+  currentUser = null;
+  try { localStorage.removeItem(SESSION_KEY); } catch(err) {}
+  updateNavDiscord();
+  renderConnectionState();
+  renderReviews();
+  navDiscordDropdown.classList.remove('active');
+});
+
+document.addEventListener('click', () => {
+  navDiscordDropdown.classList.remove('active');
+});
+
+// === STATUS DANS LA SECTION AVIS ===
+const statusEl = document.getElementById('discord-status');
+const connectBtn = document.getElementById('discord-connect-btn');
+const reviewForm = document.getElementById('review-form');
+
+function renderConnectionState() {
+  if (currentUser) {
+    statusEl.innerHTML = `Connecté en tant que <b>${currentUser.name}</b>. Tu peux laisser ton avis ci-dessous. <a href="#" id="logout-link" style="color:var(--orange);text-decoration:underline;">Se déconnecter</a>`;
+    connectBtn.style.display = 'none';
+    reviewForm.classList.add('active');
+    document.getElementById('logout-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      currentUser = null;
+      try { localStorage.removeItem(SESSION_KEY); } catch(err) {}
+      updateNavDiscord();
+      renderConnectionState();
+      renderReviews();
+    });
+  } else {
+    statusEl.textContent = "Merci de te connecter pour laisser un avis. Clique sur le bouton ci-dessus pour te connecter via Discord.";
+    connectBtn.style.display = 'inline-flex';
+    reviewForm.classList.remove('active');
+  }
+}
+renderConnectionState();
+
+connectBtn.addEventListener('click', () => {
+  if (!DATA.discord.clientId || DATA.discord.clientId === 'TON_CLIENT_ID') {
+    const name = prompt('Entrez votre pseudo Discord (pour tester) :', 'zo7q');
+    if(name && name.trim()) {
+      currentUser = { id: 'test_'+Date.now(), name: name.trim(), avatar: '', discordHandle: name.trim() };
+      try { localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser)); } catch(e) {}
+      updateNavDiscord();
+      renderConnectionState();
+      renderReviews();
+    }
+    return;
+  }
+  const redirect = encodeURIComponent(DATA.discord.backendAuthUrl);
+  window.location.href = `https://discord.com/oauth2/authorize?client_id=${DATA.discord.clientId}&redirect_uri=${redirect}&response_type=code&scope=identify`;
+});
+
+// === STARS ===
+let selectedRating = 0;
+document.querySelectorAll('#star-picker span').forEach(star => {
+  star.addEventListener('click', () => {
+    selectedRating = parseInt(star.dataset.v);
+    document.querySelectorAll('#star-picker span').forEach(s => s.classList.toggle('active', parseInt(s.dataset.v) <= selectedRating));
+  });
+});
+
+// === CHARGEMENT INITIAL DES AVIS ===
+renderReviews();
+
+// === PROJETS ===
 const activeProjects = DATA.projects.filter(p => p.enabled !== false);
-
 const projectsGrid = document.getElementById('projects-grid');
 projectsGrid.innerHTML = activeProjects.map((p, index) => `
   <div class="project-card" data-index="${index}">
@@ -947,7 +1340,7 @@ projectsGrid.innerHTML = activeProjects.map((p, index) => `
   </div>`).join('');
 attachCardEffects();
 
-/* ===== MODALE ===== */
+// === MODALE PROJET ===
 const modalOverlay = document.getElementById('project-modal');
 const modalClose = document.getElementById('modal-close');
 const modalImg = document.getElementById('modal-img');
@@ -961,11 +1354,7 @@ const modalCreators = document.getElementById('modal-creators');
 const modalActions = document.getElementById('modal-actions');
 
 function getStatusBadge(status) {
-  const map = {
-    'Terminé': 'termine',
-    'En développement': 'developpement',
-    'En pause': 'enpause'
-  };
+  const map = { 'Terminé':'termine', 'En développement':'developpement', 'En pause':'enpause' };
   const cls = map[status] || '';
   return `<span class="badge badge-status ${cls}">${status}</span>`;
 }
@@ -981,13 +1370,10 @@ function copyDiscord(handle, btnElement) {
         setTimeout(() => { feedback.textContent = ''; }, 300);
       }, 1500);
     }
-  }).catch(err => {
-    console.warn('Copie impossible :', err);
-  });
+  }).catch(err => console.warn('Copie impossible :', err));
 }
 
 function openModal(index) {
-  // On utilise activeProjects (tableau filtré)
   const p = activeProjects[index];
   if (!p) return;
   modalImg.src = p.image;
@@ -995,13 +1381,10 @@ function openModal(index) {
   modalTitle.textContent = p.title;
   modalTags.innerHTML = p.tags.map(t => `<span class="tag">${t}</span>`).join('');
   modalDesc.textContent = p.fullDesc || p.desc;
-
-  // Détails
   modalGenre.textContent = p.genre || 'Non défini';
   modalStatus.innerHTML = p.status ? getStatusBadge(p.status) : 'Non défini';
   modalUpdate.textContent = p.lastUpdate || 'Non renseignée';
 
-  // Créateurs avec bouton de copie (logo Discord SVG)
   if (p.creators && p.creators.length > 0) {
     modalCreators.innerHTML = p.creators.map(c => {
       const discordHandle = c.discord || '';
@@ -1026,7 +1409,6 @@ function openModal(index) {
     modalCreators.innerHTML = '<span style="color:var(--muted);font-size:13px;">Non renseigné</span>';
   }
 
-  // Boutons d'action
   let actionsHtml = '';
   if (p.discord) {
     actionsHtml += `<a href="${p.discord}" target="_blank" class="btn btn-discord"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="margin-right:6px;"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.099.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.076.076 0 0 0-.04.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.955 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg> Discord</a>`;
@@ -1054,7 +1436,6 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeModal();
 });
 
-// Click handler sur les cartes projets (utilisation de activeProjects)
 projectsGrid.addEventListener('click', (e) => {
   const card = e.target.closest('.project-card');
   if (card && card.dataset.index !== undefined) {
@@ -1062,7 +1443,7 @@ projectsGrid.addEventListener('click', (e) => {
   }
 });
 
-/* FAQ ACCORDION */
+// === FAQ ACCORDION ===
 const faqList = document.getElementById('faq-list');
 DATA.faq.forEach(item => {
   faqList.insertAdjacentHTML('beforeend', `
@@ -1079,7 +1460,7 @@ document.querySelectorAll('.faq-q').forEach(q => {
   });
 });
 
-/* SCROLL REVEAL */
+// === SCROLL REVEAL ===
 const io = new IntersectionObserver((entries) => {
   entries.forEach(e => {
     if (e.isIntersecting) {
@@ -1094,118 +1475,31 @@ const io = new IntersectionObserver((entries) => {
 }, { threshold: 0.15 });
 document.querySelectorAll('.reveal, .stagger').forEach(el => io.observe(el));
 
-/* DISCORD OAUTH FLOW + COMPTE PERSISTANT */
-const SESSION_KEY = 'exiozz_discord_session';
-const params = new URLSearchParams(window.location.search);
-let currentUser = null;
-
-if (params.get('discord_id')) {
-  currentUser = { id: params.get('discord_id'), name: params.get('discord_user'), avatar: params.get('discord_avatar') };
-  try { localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser)); } catch(e) {}
-  window.history.replaceState({}, '', window.location.pathname);
-} else {
-  try {
-    const saved = localStorage.getItem(SESSION_KEY);
-    if (saved) currentUser = JSON.parse(saved);
-  } catch(e) {}
-}
-
-const statusEl = document.getElementById('discord-status');
-const connectBtn = document.getElementById('discord-connect-btn');
-const reviewForm = document.getElementById('review-form');
-
-function renderConnectionState() {
-  if (currentUser) {
-    statusEl.innerHTML = `Connecté en tant que <b>${currentUser.name}</b>. Tu peux laisser ton avis ci-dessous. <a href="#" id="logout-link" style="color:var(--orange);text-decoration:underline;">Se déconnecter</a>`;
-    connectBtn.style.display = 'none';
-    reviewForm.classList.add('active');
-    document.getElementById('logout-link').addEventListener('click', (e) => {
-      e.preventDefault();
-      currentUser = null;
-      try { localStorage.removeItem(SESSION_KEY); } catch(err) {}
-      connectBtn.style.display = 'inline-flex';
-      reviewForm.classList.remove('active');
-      statusEl.textContent = "Merci de te connecter pour laisser un avis. Clique sur le bouton ci-dessus pour te connecter via Discord.";
+// === ATTACH CARD EFFECTS ===
+function attachCardEffects(){
+  document.querySelectorAll('.service-card, .project-card, .process-step').forEach(card=>{
+    if(card.dataset.tiltBound) return; card.dataset.tiltBound = '1';
+    card.addEventListener('mousemove', (e)=>{
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX-r.left)/r.width - 0.5, y = (e.clientY-r.top)/r.height - 0.5;
+      card.style.transform = `translateY(-6px) rotateX(${-y*4}deg) rotateY(${x*4}deg)`;
     });
-  } else {
-    statusEl.textContent = "Merci de te connecter pour laisser un avis. Clique sur le bouton ci-dessus pour te connecter via Discord.";
-  }
-}
-renderConnectionState();
-connectBtn.addEventListener('click', () => {
-  if (!DATA.discord.clientId || DATA.discord.clientId === 'TON_CLIENT_ID') {
-    alert("Configure ton Client ID Discord.");
-    return;
-  }
-  const redirect = encodeURIComponent(DATA.discord.backendAuthUrl);
-  window.location.href = `https://discord.com/oauth2/authorize?client_id=${DATA.discord.clientId}&redirect_uri=${redirect}&response_type=code&scope=identify`;
-});
-
-/* STAR PICKER */
-let selectedRating = 0;
-document.querySelectorAll('#star-picker span').forEach(star => {
-  star.addEventListener('click', () => {
-    selectedRating = parseInt(star.dataset.v);
-    document.querySelectorAll('#star-picker span').forEach(s => s.classList.toggle('active', parseInt(s.dataset.v) <= selectedRating));
+    card.addEventListener('mouseleave', ()=>{ card.style.transform = ''; });
   });
-});
-
-/* REVIEWS */
-async function loadReviews() {
-  const grid = document.getElementById('reviews-grid');
-  if (DATA.discord.backendAuthUrl.includes('TON-BACKEND')) {
-    grid.innerHTML = '<div class="empty-note">Aucun avis pour le moment. Sois le premier à en laisser un !</div>';
-    return;
-  }
-  const apiBase = DATA.discord.backendAuthUrl.replace('/auth/discord', '');
-  try {
-    const res = await fetch(`${apiBase}/api/reviews`);
-    const reviews = await res.json();
-    if (!res.ok) {
-      grid.innerHTML = `<div class="empty-note">Erreur serveur (${res.status}) : ${reviews.error || ''} ${reviews.detail || ''}</div>`;
-      return;
-    }
-    if (!reviews || reviews.length === 0) {
-      grid.innerHTML = '<div class="empty-note">Aucun avis pour le moment. Sois le premier à en laisser un !</div>';
-      return;
-    }
-    grid.innerHTML = reviews.map(r => `
-      <div class="review-card"><div class="review-head">
-        <div class="review-avatar">${r.avatar ? `<img src="${r.avatar}" alt="">` : r.name.slice(0,2).toUpperCase()}</div>
-        <div><div class="review-name">${r.name}</div><div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div></div>
-      </div><p>${r.text}</p></div>`).join('');
-  } catch (e) {
-    grid.innerHTML = '<div class="empty-note">Impossible de charger les avis pour le moment.</div>';
-  }
-}
-loadReviews();
-document.getElementById('submit-review').addEventListener('click', async () => {
-  const debugEl = document.getElementById('review-debug');
-  debugEl.textContent = '';
-  const text = document.getElementById('review-text').value.trim();
-  if (!currentUser) { debugEl.textContent = 'Erreur : currentUser est vide, tu n\'es pas vraiment connecté.'; return; }
-  if (!text) { alert('Écris un avis avant de publier.'); return; }
-  if (selectedRating === 0) { alert('Choisis une note.'); return; }
-  const apiBase = DATA.discord.backendAuthUrl.replace('/auth/discord', '');
-  const payload = { discordId: currentUser.id, name: currentUser.name, avatar: currentUser.avatar, rating: selectedRating, text };
-  debugEl.textContent = 'Envoi vers ' + apiBase + '/api/reviews ...';
-  try {
-    const res = await fetch(`${apiBase}/api/reviews`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+  document.querySelectorAll('.btn-primary, .btn-purple, .discord-btn').forEach(btn=>{
+    if(btn.dataset.magnetBound) return; btn.dataset.magnetBound = '1';
+    btn.addEventListener('mousemove', (e)=>{
+      const r = btn.getBoundingClientRect();
+      const x = e.clientX - r.left - r.width/2, y = e.clientY - r.top - r.height/2;
+      btn.style.transform = `translate(${x*0.15}px, ${y*0.25}px) translateY(-3px)`;
     });
-    let data = {};
-    try { data = await res.json(); } catch(e) {}
-    debugEl.textContent = `Statut: ${res.status} | Réponse: ${JSON.stringify(data)}`;
-    if (!res.ok) return;
-    document.getElementById('review-text').value = ''; selectedRating = 0;
-    document.querySelectorAll('#star-picker span').forEach(s => s.classList.remove('active'));
-    loadReviews();
-  } catch (e) {
-    debugEl.textContent = `Erreur réseau : ${e.message} (URL essayée: ${apiBase}/api/reviews)`;
-  }
-});
+    btn.addEventListener('mouseleave', ()=>{ btn.style.transform = ''; });
+  });
+}
+attachCardEffects();
+
+// === INIT PANIER ===
+renderCart();
 </script>
 </body>
 </html>

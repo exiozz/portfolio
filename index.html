@@ -1113,22 +1113,22 @@ document.getElementById('cart-order').addEventListener('click', () => {
   window.location.href = mailto;
 });
 
-// === GESTION DES AVIS (localStorage) ===
-const REVIEWS_KEY = 'exiozz_reviews';
-function loadReviewsFromStorage(){
+// === GESTION DES AVIS (backend Replit — visibles par tous les visiteurs) ===
+function apiBase(){ return DATA.discord.backendAuthUrl.replace('/auth/discord', ''); }
+
+async function fetchReviews(){
   try {
-    const data = localStorage.getItem(REVIEWS_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch { return []; }
-}
-function saveReviews(reviews){
-  localStorage.setItem(REVIEWS_KEY, JSON.stringify(reviews));
+    const res = await fetch(`${apiBase()}/api/reviews`);
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (e) { return []; }
 }
 
-function renderReviews(){
+async function renderReviews(){
   const grid = document.getElementById('reviews-grid');
-  const reviews = loadReviewsFromStorage();
-  if(reviews.length === 0){
+  grid.innerHTML = '<div class="empty-note">Chargement des avis...</div>';
+  const reviews = await fetchReviews();
+  if(!reviews || reviews.length === 0){
     grid.innerHTML = '<div class="empty-note">Aucun avis pour le moment. Sois le premier à en laisser un !</div>';
     return;
   }
@@ -1142,49 +1142,56 @@ function renderReviews(){
           <div><div class="review-name">${r.name}</div><div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div></div>
         </div>
         <p>${r.text}</p>
-        ${canDelete ? `<button class="review-delete" data-id="${r.id}" title="Supprimer">🗑️</button>` : ''}
+        ${canDelete ? `<button class="review-delete" data-discord-id="${r.discordId}" title="Supprimer">🗑️</button>` : ''}
       </div>
     `;
   }).join('');
 
   grid.querySelectorAll('.review-delete').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.id;
-      if(confirm('Supprimer cet avis ?')) {
-        let reviews = loadReviewsFromStorage();
-        reviews = reviews.filter(r => r.id !== id);
-        saveReviews(reviews);
+    btn.addEventListener('click', async () => {
+      const discordId = btn.dataset.discordId;
+      if(!confirm('Supprimer cet avis ?')) return;
+      try {
+        const res = await fetch(`${apiBase()}/api/reviews/${discordId}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requesterId: currentUser.id })
+        });
+        if (!res.ok) { const d = await res.json().catch(()=>({})); alert('Erreur : ' + (d.error || res.status)); return; }
         renderReviews();
-      }
+      } catch (e) { alert('Impossible de contacter le serveur.'); }
     });
   });
 }
 
 // === SUBMIT REVIEW ===
-document.getElementById('submit-review').addEventListener('click', () => {
+document.getElementById('submit-review').addEventListener('click', async () => {
   const debugEl = document.getElementById('review-debug');
   debugEl.textContent = '';
   const text = document.getElementById('review-text').value.trim();
   if (!currentUser) { alert('Connecte-toi d\'abord.'); return; }
   if (!text) { alert('Écris un avis.'); return; }
   if (selectedRating === 0) { alert('Choisis une note.'); return; }
-  const reviews = loadReviewsFromStorage();
-  const newReview = {
-    id: Date.now().toString(36) + Math.random().toString(36).substr(2,5),
-    discordId: currentUser.id,
-    name: currentUser.name,
-    avatar: currentUser.avatar || '',
-    rating: selectedRating,
-    text: text,
-    timestamp: new Date().toISOString()
-  };
-  reviews.push(newReview);
-  saveReviews(reviews);
-  renderReviews();
-  document.getElementById('review-text').value = '';
-  selectedRating = 0;
-  document.querySelectorAll('#star-picker span').forEach(s => s.classList.remove('active'));
-  debugEl.textContent = '✅ Avis publié !';
+  debugEl.textContent = 'Envoi en cours...';
+  try {
+    const res = await fetch(`${apiBase()}/api/reviews`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        discordId: currentUser.id, name: currentUser.name, avatar: currentUser.avatar || '',
+        rating: selectedRating, text
+      })
+    });
+    const data = await res.json().catch(()=>({}));
+    if (!res.ok) { debugEl.textContent = `Erreur (${res.status}) : ${data.error || 'inconnue'}`; return; }
+    renderReviews();
+    document.getElementById('review-text').value = '';
+    selectedRating = 0;
+    document.querySelectorAll('#star-picker span').forEach(s => s.classList.remove('active'));
+    debugEl.textContent = '✅ Avis publié !';
+  } catch (e) {
+    debugEl.textContent = `Impossible de contacter le serveur (${e.message})`;
+  }
 });
 
 // === DISCORD LOGIN (OAuth + fallback) ===

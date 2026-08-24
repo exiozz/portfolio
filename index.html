@@ -280,6 +280,19 @@
   .stars span.active{color:var(--orange);}
   .reviews-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;}
   .review-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px;transition:transform .25s ease, border-color .25s ease;position:relative;}
+
+  .reviews-carousel{display:flex;align-items:center;gap:14px;}
+  .carousel-viewport{overflow:hidden;flex:1;}
+  .reviews-track{display:flex;gap:18px;transition:transform .5s cubic-bezier(.2,.9,.25,1);}
+  .reviews-track .review-card{flex:0 0 calc(33.333% - 12px);min-width:260px;}
+  @media (max-width:900px){.reviews-track .review-card{flex:0 0 calc(50% - 9px);}}
+  @media (max-width:640px){.reviews-track .review-card{flex:0 0 100%;}}
+  .review-card .top-badge{position:absolute;top:-10px;left:16px;background:var(--blue);color:#000;font-family:'JetBrains Mono';font-size:10px;font-weight:700;padding:3px 10px;border-radius:999px;}
+  .carousel-arrow{background:var(--panel);border:1px solid var(--line);color:var(--text);width:38px;height:38px;border-radius:50%;font-size:20px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s ease;}
+  .carousel-arrow:hover{border-color:var(--blue);color:var(--blue);transform:scale(1.08);}
+  .carousel-dots{display:flex;justify-content:center;gap:7px;margin-top:20px;}
+  .carousel-dots span{width:7px;height:7px;border-radius:50%;background:var(--line);cursor:pointer;transition:all .2s ease;}
+  .carousel-dots span.active{background:var(--blue);width:20px;border-radius:4px;}
   .review-card:hover{transform:translateY(-4px);border-color:var(--blue);}
   .review-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
   .review-avatar{width:38px;height:38px;border-radius:50%;background:var(--panel-2);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-size:13px;color:var(--blue);overflow:hidden;}
@@ -683,6 +696,7 @@ Joueur<span class="kw">:Connect</span>(<span class="kw">function</span>(player)<
           Robux
         </button>
       </div>
+      <p id="currency-note" style="font-family:'JetBrains Mono';font-size:12px;color:var(--muted);margin:-18px 0 26px;">💳 Paiement en euros via PayPal</p>
       <div class="cat-tabs" id="service-tabs"></div>
     </div>
     <div id="service-panels"></div>
@@ -760,7 +774,14 @@ Joueur<span class="kw">:Connect</span>(<span class="kw">function</span>(player)<
         <div id="review-debug" style="margin-top:14px;font-family:'JetBrains Mono';font-size:12px;color:var(--muted);white-space:pre-wrap;"></div>
       </div>
     </div>
-    <div class="reviews-grid" id="reviews-grid"></div>
+    <div class="reviews-carousel" id="reviews-carousel">
+      <button class="carousel-arrow prev" id="reviews-prev" aria-label="Avis précédent">‹</button>
+      <div class="carousel-viewport">
+        <div class="reviews-track" id="reviews-grid"></div>
+      </div>
+      <button class="carousel-arrow next" id="reviews-next" aria-label="Avis suivant">›</button>
+    </div>
+    <div class="carousel-dots" id="reviews-dots"></div>
   </div>
 </section>
 
@@ -994,6 +1015,9 @@ document.getElementById('pricing-toggle').addEventListener('click', (e) => {
     el.textContent = currentCurrency === 'robux' ? Number(el.dataset.robux).toLocaleString('fr-FR') : el.dataset.eur;
   });
   document.querySelectorAll('.curr-label').forEach(el => { el.textContent = CURRENCY_LABEL[currentCurrency]; });
+  document.getElementById('currency-note').textContent = currentCurrency === 'robux'
+    ? '🎮 Paiement en Robux via échange/groupe Roblox'
+    : '💳 Paiement en euros via PayPal';
 });
 
 // === GESTION DU PANIER ===
@@ -1037,6 +1061,10 @@ function renderCart(){
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('.btn-cart-toggle');
   if(!btn) return;
+  if(!currentUser) {
+    alert('Connecte-toi avec Discord (bouton en haut à droite) pour ajouter des articles au panier.');
+    return;
+  }
   const id = btn.dataset.id;
   const card = btn.closest('.service-card');
   if(!card) return;
@@ -1073,7 +1101,13 @@ document.getElementById('cart-clear').addEventListener('click', () => {
 });
 
 // Ouvrir / fermer le panier
-function openCart(){ document.getElementById('cart-modal').classList.add('active'); renderCart(); }
+function openCart(){
+  if(!currentUser) {
+    alert('Connecte-toi avec Discord (bouton en haut à droite) pour accéder au panier.');
+    return;
+  }
+  document.getElementById('cart-modal').classList.add('active'); renderCart();
+}
 function closeCart(){ document.getElementById('cart-modal').classList.remove('active'); }
 document.getElementById('nav-cart-btn').addEventListener('click', openCart);
 document.getElementById('cart-button').addEventListener('click', openCart);
@@ -1082,8 +1116,9 @@ document.getElementById('cart-modal').addEventListener('click', (e) => {
   if(e.target === document.getElementById('cart-modal')) closeCart();
 });
 
-// === COMMANDE PAR EMAIL ===
-document.getElementById('cart-order').addEventListener('click', () => {
+// === COMMANDE VIA DISCORD (webhook) — plus fiable que mailto pour plusieurs articles ===
+document.getElementById('cart-order').addEventListener('click', async () => {
+  const orderBtn = document.getElementById('cart-order');
   if(cart.length === 0) {
     alert('Votre panier est vide.');
     return;
@@ -1092,26 +1127,93 @@ document.getElementById('cart-order').addEventListener('click', () => {
     alert('Connecte-toi avec Discord avant de passer commande.');
     return;
   }
-  let lines = ['Bonjour Exiozz,', '', 'Voici ma commande :'];
   let total = 0;
-  cart.forEach(item => {
+  const items = cart.map(item => {
     const price = currentCurrency === 'robux' ? item.priceRobux : item.priceEur;
     const sub = price * item.qty;
     total += sub;
-    lines.push(`- ${item.title} : ${sub.toLocaleString('fr-FR')} ${CURRENCY_LABEL[currentCurrency]}`);
+    return { title: item.title, price: sub };
   });
-  lines.push('');
-  lines.push(`Total : ${total.toLocaleString('fr-FR')} ${CURRENCY_LABEL[currentCurrency]}`);
-  lines.push('');
-  lines.push('Client : ' + currentUser.name + ' (Discord)');
-  lines.push('Mon Discord : ' + (currentUser.discordHandle || 'non fourni'));
-  lines.push('');
-  lines.push('Merci !');
-  const message = lines.join('\n');
-  const subject = 'Commande depuis le portfolio - ' + currentUser.name;
-  const mailto = `mailto:${DATA.contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
-  window.location.href = mailto;
+
+  const originalText = orderBtn.textContent;
+  orderBtn.textContent = 'Envoi en cours...';
+  orderBtn.disabled = true;
+
+  try {
+    const res = await fetch(`${apiBase()}/api/order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerName: currentUser.name,
+        discordId: currentUser.id,
+        items,
+        total,
+        currency: CURRENCY_LABEL[currentCurrency]
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      alert(`Erreur lors de l'envoi de la commande (${res.status}) : ${data.error || 'raison inconnue'}`);
+      orderBtn.textContent = originalText;
+      orderBtn.disabled = false;
+      return;
+    }
+    alert('✅ Commande envoyée ! Exiozz va te recontacter directement sur Discord — pense à laisser tes messages privés ouverts sur son serveur, sinon il ne pourra pas te joindre.');
+    cart = [];
+    renderCart();
+    closeCart();
+    orderBtn.textContent = originalText;
+    orderBtn.disabled = false;
+  } catch (e) {
+    alert(`Impossible de contacter le serveur (${e.message}).`);
+    orderBtn.textContent = originalText;
+    orderBtn.disabled = false;
+  }
 });
+
+let carouselIndex = 0;
+let carouselTimer = null;
+let carouselPageCount = 1;
+
+function getCardsPerView(){
+  const w = window.innerWidth;
+  if (w <= 640) return 1;
+  if (w <= 900) return 2;
+  return 3;
+}
+
+function updateCarousel(){
+  const track = document.getElementById('reviews-grid');
+  const cards = track.children;
+  if (cards.length === 0) return;
+  const perView = getCardsPerView();
+  carouselPageCount = Math.max(1, cards.length - perView + 1);
+  if (carouselIndex >= carouselPageCount) carouselIndex = 0;
+  if (carouselIndex < 0) carouselIndex = carouselPageCount - 1;
+  const cardWidth = cards[0].getBoundingClientRect().width + 18; // + gap
+  track.style.transform = `translateX(-${carouselIndex * cardWidth}px)`;
+  const dots = document.getElementById('reviews-dots');
+  dots.innerHTML = Array.from({length: carouselPageCount}).map((_, i) =>
+    `<span class="${i === carouselIndex ? 'active' : ''}" data-i="${i}"></span>`).join('');
+  dots.querySelectorAll('span').forEach(dot => {
+    dot.addEventListener('click', () => { carouselIndex = parseInt(dot.dataset.i); updateCarousel(); resetCarouselTimer(); });
+  });
+}
+
+function resetCarouselTimer(){
+  if (carouselTimer) clearInterval(carouselTimer);
+  carouselTimer = setInterval(() => {
+    carouselIndex++;
+    updateCarousel();
+  }, 4500);
+}
+
+document.getElementById('reviews-prev').addEventListener('click', () => { carouselIndex--; updateCarousel(); resetCarouselTimer(); });
+document.getElementById('reviews-next').addEventListener('click', () => { carouselIndex++; updateCarousel(); resetCarouselTimer(); });
+const carouselEl = document.getElementById('reviews-carousel');
+carouselEl.addEventListener('mouseenter', () => { if (carouselTimer) clearInterval(carouselTimer); });
+carouselEl.addEventListener('mouseleave', resetCarouselTimer);
+window.addEventListener('resize', () => updateCarousel());
 
 // === GESTION DES AVIS (backend Replit — visibles par tous les visiteurs) ===
 function apiBase(){ return DATA.discord.backendAuthUrl.replace('/auth/discord', ''); }
@@ -1126,17 +1228,30 @@ async function fetchReviews(){
 
 async function renderReviews(){
   const grid = document.getElementById('reviews-grid');
+  const carouselWrap = document.getElementById('reviews-carousel');
+  const dotsWrap = document.getElementById('reviews-dots');
   grid.innerHTML = '<div class="empty-note">Chargement des avis...</div>';
-  const reviews = await fetchReviews();
+  let reviews = await fetchReviews();
   if(!reviews || reviews.length === 0){
     grid.innerHTML = '<div class="empty-note">Aucun avis pour le moment. Sois le premier à en laisser un !</div>';
+    carouselWrap.style.display = 'none';
+    dotsWrap.style.display = 'none';
     return;
   }
+  carouselWrap.style.display = 'flex';
+  dotsWrap.style.display = 'flex';
+
+  // Meilleures notes en premier, puis les plus récents en cas d'égalité
+  reviews = reviews.slice().sort((a, b) => b.rating - a.rating || b.timestamp - a.timestamp);
+
   const isAdmin = currentUser && currentUser.id === DATA.adminDiscordId;
+  const topRating = reviews[0].rating;
   grid.innerHTML = reviews.map(r => {
     const canDelete = (currentUser && r.discordId === currentUser.id) || isAdmin;
+    const isTop = r.rating === topRating && topRating >= 4;
     return `
       <div class="review-card">
+        ${isTop ? '<span class="top-badge">⭐ Top avis</span>' : ''}
         <div class="review-head">
           <div class="review-avatar">${r.avatar ? `<img src="${r.avatar}" alt="">` : r.name.slice(0,2).toUpperCase()}</div>
           <div><div class="review-name">${r.name}</div><div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div></div>
@@ -1162,6 +1277,9 @@ async function renderReviews(){
       } catch (e) { alert('Impossible de contacter le serveur.'); }
     });
   });
+
+  carouselIndex = 0;
+  requestAnimationFrame(() => { updateCarousel(); resetCarouselTimer(); });
 }
 
 // === SUBMIT REVIEW ===

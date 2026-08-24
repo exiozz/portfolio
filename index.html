@@ -594,7 +594,7 @@
           <a href="#" id="nav-discord-logout">🚪 Se déconnecter</a>
         </div>
       </div>
-      <!-- Bouton Panier (masqué si non connecté grâce à la classe) -->
+      <!-- Bouton Panier (masqué si non connecté) -->
       <button class="nav-btn cart hidden-if-not-logged" id="nav-cart-btn">
         🛒
         <span class="label">Panier</span>
@@ -968,6 +968,13 @@ buildTabs(skillTabs, skillPanels, DATA.skillCategories,
 const serviceTabs = document.getElementById('service-tabs');
 const servicePanels = document.getElementById('service-panels');
 let cart = JSON.parse(localStorage.getItem('exiozz_cart') || '[]');
+
+// 🧹 VIDER LE PANIER À CHAQUE CHARGEMENT pour supprimer tout article par défaut
+if (cart.length > 0) {
+  cart = [];
+  localStorage.setItem('exiozz_cart', JSON.stringify(cart));
+}
+
 const CURRENCY_LABEL = { eur: '€', robux: 'R$' };
 let currentCurrency = 'eur';
 
@@ -1014,12 +1021,6 @@ document.getElementById('pricing-toggle').addEventListener('click', (e) => {
 });
 
 // === GESTION DU PANIER ===
-  let cart = JSON.parse(localStorage.getItem('exiozz_cart') || '[]');
-// VIDER LE PANIER À CHAQUE CHARGEMENT (pour supprimer les articles par défaut)
-if (cart.length > 0) {
-  cart = [];
-  localStorage.setItem('exiozz_cart', JSON.stringify(cart));
-}
 function renderCart(){
   const count = cart.reduce((sum, item) => sum + item.qty, 0);
   document.getElementById('nav-cart-count').textContent = count;
@@ -1350,7 +1351,8 @@ function updateNavDiscord() {
   const headerEl = document.getElementById('dropdown-header');
   if (currentUser) {
     navDiscordLabel.textContent = currentUser.name;
-    navDiscordDropdown.classList.add('active');
+    // On retire la classe active pour fermer le dropdown au chargement
+    navDiscordDropdown.classList.remove('active');
     const isAdminUser = currentUser.id === DATA.adminDiscordId;
     const avatarSrc = currentUser.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
     headerEl.innerHTML = `

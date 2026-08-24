@@ -1133,8 +1133,8 @@ function renderConnectionState() {
 }
 renderConnectionState();
 connectBtn.addEventListener('click', () => {
-  if (DATA.discord.clientId === '1540486396287000626') {
-    alert("Configure d'abord ton Client ID Discord et l'URL de ton backend dans le bloc JSON en haut du fichier, puis héberge server.js. Voir le README fourni.");
+  if (!DATA.discord.clientId || DATA.discord.clientId === 'TON_CLIENT_ID') {
+    alert("Configure ton Client ID Discord.");
     return;
   }
   const redirect = encodeURIComponent(DATA.discord.backendAuthUrl);

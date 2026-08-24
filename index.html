@@ -1014,6 +1014,12 @@ document.getElementById('pricing-toggle').addEventListener('click', (e) => {
 });
 
 // === GESTION DU PANIER ===
+  let cart = JSON.parse(localStorage.getItem('exiozz_cart') || '[]');
+// VIDER LE PANIER À CHAQUE CHARGEMENT (pour supprimer les articles par défaut)
+if (cart.length > 0) {
+  cart = [];
+  localStorage.setItem('exiozz_cart', JSON.stringify(cart));
+}
 function renderCart(){
   const count = cart.reduce((sum, item) => sum + item.qty, 0);
   document.getElementById('nav-cart-count').textContent = count;

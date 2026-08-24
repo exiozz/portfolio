@@ -1114,59 +1114,54 @@ document.getElementById('cart-modal').addEventListener('click', (e) => {
   if(e.target === document.getElementById('cart-modal')) closeCart();
 });
 
-// === COMMANDE VIA DISCORD (webhook) — plus fiable que mailto pour plusieurs articles ===
-document.getElementById('cart-order').addEventListener('click', async () => {
-  const orderBtn = document.getElementById('cart-order');
-  if(cart.length === 0) {
+// === COMMANDE PAR EMAIL ===
+document.getElementById('cart-order').addEventListener('click', () => {
+  if (cart.length === 0) {
     alert('Votre panier est vide.');
     return;
   }
-  if(!currentUser) {
+
+  if (!currentUser) {
     alert('Connecte-toi avec Discord avant de passer commande.');
     return;
   }
+
   let total = 0;
-  const items = cart.map(item => {
-    const price = currentCurrency === 'robux' ? item.priceRobux : item.priceEur;
+
+  const orderLines = cart.map(item => {
+    const price = currentCurrency === 'robux'
+      ? item.priceRobux
+      : item.priceEur;
+
     const sub = price * item.qty;
     total += sub;
-    return { title: item.title, price: sub };
+
+    return `- ${item.title} x${item.qty} : ${sub} ${CURRENCY_LABEL[currentCurrency]}`;
   });
 
-  const originalText = orderBtn.textContent;
-  orderBtn.textContent = 'Envoi en cours...';
-  orderBtn.disabled = true;
+  const subject = `Commande - ${currentUser.name}`;
 
-  try {
-    const res = await fetch(`${apiBase()}/api/order`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        customerName: currentUser.name,
-        discordId: currentUser.id,
-        items,
-        total,
-        currency: CURRENCY_LABEL[currentCurrency]
-      })
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      alert(`Erreur lors de l'envoi de la commande (${res.status}) : ${data.error || 'raison inconnue'}`);
-      orderBtn.textContent = originalText;
-      orderBtn.disabled = false;
-      return;
-    }
-    alert('✅ Commande envoyée ! Exiozz va te recontacter directement sur Discord — pense à laisser tes messages privés ouverts sur son serveur, sinon il ne pourra pas te joindre.');
-    cart = [];
-    renderCart();
-    closeCart();
-    orderBtn.textContent = originalText;
-    orderBtn.disabled = false;
-  } catch (e) {
-    alert(`Impossible de contacter le serveur (${e.message}).`);
-    orderBtn.textContent = originalText;
-    orderBtn.disabled = false;
-  }
+  const body = [
+    `Bonjour,`,
+    ``,
+    `Je souhaite passer une commande.`,
+    ``,
+    `CLIENT`,
+    `Nom Discord : ${currentUser.name}`,
+    `Discord ID : ${currentUser.id}`,
+    ``,
+    `COMMANDE`,
+    ...orderLines,
+    ``,
+    `TOTAL : ${total} ${CURRENCY_LABEL[currentCurrency]}`,
+    ``,
+    `Merci !`
+  ].join('\n');
+
+  const email = DATA.contactEmail;
+
+  window.location.href =
+    `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 });
 
 let carouselIndex = 0;

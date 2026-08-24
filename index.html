@@ -55,8 +55,8 @@
   .nav-btn.cart .cart-count{position:absolute;top:-6px;right:-6px;background:var(--orange);color:#000;border-radius:50%;width:20px;height:20px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono';}
   @media (max-width:600px){.nav-buttons .nav-btn span.label{display:none;}}
 
-  /* Masquer les éléments liés au panier quand non connecté */
-  .hidden-if-not-logged { display: none !important; }
+  /* Masquer les éléments liés au panier quand non connecté (sans !important) */
+  .hidden-if-not-logged { display: none; }
 
   .marquee-wrap{border-bottom:1px solid var(--line);overflow:hidden;background:var(--panel);position:relative;z-index:1;}
   .marquee{display:flex;white-space:nowrap;animation:marquee 26s linear infinite;}
@@ -594,7 +594,7 @@
           <a href="#" id="nav-discord-logout">🚪 Se déconnecter</a>
         </div>
       </div>
-      <!-- Bouton Panier (masqué si non connecté) -->
+      <!-- Bouton Panier (masqué si non connecté grâce à la classe) -->
       <button class="nav-btn cart hidden-if-not-logged" id="nav-cart-btn">
         🛒
         <span class="label">Panier</span>
@@ -1333,9 +1333,9 @@ function updateCartVisibility() {
   const cartElements = document.querySelectorAll('.hidden-if-not-logged');
   cartElements.forEach(el => {
     if (currentUser) {
-      el.style.display = ''; // rétablir l'affichage (par défaut selon CSS)
+      el.classList.remove('hidden-if-not-logged');
     } else {
-      el.style.display = 'none';
+      el.classList.add('hidden-if-not-logged');
     }
   });
 }

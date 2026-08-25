@@ -593,6 +593,7 @@
           <a href="#reviews" id="nav-my-review">✏️ Voir / laisser mon avis</a>
           <a href="#" id="nav-my-cart-link" class="hidden-if-not-logged">🛒 Mon panier</a>
           <a href="#" id="nav-my-orders-link" class="hidden-if-not-logged">📦 Mes commandes</a>
+          <a href="#" id="nav-admin-orders-link" style="display:none;">🛠️ Toutes les commandes (admin)</a>
           <a href="#" id="nav-discord-logout">🚪 Se déconnecter</a>
         </div>
       </div>
@@ -843,6 +844,16 @@ Joueur<span class="kw">:Connect</span>(<span class="kw">function</span>(player)<
     <button class="modal-close" id="orders-close" style="position:absolute;top:12px;right:16px;background:none;border:none;color:var(--muted);font-size:28px;cursor:pointer;">&times;</button>
     <h2>📦 Mes commandes</h2>
     <div id="orders-list"></div>
+  </div>
+</div>
+
+<div class="cart-modal" id="admin-orders-modal">
+  <div class="cart-panel" style="max-width:720px;">
+    <button class="modal-close" id="admin-orders-close" style="position:absolute;top:12px;right:16px;background:none;border:none;color:var(--muted);font-size:28px;cursor:pointer;">&times;</button>
+    <h2>🛠️ Toutes les commandes</h2>
+    <input type="text" id="admin-orders-search" placeholder="Rechercher par pseudo ou ID Discord..."
+      style="width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;color:var(--text);padding:11px 14px;font-size:14px;margin:14px 0 18px;">
+    <div id="admin-orders-list" style="max-height:60vh;overflow-y:auto;"></div>
   </div>
 </div>
 
@@ -1447,11 +1458,13 @@ function updateNavDiscord() {
       welcomeEl.innerHTML = `👋 Bon retour, <b>${currentUser.name}</b> ! Ton panier et tes commandes sont accessibles depuis ton compte, en haut à droite.`;
       welcomeEl.style.display = 'flex';
     }
+    document.getElementById('nav-admin-orders-link').style.display = isAdminUser ? 'block' : 'none';
   } else {
     navDiscordLabel.textContent = 'Se connecter';
     navDiscordDropdown.classList.remove('active');
     headerEl.innerHTML = '';
     if (welcomeEl) welcomeEl.style.display = 'none';
+    document.getElementById('nav-admin-orders-link').style.display = 'none';
   }
   updateCartVisibility();
 }
@@ -1494,6 +1507,77 @@ async function openOrders(){
 document.getElementById('nav-my-orders-link').addEventListener('click', (e) => { e.preventDefault(); openOrders(); });
 document.getElementById('orders-close').addEventListener('click', () => document.getElementById('orders-modal').classList.remove('active'));
 document.getElementById('orders-modal').addEventListener('click', (e) => { if(e.target.id === 'orders-modal') document.getElementById('orders-modal').classList.remove('active'); });
+
+// === ADMIN : TOUTES LES COMMANDES ===
+const STATUS_OPTIONS = ['En attente de contact', 'Confirmée', 'En construction', 'En pause', 'Payée', 'Annulée'];
+let allOrdersCache = [];
+
+function renderAdminOrders(filter){
+  const list = document.getElementById('admin-orders-list');
+  const term = (filter || '').toLowerCase().trim();
+  const filtered = !term ? allOrdersCache : allOrdersCache.filter(o =>
+    (o.customerName || '').toLowerCase().includes(term) || (o.discordId || '').includes(term)
+  );
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty-note">Aucune commande trouvée.</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(o => `
+    <div class="cart-item" style="flex-direction:column;align-items:flex-start;gap:8px;padding:14px 0;">
+      <div style="display:flex;justify-content:space-between;width:100%;flex-wrap:wrap;gap:6px;">
+        <div>
+          <span class="title">${o.customerName}</span>
+          <span style="font-family:'JetBrains Mono';font-size:11px;color:var(--muted);margin-left:8px;">ID: ${o.discordId}</span>
+        </div>
+        <span class="price">${Number(o.total).toLocaleString('fr-FR')} ${o.currency || ''}</span>
+      </div>
+      <div style="font-size:12.5px;color:var(--muted);">${o.items.map(i => i.title).join(', ')} — ${new Date(o.timestamp).toLocaleDateString('fr-FR')}</div>
+      <select data-order-id="${o.id}" class="admin-status-select" style="background:var(--panel-2);border:1px solid var(--line);color:var(--text);border-radius:7px;padding:6px 10px;font-size:12.5px;font-family:'JetBrains Mono';">
+        ${STATUS_OPTIONS.map(s => `<option value="${s}" ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}
+      </select>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.admin-status-select').forEach(sel => {
+    sel.addEventListener('change', async () => {
+      const orderId = sel.dataset.orderId;
+      const newStatus = sel.value;
+      sel.disabled = true;
+      try {
+        const res = await fetch(`${apiBase()}/api/orders/${orderId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requesterId: currentUser.id, status: newStatus })
+        });
+        if (!res.ok) { const d = await res.json().catch(()=>({})); alert('Erreur : ' + (d.error || res.status)); }
+        else {
+          const o = allOrdersCache.find(o => o.id === orderId);
+          if (o) o.status = newStatus;
+        }
+      } catch (e) { alert('Impossible de contacter le serveur.'); }
+      sel.disabled = false;
+    });
+  });
+}
+
+async function openAdminOrders(){
+  navDiscordDropdown.classList.remove('active');
+  const modal = document.getElementById('admin-orders-modal');
+  modal.classList.add('active');
+  document.getElementById('admin-orders-list').innerHTML = '<div class="empty-note">Chargement...</div>';
+  try {
+    const res = await fetch(`${apiBase()}/api/admin/orders?requesterId=${currentUser.id}`);
+    if (!res.ok) { document.getElementById('admin-orders-list').innerHTML = '<div class="empty-note">Accès refusé.</div>'; return; }
+    allOrdersCache = await res.json();
+    renderAdminOrders('');
+  } catch (e) {
+    document.getElementById('admin-orders-list').innerHTML = '<div class="empty-note">Impossible de charger les commandes.</div>';
+  }
+}
+document.getElementById('nav-admin-orders-link').addEventListener('click', (e) => { e.preventDefault(); openAdminOrders(); });
+document.getElementById('admin-orders-close').addEventListener('click', () => document.getElementById('admin-orders-modal').classList.remove('active'));
+document.getElementById('admin-orders-modal').addEventListener('click', (e) => { if(e.target.id === 'admin-orders-modal') document.getElementById('admin-orders-modal').classList.remove('active'); });
+document.getElementById('admin-orders-search').addEventListener('input', (e) => renderAdminOrders(e.target.value));
 
 navDiscordBtn.addEventListener('click', (e) => {
   e.stopPropagation();

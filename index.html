@@ -1142,53 +1142,59 @@ document.getElementById('cart-modal').addEventListener('click', (e) => {
 });
 
 // === COMMANDE PAR EMAIL ===
-document.getElementById('cart-order').addEventListener('click', () => {
+document.getElementById('cart-order').addEventListener('click', async () => {
+  const orderBtn = document.getElementById('cart-order');
   if (cart.length === 0) {
     alert('Votre panier est vide.');
     return;
   }
-
   if (!currentUser) {
     alert('Connecte-toi avec Discord avant de passer commande.');
     return;
   }
 
   let total = 0;
-
-  const orderLines = cart.map(item => {
-    const price = currentCurrency === 'robux'
-      ? item.priceRobux
-      : item.priceEur;
-
+  const items = cart.map(item => {
+    const price = currentCurrency === 'robux' ? item.priceRobux : item.priceEur;
     const sub = price * item.qty;
     total += sub;
-
-    return `- ${item.title} x${item.qty} : ${sub} ${CURRENCY_LABEL[currentCurrency]}`;
+    return { title: `${item.title}${item.qty > 1 ? ' x' + item.qty : ''}`, price: sub };
   });
 
-  const subject = `Commande - ${currentUser.name}`;
+  const originalText = orderBtn.textContent;
+  orderBtn.textContent = 'Envoi en cours...';
+  orderBtn.disabled = true;
 
-  const body = [
-    `Bonjour,`,
-    ``,
-    `Je souhaite passer une commande.`,
-    ``,
-    `CLIENT`,
-    `Nom Discord : ${currentUser.name}`,
-    `Discord ID : ${currentUser.id}`,
-    ``,
-    `COMMANDE`,
-    ...orderLines,
-    ``,
-    `TOTAL : ${total} ${CURRENCY_LABEL[currentCurrency]}`,
-    ``,
-    `Merci !`
-  ].join('\n');
-
-  const email = DATA.contactEmail;
-
-  window.location.href =
-    `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  try {
+    const res = await fetch(`${apiBase()}/api/order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerName: currentUser.name,
+        discordId: currentUser.id,
+        items,
+        total,
+        currency: CURRENCY_LABEL[currentCurrency]
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      alert(`Erreur lors de l'envoi de la commande (${res.status}) : ${data.error || 'raison inconnue'}`);
+      orderBtn.textContent = originalText;
+      orderBtn.disabled = false;
+      return;
+    }
+    alert('✅ Commande envoyée ! Regarde tes messages privés Discord — Exiozz va te contacter. Va régulièrement dans ton profil (📦 Mes commandes) pour suivre le statut de ta commande.');
+    cart = [];
+    renderCart();
+    document.getElementById('cart-modal').classList.remove('active');
+    orderBtn.textContent = originalText;
+    orderBtn.disabled = false;
+  } catch (e) {
+    alert(`Impossible de contacter le serveur (${e.message}).`);
+    orderBtn.textContent = originalText;
+    orderBtn.disabled = false;
+  }
 });
 
 let carouselIndex = 0;
@@ -1560,23 +1566,38 @@ function renderAdminOrders(filter){
   });
 }
 
+let adminOrdersInterval = null;
+
+async function fetchAdminOrders(silent){
+  try {
+    const res = await fetch(`${apiBase()}/api/admin/orders?requesterId=${currentUser.id}`);
+    if (!res.ok) {
+      if (!silent) document.getElementById('admin-orders-list').innerHTML = '<div class="empty-note">Accès refusé.</div>';
+      return;
+    }
+    allOrdersCache = await res.json();
+    renderAdminOrders(document.getElementById('admin-orders-search').value);
+  } catch (e) {
+    if (!silent) document.getElementById('admin-orders-list').innerHTML = '<div class="empty-note">Impossible de charger les commandes.</div>';
+  }
+}
+
 async function openAdminOrders(){
   navDiscordDropdown.classList.remove('active');
   const modal = document.getElementById('admin-orders-modal');
   modal.classList.add('active');
   document.getElementById('admin-orders-list').innerHTML = '<div class="empty-note">Chargement...</div>';
-  try {
-    const res = await fetch(`${apiBase()}/api/admin/orders?requesterId=${currentUser.id}`);
-    if (!res.ok) { document.getElementById('admin-orders-list').innerHTML = '<div class="empty-note">Accès refusé.</div>'; return; }
-    allOrdersCache = await res.json();
-    renderAdminOrders('');
-  } catch (e) {
-    document.getElementById('admin-orders-list').innerHTML = '<div class="empty-note">Impossible de charger les commandes.</div>';
-  }
+  await fetchAdminOrders(false);
+  if (adminOrdersInterval) clearInterval(adminOrdersInterval);
+  adminOrdersInterval = setInterval(() => fetchAdminOrders(true), 15000); // actualisation auto toutes les 15s
+}
+function closeAdminOrders(){
+  document.getElementById('admin-orders-modal').classList.remove('active');
+  if (adminOrdersInterval) { clearInterval(adminOrdersInterval); adminOrdersInterval = null; }
 }
 document.getElementById('nav-admin-orders-link').addEventListener('click', (e) => { e.preventDefault(); openAdminOrders(); });
-document.getElementById('admin-orders-close').addEventListener('click', () => document.getElementById('admin-orders-modal').classList.remove('active'));
-document.getElementById('admin-orders-modal').addEventListener('click', (e) => { if(e.target.id === 'admin-orders-modal') document.getElementById('admin-orders-modal').classList.remove('active'); });
+document.getElementById('admin-orders-close').addEventListener('click', closeAdminOrders);
+document.getElementById('admin-orders-modal').addEventListener('click', (e) => { if(e.target.id === 'admin-orders-modal') closeAdminOrders(); });
 document.getElementById('admin-orders-search').addEventListener('input', (e) => renderAdminOrders(e.target.value));
 
 navDiscordBtn.addEventListener('click', (e) => {

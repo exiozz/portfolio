@@ -67,7 +67,6 @@
   .hero{padding:110px 0 70px;position:relative;}
   .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:50px;align-items:center;}
   @media (max-width:900px){.hero-grid{grid-template-columns:1fr;}}
-  #welcome-banner{display:none;align-items:center;justify-content:center;gap:8px;background:var(--panel);border-bottom:1px solid var(--line);padding:11px 20px;font-size:13px;text-align:center;}
   .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono';font-size:12px;color:var(--blue);border:1px solid var(--line);padding:6px 14px;border-radius:999px;margin-bottom:26px;background:var(--panel);opacity:0;animation:fadeUp .7s ease forwards;}
   .eyebrow::before{content:"";width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:pulse-dot 1.6s infinite;}
   @keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:.3;}}
@@ -334,6 +333,22 @@
   .dropdown-header .dh-badge{font-family:'JetBrains Mono';font-size:10px;color:#000;background:var(--blue);padding:2px 7px;border-radius:999px;display:inline-block;margin-top:3px;}
 
   @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}}
+
+  /* === COMMANDES === */
+  .order-card{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px;}
+  .order-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px;}
+  .order-id{font-family:'JetBrains Mono';font-size:11px;color:var(--muted);margin-top:4px;}
+  .order-status{font-family:'JetBrains Mono';font-size:11px;padding:5px 9px;border-radius:999px;border:1px solid var(--line);white-space:nowrap;}
+  .order-items{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:9px 0;margin:10px 0;}
+  .order-item-row{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:13px;color:var(--muted);}
+  .order-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;}
+  .order-total{font-family:'JetBrains Mono';font-weight:700;}
+  .admin-order-actions{display:flex;align-items:center;gap:8px;margin-top:12px;}
+  .admin-order-actions select{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:7px;padding:7px 9px;font-family:'JetBrains Mono';font-size:11px;}
+  .admin-delete-order{width:32px;height:32px;border:1px solid rgba(255,80,80,.35);background:rgba(255,80,80,.08);color:#ff6464;border-radius:7px;cursor:pointer;font-size:18px;font-weight:700;line-height:1;}
+  .admin-delete-order:hover{background:rgba(255,80,80,.18);border-color:#ff6464;}
+  .orders-admin-title{font-family:'JetBrains Mono';font-size:12px;color:var(--muted);margin:20px 0 10px;text-transform:uppercase;}
+
 </style>
 </head>
 <body>
@@ -593,7 +608,6 @@
           <a href="#reviews" id="nav-my-review">✏️ Voir / laisser mon avis</a>
           <a href="#" id="nav-my-cart-link" class="hidden-if-not-logged">🛒 Mon panier</a>
           <a href="#" id="nav-my-orders-link" class="hidden-if-not-logged">📦 Mes commandes</a>
-          <a href="#" id="nav-admin-orders-link" style="display:none;">🛠️ Toutes les commandes (admin)</a>
           <a href="#" id="nav-discord-logout">🚪 Se déconnecter</a>
         </div>
       </div>
@@ -609,8 +623,6 @@
 </nav>
 
 <div class="marquee-wrap"><div class="marquee" id="marquee"></div></div>
-
-<div id="welcome-banner" style="display:none;"></div>
 
 <header class="hero">
   <div class="wrap hero-grid">
@@ -786,10 +798,6 @@ Joueur<span class="kw">:Connect</span>(<span class="kw">function</span>(player)<
       <button class="carousel-arrow next" id="reviews-next" aria-label="Avis suivant">›</button>
     </div>
     <div class="carousel-dots" id="reviews-dots"></div>
-    <div id="other-reviews-section" style="margin-top: 40px; display: none;">
-      <h3 style="font-size: 18px; margin-bottom: 16px; color: var(--text);">Autres avis</h3>
-      <div class="reviews-grid" id="other-reviews-grid"></div>
-    </div>
   </div>
 </section>
 
@@ -805,6 +813,15 @@ Joueur<span class="kw">:Connect</span>(<span class="kw">function</span>(player)<
     </div>
   </div>
 </section>
+
+<!-- MODALE COMMANDES -->
+<div class="cart-modal" id="orders-modal">
+  <div class="cart-panel" style="max-width:900px;">
+    <button class="modal-close" id="orders-close" style="position:absolute;top:12px;right:16px;background:none;border:none;color:var(--muted);font-size:28px;cursor:pointer;">&times;</button>
+    <h2>📦 Mes commandes</h2>
+    <div id="orders-list"><div class="cart-empty">Chargement...</div></div>
+  </div>
+</div>
 
 <footer>
   <div class="wrap">
@@ -833,27 +850,9 @@ Joueur<span class="kw">:Connect</span>(<span class="kw">function</span>(player)<
     <div id="cart-items"></div>
     <div class="cart-total" id="cart-total">Total : <span>0 €</span></div>
     <div class="cart-actions">
-      <button class="btn btn-primary" id="cart-order">📨 Commander</button>
+      <button class="btn btn-primary" id="cart-order">📦 Commander</button>
       <button class="btn btn-ghost" id="cart-clear">Vider le panier</button>
     </div>
-  </div>
-</div>
-
-<div class="cart-modal" id="orders-modal">
-  <div class="cart-panel">
-    <button class="modal-close" id="orders-close" style="position:absolute;top:12px;right:16px;background:none;border:none;color:var(--muted);font-size:28px;cursor:pointer;">&times;</button>
-    <h2>📦 Mes commandes</h2>
-    <div id="orders-list"></div>
-  </div>
-</div>
-
-<div class="cart-modal" id="admin-orders-modal">
-  <div class="cart-panel" style="max-width:720px;">
-    <button class="modal-close" id="admin-orders-close" style="position:absolute;top:12px;right:16px;background:none;border:none;color:var(--muted);font-size:28px;cursor:pointer;">&times;</button>
-    <h2>🛠️ Toutes les commandes</h2>
-    <input type="text" id="admin-orders-search" placeholder="Rechercher par pseudo ou ID Discord..."
-      style="width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;color:var(--text);padding:11px 14px;font-size:14px;margin:14px 0 18px;">
-    <div id="admin-orders-list" style="max-height:60vh;overflow-y:auto;"></div>
   </div>
 </div>
 
@@ -1141,24 +1140,23 @@ document.getElementById('cart-modal').addEventListener('click', (e) => {
   if(e.target === document.getElementById('cart-modal')) closeCart();
 });
 
-// === COMMANDE PAR EMAIL ===
+// === COMMANDE VIA DISCORD (webhook) — plus fiable que mailto pour plusieurs articles ===
 document.getElementById('cart-order').addEventListener('click', async () => {
   const orderBtn = document.getElementById('cart-order');
-  if (cart.length === 0) {
+  if(cart.length === 0) {
     alert('Votre panier est vide.');
     return;
   }
-  if (!currentUser) {
+  if(!currentUser) {
     alert('Connecte-toi avec Discord avant de passer commande.');
     return;
   }
-
   let total = 0;
   const items = cart.map(item => {
     const price = currentCurrency === 'robux' ? item.priceRobux : item.priceEur;
     const sub = price * item.qty;
     total += sub;
-    return { title: `${item.title}${item.qty > 1 ? ' x' + item.qty : ''}`, price: sub };
+    return { title: item.title, price: sub };
   });
 
   const originalText = orderBtn.textContent;
@@ -1184,10 +1182,10 @@ document.getElementById('cart-order').addEventListener('click', async () => {
       orderBtn.disabled = false;
       return;
     }
-    alert('✅ Commande envoyée ! Regarde tes messages privés Discord — Exiozz va te contacter. Va régulièrement dans ton profil (📦 Mes commandes) pour suivre le statut de ta commande.');
+    alert('✅ Commande envoyée ! Exiozz va te recontacter directement sur Discord.');
     cart = [];
     renderCart();
-    document.getElementById('cart-modal').classList.remove('active');
+    closeCart();
     orderBtn.textContent = originalText;
     orderBtn.disabled = false;
   } catch (e) {
@@ -1241,23 +1239,6 @@ carouselEl.addEventListener('mouseenter', () => { if (carouselTimer) clearInterv
 carouselEl.addEventListener('mouseleave', resetCarouselTimer);
 window.addEventListener('resize', () => updateCarousel());
 
-// Navigation clavier (← →) quand le carrousel est visible/survolé
-carouselEl.setAttribute('tabindex', '0');
-carouselEl.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowLeft') { carouselIndex--; updateCarousel(); resetCarouselTimer(); }
-  if (e.key === 'ArrowRight') { carouselIndex++; updateCarousel(); resetCarouselTimer(); }
-});
-
-// Swipe tactile (mobile)
-let touchStartX = 0;
-const viewportEl = document.querySelector('.carousel-viewport');
-viewportEl.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; if (carouselTimer) clearInterval(carouselTimer); }, { passive: true });
-viewportEl.addEventListener('touchend', (e) => {
-  const delta = e.changedTouches[0].clientX - touchStartX;
-  if (Math.abs(delta) > 40) { delta > 0 ? carouselIndex-- : carouselIndex++; updateCarousel(); }
-  resetCarouselTimer();
-}, { passive: true });
-
 // === GESTION DES AVIS (backend Replit — visibles par tous les visiteurs) ===
 function apiBase(){ return DATA.discord.backendAuthUrl.replace('/auth/discord', ''); }
 
@@ -1269,113 +1250,60 @@ async function fetchReviews(){
   } catch (e) { return []; }
 }
 
-async function renderReviews() {
+async function renderReviews(){
   const grid = document.getElementById('reviews-grid');
   const carouselWrap = document.getElementById('reviews-carousel');
   const dotsWrap = document.getElementById('reviews-dots');
-  const otherSection = document.getElementById('other-reviews-section');
-  const otherGrid = document.getElementById('other-reviews-grid');
-
   grid.innerHTML = '<div class="empty-note">Chargement des avis...</div>';
-  otherGrid.innerHTML = '';
-  otherSection.style.display = 'none';
-
   let reviews = await fetchReviews();
-  if (!reviews || reviews.length === 0) {
+  if(!reviews || reviews.length === 0){
     grid.innerHTML = '<div class="empty-note">Aucun avis pour le moment. Sois le premier à en laisser un !</div>';
     carouselWrap.style.display = 'none';
     dotsWrap.style.display = 'none';
     return;
   }
+  carouselWrap.style.display = 'flex';
+  dotsWrap.style.display = 'flex';
 
-  // Séparer tops (4-5⭐) et autres (1-3⭐)
-  const topReviews = reviews.filter(r => r.rating >= 4);
-  const otherReviews = reviews.filter(r => r.rating < 4);
-
-  // Trier les tops par note décroissante puis par date
-  topReviews.sort((a, b) => b.rating - a.rating || b.timestamp - a.timestamp);
-  otherReviews.sort((a, b) => b.rating - a.rating || b.timestamp - a.timestamp);
+  // Meilleures notes en premier, puis les plus récents en cas d'égalité
+  reviews = reviews.slice().sort((a, b) => b.rating - a.rating || b.timestamp - a.timestamp);
 
   const isAdmin = currentUser && currentUser.id === DATA.adminDiscordId;
-
-  // --- Gestion du carrousel pour les tops ---
-  if (topReviews.length > 0) {
-    carouselWrap.style.display = 'flex';
-    dotsWrap.style.display = 'flex';
-    grid.innerHTML = topReviews.map(r => {
-      const canDelete = (currentUser && r.discordId === currentUser.id) || isAdmin;
-      return `
-        <div class="review-card">
-          <span class="top-badge">⭐ Top avis</span>
-          <div class="review-head">
-            <div class="review-avatar">${r.avatar ? `<img src="${r.avatar}" alt="">` : r.name.slice(0, 2).toUpperCase()}</div>
-            <div><div class="review-name">${r.name}</div><div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div></div>
-          </div>
-          <p>${r.text}</p>
-          ${canDelete ? `<button class="review-delete" data-discord-id="${r.discordId}" title="Supprimer">🗑️</button>` : ''}
+  const topRating = reviews[0].rating;
+  grid.innerHTML = reviews.map(r => {
+    const canDelete = (currentUser && r.discordId === currentUser.id) || isAdmin;
+    const isTop = r.rating === topRating && topRating >= 4;
+    return `
+      <div class="review-card">
+        ${isTop ? '<span class="top-badge">⭐ Top avis</span>' : ''}
+        <div class="review-head">
+          <div class="review-avatar">${r.avatar ? `<img src="${r.avatar}" alt="">` : r.name.slice(0,2).toUpperCase()}</div>
+          <div><div class="review-name">${r.name}</div><div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div></div>
         </div>
-      `;
-    }).join('');
+        <p>${r.text}</p>
+        ${canDelete ? `<button class="review-delete" data-discord-id="${r.discordId}" title="Supprimer">🗑️</button>` : ''}
+      </div>
+    `;
+  }).join('');
 
-    // Réattacher les événements de suppression
-    grid.querySelectorAll('.review-delete').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const discordId = btn.dataset.discordId;
-        if (!confirm('Supprimer cet avis ?')) return;
-        try {
-          const res = await fetch(`${apiBase()}/api/reviews/${discordId}`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ requesterId: currentUser.id })
-          });
-          if (!res.ok) { const d = await res.json().catch(() => ({})); alert('Erreur : ' + (d.error || res.status)); return; }
-          renderReviews();
-        } catch (e) { alert('Impossible de contacter le serveur.'); }
-      });
+  grid.querySelectorAll('.review-delete').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const discordId = btn.dataset.discordId;
+      if(!confirm('Supprimer cet avis ?')) return;
+      try {
+        const res = await fetch(`${apiBase()}/api/reviews/${discordId}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requesterId: currentUser.id })
+        });
+        if (!res.ok) { const d = await res.json().catch(()=>({})); alert('Erreur : ' + (d.error || res.status)); return; }
+        renderReviews();
+      } catch (e) { alert('Impossible de contacter le serveur.'); }
     });
+  });
 
-    carouselIndex = 0;
-    requestAnimationFrame(() => { updateCarousel(); resetCarouselTimer(); });
-  } else {
-    carouselWrap.style.display = 'none';
-    dotsWrap.style.display = 'none';
-  }
-
-  // --- Gestion des autres avis (grille) ---
-  if (otherReviews.length > 0) {
-    otherSection.style.display = 'block';
-    otherGrid.innerHTML = otherReviews.map(r => {
-      const canDelete = (currentUser && r.discordId === currentUser.id) || isAdmin;
-      return `
-        <div class="review-card">
-          <div class="review-head">
-            <div class="review-avatar">${r.avatar ? `<img src="${r.avatar}" alt="">` : r.name.slice(0, 2).toUpperCase()}</div>
-            <div><div class="review-name">${r.name}</div><div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div></div>
-          </div>
-          <p>${r.text}</p>
-          ${canDelete ? `<button class="review-delete" data-discord-id="${r.discordId}" title="Supprimer">🗑️</button>` : ''}
-        </div>
-      `;
-    }).join('');
-
-    otherGrid.querySelectorAll('.review-delete').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const discordId = btn.dataset.discordId;
-        if (!confirm('Supprimer cet avis ?')) return;
-        try {
-          const res = await fetch(`${apiBase()}/api/reviews/${discordId}`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ requesterId: currentUser.id })
-          });
-          if (!res.ok) { const d = await res.json().catch(() => ({})); alert('Erreur : ' + (d.error || res.status)); return; }
-          renderReviews();
-        } catch (e) { alert('Impossible de contacter le serveur.'); }
-      });
-    });
-  } else {
-    otherSection.style.display = 'none';
-  }
+  carouselIndex = 0;
+  requestAnimationFrame(() => { updateCarousel(); resetCarouselTimer(); });
 }
 
 // === SUBMIT REVIEW ===
@@ -1447,7 +1375,6 @@ function updateCartVisibility() {
 
 function updateNavDiscord() {
   const headerEl = document.getElementById('dropdown-header');
-  const welcomeEl = document.getElementById('welcome-banner');
   if (currentUser) {
     navDiscordLabel.textContent = currentUser.name;
     // On retire la classe active pour fermer le dropdown au chargement
@@ -1460,17 +1387,10 @@ function updateNavDiscord() {
         <div class="dh-name">${currentUser.name}</div>
         ${isAdminUser ? '<span class="dh-badge">👑 Admin</span>' : ''}
       </div>`;
-    if (welcomeEl) {
-      welcomeEl.innerHTML = `👋 Bon retour, <b>${currentUser.name}</b> ! Ton panier et tes commandes sont accessibles depuis ton compte, en haut à droite.`;
-      welcomeEl.style.display = 'flex';
-    }
-    document.getElementById('nav-admin-orders-link').style.display = isAdminUser ? 'block' : 'none';
   } else {
     navDiscordLabel.textContent = 'Se connecter';
     navDiscordDropdown.classList.remove('active');
     headerEl.innerHTML = '';
-    if (welcomeEl) welcomeEl.style.display = 'none';
-    document.getElementById('nav-admin-orders-link').style.display = 'none';
   }
   updateCartVisibility();
 }
@@ -1481,124 +1401,6 @@ document.getElementById('nav-my-cart-link').addEventListener('click', (e) => {
   navDiscordDropdown.classList.remove('active');
   openCart();
 });
-
-// === MES COMMANDES ===
-async function openOrders(){
-  navDiscordDropdown.classList.remove('active');
-  const modal = document.getElementById('orders-modal');
-  const list = document.getElementById('orders-list');
-  modal.classList.add('active');
-  list.innerHTML = '<div class="empty-note">Chargement...</div>';
-  try {
-    const res = await fetch(`${apiBase()}/api/orders/${currentUser.id}`);
-    const orders = await res.json();
-    if (!orders || orders.length === 0) {
-      list.innerHTML = '<div class="empty-note">Aucune commande pour le moment.</div>';
-      return;
-    }
-    list.innerHTML = orders.map(o => `
-      <div class="cart-item" style="flex-direction:column;align-items:flex-start;gap:6px;">
-        <div style="display:flex;justify-content:space-between;width:100%;">
-          <span class="title">${new Date(o.timestamp).toLocaleDateString('fr-FR')}</span>
-          <span class="price">${Number(o.total).toLocaleString('fr-FR')} ${o.currency || ''}</span>
-        </div>
-        <div style="font-size:12.5px;color:var(--muted);">${o.items.map(i => i.title).join(', ')}</div>
-        <div style="font-size:11.5px;font-family:'JetBrains Mono';color:var(--blue);">${o.status || 'En attente de contact'}</div>
-      </div>
-    `).join('');
-  } catch (e) {
-    list.innerHTML = '<div class="empty-note">Impossible de charger tes commandes.</div>';
-  }
-}
-document.getElementById('nav-my-orders-link').addEventListener('click', (e) => { e.preventDefault(); openOrders(); });
-document.getElementById('orders-close').addEventListener('click', () => document.getElementById('orders-modal').classList.remove('active'));
-document.getElementById('orders-modal').addEventListener('click', (e) => { if(e.target.id === 'orders-modal') document.getElementById('orders-modal').classList.remove('active'); });
-
-// === ADMIN : TOUTES LES COMMANDES ===
-const STATUS_OPTIONS = ['En attente de contact', 'Confirmée', 'En construction', 'En pause', 'Payée', 'Annulée'];
-let allOrdersCache = [];
-
-function renderAdminOrders(filter){
-  const list = document.getElementById('admin-orders-list');
-  const term = (filter || '').toLowerCase().trim();
-  const filtered = !term ? allOrdersCache : allOrdersCache.filter(o =>
-    (o.customerName || '').toLowerCase().includes(term) || (o.discordId || '').includes(term)
-  );
-  if (filtered.length === 0) {
-    list.innerHTML = '<div class="empty-note">Aucune commande trouvée.</div>';
-    return;
-  }
-  list.innerHTML = filtered.map(o => `
-    <div class="cart-item" style="flex-direction:column;align-items:flex-start;gap:8px;padding:14px 0;">
-      <div style="display:flex;justify-content:space-between;width:100%;flex-wrap:wrap;gap:6px;">
-        <div>
-          <span class="title">${o.customerName}</span>
-          <span style="font-family:'JetBrains Mono';font-size:11px;color:var(--muted);margin-left:8px;">ID: ${o.discordId}</span>
-        </div>
-        <span class="price">${Number(o.total).toLocaleString('fr-FR')} ${o.currency || ''}</span>
-      </div>
-      <div style="font-size:12.5px;color:var(--muted);">${o.items.map(i => i.title).join(', ')} — ${new Date(o.timestamp).toLocaleDateString('fr-FR')}</div>
-      <select data-order-id="${o.id}" class="admin-status-select" style="background:var(--panel-2);border:1px solid var(--line);color:var(--text);border-radius:7px;padding:6px 10px;font-size:12.5px;font-family:'JetBrains Mono';">
-        ${STATUS_OPTIONS.map(s => `<option value="${s}" ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}
-      </select>
-    </div>
-  `).join('');
-
-  list.querySelectorAll('.admin-status-select').forEach(sel => {
-    sel.addEventListener('change', async () => {
-      const orderId = sel.dataset.orderId;
-      const newStatus = sel.value;
-      sel.disabled = true;
-      try {
-        const res = await fetch(`${apiBase()}/api/orders/${orderId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ requesterId: currentUser.id, status: newStatus })
-        });
-        if (!res.ok) { const d = await res.json().catch(()=>({})); alert('Erreur : ' + (d.error || res.status)); }
-        else {
-          const o = allOrdersCache.find(o => o.id === orderId);
-          if (o) o.status = newStatus;
-        }
-      } catch (e) { alert('Impossible de contacter le serveur.'); }
-      sel.disabled = false;
-    });
-  });
-}
-
-let adminOrdersInterval = null;
-
-async function fetchAdminOrders(silent){
-  try {
-    const res = await fetch(`${apiBase()}/api/admin/orders?requesterId=${currentUser.id}`);
-    if (!res.ok) {
-      if (!silent) document.getElementById('admin-orders-list').innerHTML = '<div class="empty-note">Accès refusé.</div>';
-      return;
-    }
-    allOrdersCache = await res.json();
-    renderAdminOrders(document.getElementById('admin-orders-search').value);
-  } catch (e) {
-    if (!silent) document.getElementById('admin-orders-list').innerHTML = '<div class="empty-note">Impossible de charger les commandes.</div>';
-  }
-}
-
-async function openAdminOrders(){
-  navDiscordDropdown.classList.remove('active');
-  const modal = document.getElementById('admin-orders-modal');
-  modal.classList.add('active');
-  document.getElementById('admin-orders-list').innerHTML = '<div class="empty-note">Chargement...</div>';
-  await fetchAdminOrders(false);
-  if (adminOrdersInterval) clearInterval(adminOrdersInterval);
-  adminOrdersInterval = setInterval(() => fetchAdminOrders(true), 15000); // actualisation auto toutes les 15s
-}
-function closeAdminOrders(){
-  document.getElementById('admin-orders-modal').classList.remove('active');
-  if (adminOrdersInterval) { clearInterval(adminOrdersInterval); adminOrdersInterval = null; }
-}
-document.getElementById('nav-admin-orders-link').addEventListener('click', (e) => { e.preventDefault(); openAdminOrders(); });
-document.getElementById('admin-orders-close').addEventListener('click', closeAdminOrders);
-document.getElementById('admin-orders-modal').addEventListener('click', (e) => { if(e.target.id === 'admin-orders-modal') closeAdminOrders(); });
-document.getElementById('admin-orders-search').addEventListener('input', (e) => renderAdminOrders(e.target.value));
 
 navDiscordBtn.addEventListener('click', (e) => {
   e.stopPropagation();
@@ -1802,6 +1604,171 @@ projectsGrid.addEventListener('click', (e) => {
     openModal(parseInt(card.dataset.index));
   }
 });
+
+// === COMMANDES CLIENT / ADMIN ===
+const ordersModal = document.getElementById('orders-modal');
+const ordersList = document.getElementById('orders-list');
+const ordersClose = document.getElementById('orders-close');
+const navMyOrdersLink = document.getElementById('nav-my-orders-link');
+const ORDER_STATUS_OPTIONS = [
+  'En attente de contact',
+  'Confirmée',
+  'En construction',
+  'En pause',
+  'Payée',
+  'Annulée'
+];
+
+function formatOrderDate(timestamp){
+  if(!timestamp) return 'Date inconnue';
+  return new Date(timestamp).toLocaleString('fr-FR', { dateStyle:'short', timeStyle:'short' });
+}
+
+function orderStatusStyle(status){
+  if(status === 'Annulée') return 'color:#ff6464;border-color:rgba(255,80,80,.35);background:rgba(255,80,80,.08);';
+  if(status === 'Payée') return 'color:#62d68a;border-color:rgba(98,214,138,.3);background:rgba(98,214,138,.08);';
+  if(status === 'Confirmée' || status === 'En construction') return 'color:#fff;border-color:#444;background:#181818;';
+  return 'color:var(--muted);';
+}
+
+function orderCardHtml(order, isAdmin=false){
+  const itemsHtml = Array.isArray(order.items) ? order.items.map(item => `
+    <div class="order-item-row">
+      <span>${item.title || 'Article'}${item.qty && item.qty > 1 ? ` ×${item.qty}` : ''}</span>
+      <span>${Number(item.price || 0).toLocaleString('fr-FR')} ${order.currency || ''}</span>
+    </div>
+  `).join('') : '';
+
+  const adminActions = isAdmin ? `
+    <div class="admin-order-actions">
+      <select class="admin-order-status" data-order-id="${order.id}">
+        ${ORDER_STATUS_OPTIONS.map(status => `<option value="${status}" ${status === order.status ? 'selected' : ''}>${status}</option>`).join('')}
+      </select>
+      <button class="admin-delete-order" data-order-id="${order.id}" title="Supprimer définitivement">×</button>
+    </div>
+  ` : '';
+
+  return `
+    <div class="order-card">
+      <div class="order-head">
+        <div>
+          <b>${isAdmin ? (order.customerName || 'Client') : 'Commande'}</b>
+          <div class="order-id">#${order.id} · ${formatOrderDate(order.timestamp)}</div>
+          ${isAdmin ? `<div class="order-id">Discord : ${order.discordId || 'inconnu'}</div>` : ''}
+        </div>
+        <span class="order-status" style="${orderStatusStyle(order.status)}">${order.status || 'En attente de contact'}</span>
+      </div>
+      <div class="order-items">${itemsHtml || '<div class="order-item-row"><span>Aucun article</span></div>'}</div>
+      <div class="order-footer">
+        <span>Total</span>
+        <span class="order-total">${Number(order.total || 0).toLocaleString('fr-FR')} ${order.currency || ''}</span>
+      </div>
+      ${adminActions}
+    </div>
+  `;
+}
+
+async function fetchMyOrders(){
+  if(!currentUser) return [];
+  const res = await fetch(`${apiBase()}/api/orders/${encodeURIComponent(currentUser.id)}`);
+  if(!res.ok) throw new Error('Impossible de charger tes commandes.');
+  return await res.json();
+}
+
+async function fetchAdminOrders(){
+  if(!currentUser || currentUser.id !== DATA.adminDiscordId) return [];
+  const res = await fetch(`${apiBase()}/api/admin/orders?requesterId=${encodeURIComponent(currentUser.id)}`);
+  if(!res.ok) throw new Error('Impossible de charger les commandes admin.');
+  return await res.json();
+}
+
+async function renderOrders(){
+  if(!currentUser){
+    ordersList.innerHTML = '<div class="cart-empty">Connecte-toi avec Discord pour voir tes commandes.</div>';
+    return;
+  }
+
+  ordersList.innerHTML = '<div class="cart-empty">Chargement des commandes...</div>';
+  try {
+    const mine = await fetchMyOrders();
+    const isAdmin = currentUser.id === DATA.adminDiscordId;
+    let html = '';
+
+    html += `<div class="orders-admin-title">Mes commandes</div>`;
+    html += mine.length ? mine.map(o => orderCardHtml(o, false)).join('') : '<div class="cart-empty">Aucune commande.</div>';
+
+    if(isAdmin){
+      const all = await fetchAdminOrders();
+      html += `<div class="orders-admin-title">Administration — toutes les commandes</div>`;
+      html += all.length ? all.map(o => orderCardHtml(o, true)).join('') : '<div class="cart-empty">Aucune commande.</div>';
+    }
+
+    ordersList.innerHTML = html;
+    bindOrderAdminActions();
+  } catch(e){
+    ordersList.innerHTML = `<div class="cart-empty">❌ ${e.message}</div>`;
+  }
+}
+
+function openOrders(){
+  if(!currentUser){ alert('Connecte-toi avec Discord pour voir tes commandes.'); return; }
+  ordersModal.classList.add('active');
+  renderOrders();
+}
+
+function closeOrders(){ ordersModal.classList.remove('active'); }
+
+function bindOrderAdminActions(){
+  if(!currentUser || currentUser.id !== DATA.adminDiscordId) return;
+
+  ordersList.querySelectorAll('.admin-order-status').forEach(select => {
+    select.addEventListener('change', async () => {
+      const orderId = select.dataset.orderId;
+      const newStatus = select.value;
+      select.disabled = true;
+      try {
+        const res = await fetch(`${apiBase()}/api/orders/${encodeURIComponent(orderId)}`, {
+          method:'PATCH',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ requesterId: currentUser.id, status:newStatus })
+        });
+        const data = await res.json().catch(()=>({}));
+        if(!res.ok){ alert(data.error || `Erreur ${res.status}`); }
+        await renderOrders();
+      } catch(e){
+        alert('Impossible de contacter le serveur.');
+        select.disabled = false;
+      }
+    });
+  });
+
+  ordersList.querySelectorAll('.admin-delete-order').forEach(button => {
+    button.addEventListener('click', async () => {
+      const orderId = button.dataset.orderId;
+      if(!confirm('Supprimer définitivement cette commande ?\n\nCette action est irréversible.')) return;
+      button.disabled = true;
+      button.textContent = '…';
+      try {
+        const res = await fetch(`${apiBase()}/api/orders/${encodeURIComponent(orderId)}`, {
+          method:'DELETE',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ requesterId: currentUser.id })
+        });
+        const data = await res.json().catch(()=>({}));
+        if(!res.ok){ alert(data.error || `Erreur ${res.status}`); button.disabled=false; button.textContent='×'; return; }
+        await renderOrders();
+      } catch(e){
+        alert('Impossible de contacter le serveur.');
+        button.disabled=false;
+        button.textContent='×';
+      }
+    });
+  });
+}
+
+navMyOrdersLink.addEventListener('click', e => { e.preventDefault(); navDiscordDropdown.classList.remove('active'); openOrders(); });
+ordersClose.addEventListener('click', closeOrders);
+ordersModal.addEventListener('click', e => { if(e.target === ordersModal) closeOrders(); });
 
 // === FAQ ACCORDION ===
 const faqList = document.getElementById('faq-list');

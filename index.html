@@ -73,6 +73,17 @@
             pointer-events: none;
             opacity: .5;
         }
+        #three-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 1.2s ease;
+        }
+        #three-bg.ready {
+            opacity: 1;
+        }
         .wrap {
             max-width: 1120px;
             margin: 0 auto;
@@ -732,6 +743,43 @@
         }
         .stagger.visible>*:nth-child(8) {
             transition-delay: .75s;
+        }
+
+        /* === Variantes d'animations au scroll === */
+        [data-reveal] {
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+        [data-reveal].visible {
+            opacity: 1;
+        }
+        [data-reveal="flip"] {
+            transform: perspective(1000px) rotateX(35deg) translateY(40px);
+            transition: opacity .8s cubic-bezier(.2, .9, .25, 1), transform .8s cubic-bezier(.2, .9, .25, 1);
+        }
+        [data-reveal="flip"].visible {
+            transform: perspective(1000px) rotateX(0deg) translateY(0);
+        }
+        [data-reveal="left"] {
+            transform: translateX(-50px);
+            transition: opacity .8s cubic-bezier(.2, .9, .25, 1), transform .8s cubic-bezier(.2, .9, .25, 1);
+        }
+        [data-reveal="left"].visible {
+            transform: translateX(0);
+        }
+        [data-reveal="right"] {
+            transform: translateX(50px);
+            transition: opacity .8s cubic-bezier(.2, .9, .25, 1), transform .8s cubic-bezier(.2, .9, .25, 1);
+        }
+        [data-reveal="right"].visible {
+            transform: translateX(0);
+        }
+        [data-reveal="zoom"] {
+            transform: scale(.85);
+            transition: opacity .7s cubic-bezier(.2, .9, .25, 1), transform .7s cubic-bezier(.2, .9, .25, 1);
+        }
+        [data-reveal="zoom"].visible {
+            transform: scale(1);
         }
 
         .about-grid {
@@ -2131,6 +2179,30 @@
                         { "name": "JavaScript / Interactions", "level": 75 },
                         { "name": "Responsive / Accessibilité", "level": 70 }
                     ]
+                },
+                {
+                    "id": "3d",
+                    "label": "3D",
+                    "icon": "🧊",
+                    "desc": "Modélisation, texturing et rendu 3D pour jeux, produits ou visuels.",
+                    "subskills": [
+                        { "name": "Modélisation 3D", "level": 75 },
+                        { "name": "Texturing / Matériaux", "level": 65 },
+                        { "name": "Rendu / Éclairage", "level": 60 },
+                        { "name": "Animation 3D", "level": 50 }
+                    ]
+                },
+                {
+                    "id": "uiux",
+                    "label": "UI/UX Design",
+                    "icon": "🖌️",
+                    "desc": "Interfaces claires et expérience utilisateur pensée pour chaque plateforme.",
+                    "subskills": [
+                        { "name": "Wireframing", "level": 80 },
+                        { "name": "Design d'interface", "level": 85 },
+                        { "name": "Prototypage interactif", "level": 70 },
+                        { "name": "Ergonomie / UX", "level": 75 }
+                    ]
                 }
             ],
             "serviceCategories": [
@@ -2146,7 +2218,8 @@
                         "priceNote": "selon complexité du système",
                         "features": ["1 système complet", "Tests & corrections inclus", "Code commenté", "Support 7 jours"],
                         "cta": "Ajouter au panier",
-                        "popular": false
+                        "popular": false,
+                        "enabled": true
                     }, {
                         "icon": "🎮",
                         "title": "Jeu complet",
@@ -2155,7 +2228,8 @@
                         "priceNote": "selon ampleur du projet",
                         "features": ["Concept & game design", "Scripting complet", "Build & UI inclus", "Suivi jusqu'à publication"],
                         "cta": "Ajouter au panier",
-                        "popular": true
+                        "popular": true,
+                        "enabled": true
                     }, {
                         "icon": "🛠️",
                         "title": "Maintenance & Support",
@@ -2164,7 +2238,8 @@
                         "priceNote": "selon volume de travail",
                         "features": ["Diagnostic inclus", "Corrections rapides", "Rapport détaillé", "Facturation à la tâche"],
                         "cta": "Ajouter au panier",
-                        "popular": false
+                        "popular": false,
+                        "enabled": true
                     }]
                 },
                 {
@@ -2179,7 +2254,8 @@
                         "priceNote": "par PFP, révisions incluses",
                         "features": ["Format carré HD", "2 révisions incluses", "Livraison rapide"],
                         "cta": "Ajouter au panier",
-                        "popular": false
+                        "popular": false,
+                        "enabled": true
                     }, {
                         "icon": "🏳️",
                         "title": "Bannière",
@@ -2188,7 +2264,8 @@
                         "priceNote": "par bannière, aux bonnes dimensions",
                         "features": ["Dimensions adaptées à la plateforme", "2 révisions incluses", "Fichier source sur demande"],
                         "cta": "Ajouter au panier",
-                        "popular": true
+                        "popular": true,
+                        "enabled": true
                     }, {
                         "icon": "🎬",
                         "title": "Thumbnail",
@@ -2197,7 +2274,8 @@
                         "priceNote": "par thumbnail",
                         "features": ["Composition originale", "Optimisée pour le clic", "2 révisions incluses"],
                         "cta": "Ajouter au panier",
-                        "popular": false
+                        "popular": false,
+                        "enabled": true
                     }]
                 },
                 {
@@ -2212,7 +2290,8 @@
                         "priceNote": "selon fonctionnalités demandées",
                         "features": ["Fonctionnalités sur mesure", "Code source fourni", "Aide à l'hébergement", "Support 7 jours"],
                         "cta": "Ajouter au panier",
-                        "popular": false
+                        "popular": false,
+                        "enabled": true
                     }, {
                         "icon": "🏗️",
                         "title": "Création de serveur Discord",
@@ -2221,7 +2300,8 @@
                         "priceNote": "selon taille du serveur",
                         "features": ["Structure de salons", "Rôles & permissions", "Design visuel inclus", "Bots de base configurés"],
                         "cta": "Ajouter au panier",
-                        "popular": false
+                        "popular": false,
+                        "enabled": true
                     }]
                 },
                 {
@@ -2236,7 +2316,8 @@
                         "priceNote": "site statique, 1-3 pages",
                         "features": ["Design responsive", "Optimisé SEO", "1-3 pages", "Code propre"],
                         "cta": "Ajouter au panier",
-                        "popular": false
+                        "popular": false,
+                        "enabled": true
                     }, {
                         "icon": "🏗️",
                         "title": "Site complet",
@@ -2245,7 +2326,8 @@
                         "priceNote": "site complet, 4-8 pages",
                         "features": ["Multi-pages", "Animations CSS/JS", "Formulaire de contact", "Optimisé performance"],
                         "cta": "Ajouter au panier",
-                        "popular": true
+                        "popular": true,
+                        "enabled": true
                     }, {
                         "icon": "⚡",
                         "title": "Site avec backend",
@@ -2254,7 +2336,152 @@
                         "priceNote": "selon complexité backend",
                         "features": ["Base de données", "Authentification", "API personnalisée", "Dashboard admin"],
                         "cta": "Ajouter au panier",
-                        "popular": false
+                        "popular": false,
+                        "enabled": true
+                    }]
+                },
+                {
+                    "id": "3d",
+                    "label": "3D",
+                    "icon": "🧊",
+                    "services": [{
+                        "icon": "🧊",
+                        "title": "Modèle 3D",
+                        "desc": "Modélisation d'un objet, prop ou personnage 3D, texturé et prêt à l'emploi.",
+                        "priceFrom": 15,
+                        "priceNote": "selon complexité du modèle",
+                        "features": ["Modélisation & texturing", "Export dans le format voulu", "2 révisions incluses"],
+                        "cta": "Ajouter au panier",
+                        "popular": true,
+                        "enabled": true
+                    }, {
+                        "icon": "🏞️",
+                        "title": "Environnement 3D",
+                        "desc": "Scène ou environnement 3D complet, avec éclairage et ambiance soignés.",
+                        "priceFrom": 40,
+                        "priceNote": "selon taille de l'environnement",
+                        "features": ["Modélisation d'ensemble", "Éclairage & ambiance", "Optimisation", "Fichier source sur demande"],
+                        "cta": "Ajouter au panier",
+                        "popular": false,
+                        "enabled": false
+                    }, {
+                        "icon": "🎞️",
+                        "title": "Rendu / Animation 3D",
+                        "desc": "Rendu final ou courte animation 3D pour présenter un objet, un produit ou une scène.",
+                        "priceFrom": 20,
+                        "priceNote": "selon durée / nombre de rendus",
+                        "features": ["Rendu HD", "Éclairage soigné", "Révisions incluses"],
+                        "cta": "Ajouter au panier",
+                        "popular": false,
+                        "enabled": false
+                    }]
+                },
+                {
+                    "id": "uiux",
+                    "label": "UI/UX Design",
+                    "icon": "🖌️",
+                    "services": [{
+                        "icon": "✏️",
+                        "title": "Wireframe / Maquette",
+                        "desc": "Structure et wireframe d'une interface, pour poser les bases avant le développement.",
+                        "priceFrom": 10,
+                        "priceNote": "selon nombre d'écrans",
+                        "features": ["Wireframes clairs", "Organisation des contenus", "1 aller-retour de révision"],
+                        "cta": "Ajouter au panier",
+                        "popular": false,
+                        "enabled": true
+                    }, {
+                        "icon": "🖥️",
+                        "title": "UI Design",
+                        "desc": "Design d'interface complet (app, site, jeu) : écrans, composants et cohérence visuelle.",
+                        "priceFrom": 25,
+                        "priceNote": "selon nombre d'écrans",
+                        "features": ["Design haute-fidélité", "Composants réutilisables", "2 révisions incluses", "Fichiers sources fournis"],
+                        "cta": "Ajouter au panier",
+                        "popular": true,
+                        "enabled": true
+                    }, {
+                        "icon": "🧭",
+                        "title": "Prototype interactif",
+                        "desc": "Prototype cliquable pour tester et valider un parcours utilisateur avant le développement.",
+                        "priceFrom": 20,
+                        "priceNote": "selon complexité du parcours",
+                        "features": ["Parcours utilisateur cliquable", "Itérations rapides", "Retours pris en compte"],
+                        "cta": "Ajouter au panier",
+                        "popular": false,
+                        "enabled": true
+                    }]
+                },
+                {
+                    "id": "script",
+                    "label": "Script",
+                    "icon": "💻",
+                    "services": [{
+                        "icon": "🧩",
+                        "title": "Script sur mesure",
+                        "desc": "Un script ou système précis développé pour tes besoins, sur Roblox ou en dehors (outil, automatisation, script web...).",
+                        "priceFrom": 15,
+                        "priceNote": "selon complexité du script",
+                        "features": ["Script commenté & organisé", "Tests & corrections inclus", "Support 7 jours"],
+                        "cta": "Ajouter au panier",
+                        "popular": true,
+                        "enabled": true
+                    }, {
+                        "icon": "🤖",
+                        "title": "Automatisation",
+                        "desc": "Automatisation d'une tâche répétitive : traitement de données, outil interne, script d'automatisation...",
+                        "priceFrom": 12,
+                        "priceNote": "selon volume de travail",
+                        "features": ["Analyse du besoin", "Script prêt à l'emploi", "Documentation incluse"],
+                        "cta": "Ajouter au panier",
+                        "popular": false,
+                        "enabled": true
+                    }, {
+                        "icon": "🛠️",
+                        "title": "Debug & Optimisation",
+                        "desc": "Correction de bugs et optimisation de performance sur un script ou projet existant, quel que soit le langage.",
+                        "priceFrom": 10,
+                        "priceNote": "selon volume de travail",
+                        "features": ["Diagnostic inclus", "Corrections rapides", "Rapport détaillé"],
+                        "cta": "Ajouter au panier",
+                        "popular": false,
+                        "enabled": true
+                    }]
+                },
+                {
+                    "id": "build",
+                    "label": "Build",
+                    "icon": "🧱",
+                    "services": [{
+                        "icon": "🧱",
+                        "title": "Build sur mesure",
+                        "desc": "Construction d'un environnement, d'une map ou d'une structure détaillée pour ton projet.",
+                        "priceFrom": 20,
+                        "priceNote": "selon taille du build",
+                        "features": ["Mapping / terrain", "Objets & détails", "Optimisation incluse"],
+                        "cta": "Ajouter au panier",
+                        "popular": true,
+                        "enabled": true
+                    }, {
+                        "icon": "💡",
+                        "title": "Lighting & VFX",
+                        "desc": "Ambiance lumineuse et effets visuels pour donner du cachet à un environnement existant.",
+                        "priceFrom": 15,
+                        "priceNote": "selon ampleur du travail",
+                        "features": ["Éclairage d'ambiance", "Effets visuels", "Révisions incluses"],
+                        "cta": "Ajouter au panier",
+                        "popular": false,
+                        "enabled": true
+                    }, {
+                        "icon": "🔧",
+                        "title": "Optimisation de build",
+                        "desc": "Optimisation des performances d'un environnement existant, trop lourd ou mal structuré.",
+                        "priceFrom": 15,
+                        "priceNote": "selon volume de travail",
+                        "features": ["Diagnostic inclus", "Corrections rapides", "Rapport détaillé"],
+                        "cta": "Ajouter au panier",
+                        "popular": false,
+                        "enabled": true
                     }]
                 }
             ],
@@ -2342,6 +2569,7 @@
     <div class="grid-bg"></div>
     <div class="glow" id="glow"></div>
     <canvas id="voxel-canvas"></canvas>
+    <div id="three-bg"></div>
 
     <nav>
         <div class="wrap">
@@ -2421,11 +2649,11 @@
 
     <section id="about">
         <div class="wrap">
-            <div class="reveal">
+            <div class="reveal" data-reveal="flip">
                 <div class="section-tag">01 — À propos</div>
                 <h2 class="section-title">Qui je suis</h2>
             </div>
-            <div class="about-grid reveal">
+            <div class="about-grid reveal" data-reveal="zoom">
                 <div class="about-text" id="about-text"></div>
                 <div class="highlight-list" id="about-highlights"></div>
             </div>
@@ -2434,7 +2662,7 @@
 
     <section id="process">
         <div class="wrap">
-            <div class="reveal">
+            <div class="reveal" data-reveal="left">
                 <div class="section-tag">02 — Méthode</div>
                 <h2 class="section-title">Comment je travaille</h2>
                 <p class="section-desc">Un processus simple en quatre étapes, du premier message à la livraison.</p>
@@ -2445,7 +2673,7 @@
 
     <section id="skills">
         <div class="wrap">
-            <div class="reveal">
+            <div class="reveal" data-reveal="right">
                 <div class="section-tag">03 — Compétences</div>
                 <h2 class="section-title">Ce que je maîtrise</h2>
                 <p class="section-desc">Développement, visuel, web et Discord — décomposés catégorie par catégorie.</p>
@@ -2649,7 +2877,7 @@
         });
         tiltWrap.addEventListener('mouseleave', () => { tiltPanel.style.transform = 'rotateX(0) rotateY(0)'; });
 
-        // === VOXEL BACKGROUND ===
+        // === VOXEL BACKGROUND (fallback 2D, utilisé si le rendu 3D est indisponible) ===
         (function() {
             const canvas = document.getElementById('voxel-canvas');
             const ctx = canvas.getContext('2d');
@@ -2681,6 +2909,121 @@
                 requestAnimationFrame(tick);
             }
             tick();
+        })();
+
+        // === VRAI FOND 3D (voxels flottants en WebGL via three.js) ===
+        (function() {
+            const mount = document.getElementById('three-bg');
+            if (!mount || typeof THREE === 'undefined') return; // fallback silencieux sur le canvas 2D si three.js n'a pas pu charger
+
+            const voxelCanvas = document.getElementById('voxel-canvas');
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 0, 14);
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            mount.appendChild(renderer.domElement);
+
+            // Groupe de "voxels" — cubes filaires + quelques cubes pleins semi-transparents,
+            // en écho au thème Roblox / voxel du site.
+            const group = new THREE.Group();
+            const shapeCount = window.innerWidth < 700 ? 22 : 42;
+            const meshes = [];
+
+            for (let i = 0; i < shapeCount; i++) {
+                const isSolid = Math.random() < 0.35;
+                const size = 0.35 + Math.random() * 1.1;
+                const geo = new THREE.BoxGeometry(size, size, size);
+                let mesh;
+                if (isSolid) {
+                    const mat = new THREE.MeshBasicMaterial({
+                        color: 0xffffff,
+                        transparent: true,
+                        opacity: 0.05 + Math.random() * 0.06
+                    });
+                    mesh = new THREE.Mesh(geo, mat);
+                } else {
+                    const edges = new THREE.EdgesGeometry(geo);
+                    const mat = new THREE.LineBasicMaterial({
+                        color: 0xffffff,
+                        transparent: true,
+                        opacity: 0.12 + Math.random() * 0.18
+                    });
+                    mesh = new THREE.LineSegments(edges, mat);
+                }
+
+                mesh.position.set(
+                    (Math.random() - 0.5) * 26,
+                    (Math.random() - 0.5) * 16,
+                    (Math.random() - 0.5) * 18
+                );
+                mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+
+                mesh.userData.rotSpeed = new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.006,
+                    (Math.random() - 0.5) * 0.006,
+                    (Math.random() - 0.5) * 0.004
+                );
+                mesh.userData.floatSpeed = 0.15 + Math.random() * 0.35;
+                mesh.userData.floatOffset = Math.random() * Math.PI * 2;
+                mesh.userData.baseY = mesh.position.y;
+
+                group.add(mesh);
+                meshes.push(mesh);
+            }
+            scene.add(group);
+
+            function resize3D() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+            window.addEventListener('resize', resize3D);
+
+            // Parallax souris
+            let targetRotX = 0,
+                targetRotY = 0;
+            document.addEventListener('mousemove', (e) => {
+                targetRotY = ((e.clientX / window.innerWidth) - 0.5) * 0.35;
+                targetRotX = ((e.clientY / window.innerHeight) - 0.5) * 0.2;
+            });
+
+            // Rotation liée au scroll : la scène "tourne" au fil de la lecture de la page
+            let scrollRatio = 0;
+            window.addEventListener('scroll', () => {
+                const d = document.documentElement;
+                scrollRatio = d.scrollTop / Math.max(1, (d.scrollHeight - d.clientHeight));
+            }, { passive: true });
+
+            const clock = new THREE.Clock();
+
+            function animate3D() {
+                const t = clock.getElapsedTime();
+
+                meshes.forEach(m => {
+                    m.rotation.x += m.userData.rotSpeed.x;
+                    m.rotation.y += m.userData.rotSpeed.y;
+                    m.rotation.z += m.userData.rotSpeed.z;
+                    m.position.y = m.userData.baseY + Math.sin(t * m.userData.floatSpeed + m.userData.floatOffset) * 0.6;
+                });
+
+                group.rotation.y += (targetRotY + scrollRatio * 1.4 - group.rotation.y) * 0.03;
+                group.rotation.x += (targetRotX - group.rotation.x) * 0.03;
+
+                renderer.render(scene, camera);
+                requestAnimationFrame(animate3D);
+            }
+            animate3D();
+
+            // Une fois la première frame prête, on fait apparaître le fond 3D
+            // en douceur et on masque le canvas 2D de secours.
+            requestAnimationFrame(() => {
+                mount.classList.add('ready');
+                if (voxelCanvas) voxelCanvas.style.opacity = '0';
+            });
         })();
 
         // === NAV / FOOTER / CTA LINKS ===
@@ -2811,8 +3154,13 @@
         buildTabs(serviceTabs, servicePanels, DATA.serviceCategories,
             (cat, i) =>
             `<div class="cat-tab ${i===0?'active':''}" data-cat="${cat.id}"><span>${cat.icon}</span> ${cat.label}</div>`,
-            (cat, i) =>
-            `<div class="cat-panel ${i===0?'active':''}" data-cat="${cat.id}"><div class="services-grid stagger visible">${cat.services.map(s => serviceCardHtml(s, cat.id)).join('')}</div></div>`
+            (cat, i) => {
+                const activeServices = cat.services.filter(s => s.enabled !== false);
+                const servicesHtml = activeServices.length ?
+                    activeServices.map(s => serviceCardHtml(s, cat.id)).join('') :
+                    '<div class="cart-empty">Aucun service disponible dans cette catégorie pour le moment.</div>';
+                return `<div class="cat-panel ${i===0?'active':''}" data-cat="${cat.id}"><div class="services-grid stagger visible">${servicesHtml}</div></div>`;
+            }
         );
 
         // === PRICING TOGGLE ===
@@ -3620,6 +3968,27 @@
             });
         }, { threshold: 0.15 });
         document.querySelectorAll('.reveal, .stagger').forEach(el => io.observe(el));
+
+        // === PARALLAX AU SCROLL (hero + éléments marqués) ===
+        const parallaxHero = document.querySelector('.tilt-wrap');
+        const parallaxEls = document.querySelectorAll('.parallax-el');
+        let lastScrollY = -1;
+        function onScrollParallax() {
+            const y = window.scrollY;
+            if (y !== lastScrollY) {
+                lastScrollY = y;
+                if (parallaxHero && y < window.innerHeight) {
+                    parallaxHero.style.transform = `translateY(${y * 0.12}px)`;
+                    parallaxHero.style.opacity = String(Math.max(0, 1 - y / 700));
+                }
+                parallaxEls.forEach((el, i) => {
+                    const speed = 0.06 + (i % 3) * 0.03;
+                    el.style.transform = `translateY(${y * speed}px)`;
+                });
+            }
+            requestAnimationFrame(onScrollParallax);
+        }
+        requestAnimationFrame(onScrollParallax);
 
         // === ATTACH CARD EFFECTS ===
         function attachCardEffects() {

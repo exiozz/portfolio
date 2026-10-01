@@ -13,7 +13,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<!-- ===== OPEN GRAPH ===== -->
 <meta property="og:title" content="Exiozz — Développeur Roblox & Web">
 <meta property="og:description" content="Développeur Roblox français polyvalent">
 <meta property="og:image" content="https://i.imgur.com/i9jsoCG.png">
@@ -60,84 +59,51 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Exiozz","jobTitle":"Développeur Roblox & Web","url":"https://exiozz.github.io/portfolio/","description":"Portfolio d'Exiozz — Développement Roblox, GFX, bots Discord, et création de sites web modernes.","knowsAbout":["Roblox","Lua","Bots Discord","Développement web","GFX"]}</script>
 
 <style>
-/* ==========================================================
-   TOKENS
-   ========================================================== */
 :root {
   --font-display: 'Unbounded', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Geist', 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-code: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-
   --accent: #2B50F0;
   --accent-ink: #FFFFFF;
   --accent-text: #2343D6;
   --accent-soft: color-mix(in srgb, var(--accent) 11%, transparent);
   --accent-line: color-mix(in srgb, var(--accent) 36%, transparent);
-
-  --bg: #F5F6FA;
-  --bg-2: #ECEEF5;
-  --surface: #FFFFFF;
-  --surface-2: #F8F9FC;
-  --ink: #0B0D14;
-  --muted: #5A6174;
-  --faint: #8A91A3;
-  --line: #E2E5EE;
-  --line-2: #CBD0DD;
+  --bg: #F5F6FA; --bg-2: #ECEEF5; --surface: #FFFFFF; --surface-2: #F8F9FC;
+  --ink: #0B0D14; --muted: #5A6174; --faint: #8A91A3;
+  --line: #E2E5EE; --line-2: #CBD0DD;
   --grid-dot: rgba(11, 13, 20, .13);
   --nav-bg: rgba(255, 255, 255, .74);
   --overlay: rgba(11, 13, 20, .52);
-  --star: #F5A524;
-  --ok: #12945F;
-  --danger: #D92D3A;
+  --star: #F5A524; --ok: #12945F; --danger: #D92D3A;
   --shadow-sm: 0 1px 2px rgba(11, 13, 20, .06);
   --shadow-md: 0 14px 34px -18px rgba(11, 13, 20, .28), 0 1px 3px rgba(11, 13, 20, .05);
   --shadow-pop: 0 34px 80px -26px rgba(11, 13, 20, .45), 0 0 0 1px var(--line);
-
-  --r: 16px;
-  --r-btn: 12px;
-  --r-sm: calc(var(--r) * .62);
+  --r: 16px; --r-btn: 12px; --r-sm: calc(var(--r) * .62);
   --ease: cubic-bezier(.2, .9, .25, 1);
   --nav-h: 66px;
 }
 :root[data-radius="sharp"] { --r: 4px; --r-btn: 4px; }
 :root[data-radius="round"] { --r: 28px; --r-btn: 999px; }
 :root[data-theme="dark"] {
-  --bg: #090A0F;
-  --bg-2: #0E1017;
-  --surface: #12141C;
-  --surface-2: #171A24;
-  --ink: #EDEFF5;
-  --muted: #9AA1B2;
-  --faint: #6E7588;
-  --line: #1F232E;
-  --line-2: #2E3441;
+  --bg: #090A0F; --bg-2: #0E1017; --surface: #12141C; --surface-2: #171A24;
+  --ink: #EDEFF5; --muted: #9AA1B2; --faint: #6E7588;
+  --line: #1F232E; --line-2: #2E3441;
   --grid-dot: rgba(255, 255, 255, .11);
   --nav-bg: rgba(14, 16, 23, .72);
   --overlay: rgba(2, 3, 7, .7);
-  --ok: #3DDC97;
-  --danger: #FF6B75;
+  --ok: #3DDC97; --danger: #FF6B75;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4);
   --shadow-md: 0 18px 40px -20px rgba(0, 0, 0, .8), 0 1px 3px rgba(0, 0, 0, .4);
   --shadow-pop: 0 40px 90px -28px rgba(0, 0, 0, .9), 0 0 0 1px var(--line-2);
 }
-
-/* ==========================================================
-   BASE
-   ========================================================== */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 96px; -webkit-text-size-adjust: 100%; scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; }
 body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-body);
-  font-size: 16px;
-  line-height: 1.6;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  background: var(--bg); color: var(--ink); font-family: var(--font-body);
+  font-size: 16px; line-height: 1.6; overflow-x: hidden;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
   transition: background-color .4s ease, color .4s ease;
-  opacity: 0;
-  animation: pageIn .5s ease forwards;
+  opacity: 0; animation: pageIn .5s ease forwards;
 }
 body.no-scroll { overflow: hidden; }
 @keyframes pageIn { to { opacity: 1; } }
@@ -148,26 +114,12 @@ h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -.03em; line-
 [hidden] { display: none !important; }
 svg.i { flex: none; display: block; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
-kbd {
-  font: 500 12px/1 var(--font-code); padding: 4px 7px; border-radius: 6px;
-  border: 1px solid var(--line-2); background: var(--bg-2); color: var(--muted);
-}
-.skip {
-  position: fixed; left: 16px; top: -60px; z-index: 500;
-  background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: var(--r-btn);
-  font-weight: 600; transition: top .2s;
-}
+kbd { font: 500 12px/1 var(--font-code); padding: 4px 7px; border-radius: 6px; border: 1px solid var(--line-2); background: var(--bg-2); color: var(--muted); }
+.skip { position: fixed; left: 16px; top: -60px; z-index: 500; background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: var(--r-btn); font-weight: 600; transition: top .2s; }
 .skip:focus { top: 16px; }
 .wrap { max-width: 1200px; margin: 0 auto; padding: 0 28px; position: relative; }
+#scroll-progress { position: fixed; top: 0; left: 0; height: 2px; width: 0; background: var(--accent); z-index: 130; transition: width .1s linear; }
 
-#scroll-progress {
-  position: fixed; top: 0; left: 0; height: 2px; width: 0;
-  background: var(--accent); z-index: 130; transition: width .1s linear;
-}
-
-/* ==========================================================
-   BOUTONS & CONTRÔLES
-   ========================================================== */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 9px;
   height: 48px; padding: 0 24px; border-radius: var(--r-btn);
@@ -179,10 +131,7 @@ kbd {
 .btn[disabled] { opacity: .45; cursor: not-allowed; pointer-events: none; }
 .btn-sm { height: 40px; padding: 0 16px; font-size: 14px; }
 .btn-block { width: 100%; }
-.btn-primary {
-  background: var(--accent); color: var(--accent-ink);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 10px 26px -12px var(--accent);
-}
+.btn-primary { background: var(--accent); color: var(--accent-ink); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 10px 26px -12px var(--accent); }
 .btn-primary:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 14px 32px -10px var(--accent); filter: brightness(1.06); }
 .btn-ghost { background: transparent; border-color: var(--line-2); color: var(--ink); }
 .btn-ghost:hover { background: var(--surface); border-color: var(--faint); }
@@ -198,58 +147,27 @@ kbd {
 .btn-outline:hover { background: color-mix(in srgb, var(--accent-ink) 12%, transparent); border-color: var(--accent-ink); }
 .btn-cart-toggle.in-cart { background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1px var(--accent-line); filter: none; }
 
-/* Boutons sans effet au survol */
 .btn.no-hover { transition: none; }
 .btn.no-hover:hover { box-shadow: none; filter: none; transform: none; }
 .btn-primary.no-hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 10px 26px -12px var(--accent); }
 .btn-inverse.no-hover { box-shadow: none; }
 
-.icon-btn {
-  position: relative; display: inline-grid; place-items: center;
-  width: 40px; height: 40px; border-radius: var(--r-btn); flex: none;
-  background: transparent; border: 1px solid transparent; color: var(--muted); cursor: pointer;
-  transition: background-color .2s, color .2s, border-color .2s;
-}
+.icon-btn { position: relative; display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: var(--r-btn); flex: none; background: transparent; border: 1px solid transparent; color: var(--muted); cursor: pointer; transition: background-color .2s, color .2s, border-color .2s; }
 .icon-btn:hover { background: var(--surface); border-color: var(--line); color: var(--ink); }
 .icon-btn-sm { width: 32px; height: 32px; }
-.badge-count {
-  position: absolute; top: -5px; right: -5px; min-width: 19px; height: 19px; padding: 0 5px;
-  display: grid; place-items: center; border-radius: 999px;
-  background: var(--accent); color: var(--accent-ink); font-size: 11px; font-weight: 700;
-  box-shadow: 0 0 0 2px var(--bg);
-}
+.badge-count { position: absolute; top: -5px; right: -5px; min-width: 19px; height: 19px; padding: 0 5px; display: grid; place-items: center; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-size: 11px; font-weight: 700; box-shadow: 0 0 0 2px var(--bg); }
 .badge-count.bump { animation: bump .45s var(--ease); }
 @keyframes bump { 40% { transform: scale(1.35); } }
 
-.seg {
-  display: inline-flex; gap: 2px; padding: 4px; border-radius: calc(var(--r-btn) + 4px);
-  background: var(--bg-2); border: 1px solid var(--line);
-}
-.seg button {
-  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-  height: 36px; padding: 0 14px; border: 0; background: transparent; cursor: pointer;
-  font-size: 14px; font-weight: 600; color: var(--muted); border-radius: var(--r-btn);
-  transition: background-color .2s, color .2s, box-shadow .2s;
-}
+.seg { display: inline-flex; gap: 2px; padding: 4px; border-radius: calc(var(--r-btn) + 4px); background: var(--bg-2); border: 1px solid var(--line); }
+.seg button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 36px; padding: 0 14px; border: 0; background: transparent; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--muted); border-radius: var(--r-btn); transition: background-color .2s, color .2s, box-shadow .2s; }
 .seg button:hover { color: var(--ink); }
 .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sm), 0 0 0 1px var(--line); }
 :root[data-theme="dark"] .seg button[aria-pressed="true"] { background: var(--surface-2); }
 
-/* ==========================================================
-   NAVIGATION
-   ========================================================== */
 .nav { position: fixed; top: 12px; left: 0; right: 0; z-index: 100; padding: 0 16px; pointer-events: none; }
-.nav-inner {
-  pointer-events: auto; max-width: 1200px; margin: 0 auto; height: var(--nav-h);
-  display: flex; align-items: center; gap: 12px; padding: 0 12px 0 22px;
-  border-radius: calc(var(--r-btn) + 10px); border: 1px solid transparent;
-  transition: background-color .3s, border-color .3s, box-shadow .3s, backdrop-filter .3s;
-}
-.nav.scrolled .nav-inner {
-  background: var(--nav-bg); border-color: var(--line);
-  -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5);
-  box-shadow: var(--shadow-md);
-}
+.nav-inner { pointer-events: auto; max-width: 1200px; margin: 0 auto; height: var(--nav-h); display: flex; align-items: center; gap: 12px; padding: 0 12px 0 22px; border-radius: calc(var(--r-btn) + 10px); border: 1px solid transparent; transition: background-color .3s, border-color .3s, box-shadow .3s, backdrop-filter .3s; }
+.nav.scrolled .nav-inner { background: var(--nav-bg); border-color: var(--line); -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5); box-shadow: var(--shadow-md); }
 .logo { display: inline-flex; align-items: center; gap: 11px; font-family: var(--font-display); font-weight: 700; font-size: 17px; letter-spacing: -.03em; }
 .logo-blocks { display: grid; grid-template-columns: repeat(2, 9px); grid-template-rows: repeat(2, 9px); gap: 3px; }
 .logo-blocks span { border-radius: 2.5px; background: var(--accent); }
@@ -257,30 +175,16 @@ kbd {
 .logo-blocks span:nth-child(2) { opacity: .7; grid-column: 1; grid-row: 2; }
 .logo-blocks span:nth-child(3) { grid-column: 2; grid-row: 2; }
 .nav-links { display: flex; gap: 2px; margin-left: 18px; }
-.nav-links a {
-  position: relative; padding: 8px 14px; border-radius: 999px;
-  font-size: 14.5px; font-weight: 500; color: var(--muted);
-  transition: color .2s, background-color .2s;
-}
+.nav-links a { position: relative; padding: 8px 14px; border-radius: 999px; font-size: 14.5px; font-weight: 500; color: var(--muted); transition: color .2s, background-color .2s; }
 .nav-links a:hover { color: var(--ink); background: var(--accent-soft); }
 .nav-links a.active { color: var(--ink); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-line); }
 .nav-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-.cmdk-trigger {
-  display: inline-flex; align-items: center; gap: 10px; height: 40px; padding: 0 8px 0 13px;
-  border-radius: var(--r-btn); border: 1px solid var(--line-2); background: color-mix(in srgb, var(--surface) 70%, transparent);
-  color: var(--muted); font-size: 14px; font-weight: 500; cursor: pointer;
-  transition: border-color .2s, color .2s, background-color .2s;
-}
+.cmdk-trigger { display: inline-flex; align-items: center; gap: 10px; height: 40px; padding: 0 8px 0 13px; border-radius: var(--r-btn); border: 1px solid var(--line-2); background: color-mix(in srgb, var(--surface) 70%, transparent); color: var(--muted); font-size: 14px; font-weight: 500; cursor: pointer; transition: border-color .2s, color .2s, background-color .2s; }
 .cmdk-trigger:hover { color: var(--ink); border-color: var(--faint); background: var(--surface); }
 .cmdk-trigger .ct-label { min-width: 74px; text-align: left; }
 .nav-user-menu { position: relative; }
 #nav-discord-label { max-width: 130px; overflow: hidden; text-overflow: ellipsis; }
-.dropdown {
-  position: absolute; right: 0; top: calc(100% + 12px); min-width: 250px; padding: 6px; z-index: 5;
-  background: var(--surface); border: 1px solid var(--line-2); border-radius: calc(var(--r) - 2px); box-shadow: var(--shadow-pop);
-  opacity: 0; visibility: hidden; transform: translateY(-6px) scale(.98); transform-origin: top right;
-  transition: opacity .2s, transform .25s var(--ease), visibility .2s;
-}
+.dropdown { position: absolute; right: 0; top: calc(100% + 12px); min-width: 250px; padding: 6px; z-index: 5; background: var(--surface); border: 1px solid var(--line-2); border-radius: calc(var(--r) - 2px); box-shadow: var(--shadow-pop); opacity: 0; visibility: hidden; transform: translateY(-6px) scale(.98); transform-origin: top right; transition: opacity .2s, transform .25s var(--ease), visibility .2s; }
 .dropdown.active { opacity: 1; visibility: visible; transform: none; }
 .dropdown-header { display: flex; align-items: center; gap: 12px; padding: 10px 10px 12px; margin-bottom: 4px; border-bottom: 1px solid var(--line); }
 .dropdown-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: var(--bg-2); }
@@ -291,27 +195,12 @@ kbd {
 .dropdown a:hover { background: var(--accent-soft); }
 .dropdown a:hover svg { color: var(--accent-text); }
 .burger { display: none; }
-
-.mobile-menu {
-  position: absolute; top: calc(var(--nav-h) + 10px); left: 16px; right: 16px; z-index: 4;
-  display: grid; gap: 2px; padding: 8px; pointer-events: auto;
-  background: var(--surface); border: 1px solid var(--line-2); border-radius: calc(var(--r) + 2px); box-shadow: var(--shadow-pop);
-  opacity: 0; visibility: hidden; transform: translateY(-8px); transition: opacity .2s, transform .3s var(--ease), visibility .2s;
-}
+.mobile-menu { position: absolute; top: calc(var(--nav-h) + 10px); left: 16px; right: 16px; z-index: 4; display: grid; gap: 2px; padding: 8px; pointer-events: auto; background: var(--surface); border: 1px solid var(--line-2); border-radius: calc(var(--r) + 2px); box-shadow: var(--shadow-pop); opacity: 0; visibility: hidden; transform: translateY(-8px); transition: opacity .2s, transform .3s var(--ease), visibility .2s; }
 .mobile-menu.active { opacity: 1; visibility: visible; transform: none; }
 .mobile-menu a { padding: 14px 16px; border-radius: var(--r-btn); font-weight: 600; font-size: 17px; }
 .mobile-menu a:hover, .mobile-menu a:active { background: var(--accent-soft); }
 
-/* ==========================================================
-   PANNEAU D'AFFICHAGE
-   ========================================================== */
-.popover {
-  position: fixed; z-index: 140; top: calc(var(--nav-h) + 26px); right: max(16px, calc((100vw - 1200px) / 2 + 16px));
-  width: 340px; max-width: calc(100vw - 32px); padding: 20px;
-  background: var(--surface); border: 1px solid var(--line-2); border-radius: calc(var(--r) + 4px); box-shadow: var(--shadow-pop);
-  opacity: 0; visibility: hidden; transform: translateY(-8px) scale(.98); transform-origin: top right;
-  transition: opacity .2s, transform .3s var(--ease), visibility .2s;
-}
+.popover { position: fixed; z-index: 140; top: calc(var(--nav-h) + 26px); right: max(16px, calc((100vw - 1200px) / 2 + 16px)); width: 340px; max-width: calc(100vw - 32px); padding: 20px; background: var(--surface); border: 1px solid var(--line-2); border-radius: calc(var(--r) + 4px); box-shadow: var(--shadow-pop); opacity: 0; visibility: hidden; transform: translateY(-8px) scale(.98); transform-origin: top right; transition: opacity .2s, transform .3s var(--ease), visibility .2s; }
 .popover.active { opacity: 1; visibility: visible; transform: none; }
 .pop-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
 .pop-head h2 { font-size: 16px; }
@@ -320,10 +209,7 @@ kbd {
 .popover .seg { display: flex; }
 .popover .seg button { flex: 1; padding: 0 8px; }
 .swatches { display: flex; gap: 10px; flex-wrap: wrap; }
-.swatch {
-  width: 34px; height: 34px; border-radius: 50%; border: 0; cursor: pointer; background: var(--sw);
-  color: var(--swi); display: grid; place-items: center; transition: transform .2s var(--ease), box-shadow .2s;
-}
+.swatch { width: 34px; height: 34px; border-radius: 50%; border: 0; cursor: pointer; background: var(--sw); color: var(--swi); display: grid; place-items: center; transition: transform .2s var(--ease), box-shadow .2s; }
 .swatch svg { opacity: 0; transform: scale(.5); transition: .2s var(--ease); }
 .swatch:hover { transform: scale(1.1); }
 .swatch[aria-checked="true"] { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--sw); }
@@ -337,37 +223,16 @@ kbd {
 .switch[aria-checked="true"]::after { transform: translateX(18px); }
 .pop-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
 
-/* ==========================================================
-   HERO
-   ========================================================== */
 .hero { position: relative; isolation: isolate; overflow: hidden; padding: calc(var(--nav-h) + 84px) 0 132px; }
-.hero::before {
-  content: ''; position: absolute; inset: 0; z-index: -3;
-  background-image: radial-gradient(circle at center, var(--grid-dot) 1.1px, transparent 1.7px);
-  background-size: 30px 30px;
-  -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 30%, #000 25%, transparent 78%);
-  mask-image: radial-gradient(ellipse 85% 75% at 50% 30%, #000 25%, transparent 78%);
-}
-.hero::after {
-  content: ''; position: absolute; z-index: -3; top: -20%; right: -10%; width: 60vw; height: 70vw; max-width: 900px; max-height: 900px;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 16%, transparent), transparent);
-}
-.hero-glow {
-  position: absolute; inset: 0; z-index: -2; pointer-events: none;
-  background: radial-gradient(480px circle at var(--mx, 30%) var(--my, 30%), color-mix(in srgb, var(--accent) 13%, transparent), transparent 62%);
-}
+.hero::before { content: ''; position: absolute; inset: 0; z-index: -3; background-image: radial-gradient(circle at center, var(--grid-dot) 1.1px, transparent 1.7px); background-size: 30px 30px; -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 30%, #000 25%, transparent 78%); mask-image: radial-gradient(ellipse 85% 75% at 50% 30%, #000 25%, transparent 78%); }
+.hero::after { content: ''; position: absolute; z-index: -3; top: -20%; right: -10%; width: 60vw; height: 70vw; max-width: 900px; max-height: 900px; background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 16%, transparent), transparent); }
+.hero-glow { position: absolute; inset: 0; z-index: -2; pointer-events: none; background: radial-gradient(480px circle at var(--mx, 30%) var(--my, 30%), color-mix(in srgb, var(--accent) 13%, transparent), transparent 62%); }
 #particles { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; opacity: .65; pointer-events: none; }
 .hero-grid { display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(0, .98fr); gap: 64px; align-items: center; }
-
-.status-pill {
-  display: inline-flex; align-items: center; gap: 10px; padding: 7px 15px 7px 12px; border-radius: 999px;
-  background: var(--surface); border: 1px solid var(--line); font-size: 13.5px; font-weight: 500; color: var(--muted);
-  box-shadow: var(--shadow-sm);
-}
+.status-pill { display: inline-flex; align-items: center; gap: 10px; padding: 7px 15px 7px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: 13.5px; font-weight: 500; color: var(--muted); box-shadow: var(--shadow-sm); }
 .status-pill .dot { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
 .status-pill .dot::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 1.5px solid var(--ok); opacity: 0; animation: ping 2.4s var(--ease) infinite; }
 @keyframes ping { 0% { transform: scale(.5); opacity: .8; } 80%, 100% { transform: scale(1.6); opacity: 0; } }
-
 .hero h1 { margin: 26px 0 18px; font-size: clamp(56px, 9.2vw, 132px); font-weight: 700; letter-spacing: -.055em; line-height: .98; white-space: nowrap; }
 .letter { display: inline-block; opacity: 0; animation: letterIn .9s var(--ease) forwards; }
 .letter.done { opacity: 1; transform: none; animation: none; }
@@ -381,13 +246,13 @@ kbd {
 .stat:first-child { padding-left: 0; border-left: 0; }
 .stat b { display: block; font-family: var(--font-display); font-weight: 600; font-size: clamp(26px, 2.8vw, 36px); letter-spacing: -.045em; line-height: 1.1; }
 .stat span { display: block; margin-top: 4px; font-size: 14px; color: var(--muted); }
-
 .hero-visual { position: relative; min-width: 0; }
-.hero-visual::before {
-  content: ''; position: absolute; inset: 10% 4% -4% 14%; z-index: -1; border-radius: 40px;
-  background: var(--accent); filter: blur(90px); opacity: .22;
-}
+.hero-visual::before { content: ''; position: absolute; inset: 10% 4% -4% 14%; z-index: -1; border-radius: 40px; background: var(--accent); filter: blur(90px); opacity: .22; }
 .tilt-wrap { perspective: 1400px; min-width: 0; }
+
+/* ==========================================================
+   STUDIO — ÉDITEUR INTERACTIF
+   ========================================================== */
 .studio-panel {
   position: relative; overflow: hidden; transform-style: preserve-3d; transition: transform .25s ease-out;
   background: #0E1017; border: 1px solid rgba(255, 255, 255, .09); border-radius: calc(var(--r) + 4px);
@@ -395,57 +260,147 @@ kbd {
   color: #D5DAEA; min-width: 0;
 }
 :root[data-theme="light"] .studio-panel { box-shadow: 0 50px 80px -36px rgba(20, 28, 70, .55), 0 0 0 1px rgba(255, 255, 255, .02) inset; }
-.studio-topbar { display: flex; align-items: center; gap: 7px; padding: 12px 16px; background: #141722; border-bottom: 1px solid rgba(255, 255, 255, .06); }
-.studio-topbar span { width: 11px; height: 11px; border-radius: 50%; background: #3A4054; }
-.studio-topbar span:nth-child(1) { background: #FF5F57; }
-.studio-topbar span:nth-child(2) { background: #FEBC2E; }
-.studio-topbar span:nth-child(3) { background: #28C840; }
-.studio-topbar b { margin-left: 14px; padding: 5px 12px; border-radius: 7px 7px 0 0; background: #0E1017; font: 500 12.5px var(--font-code); color: #B7BED2; box-shadow: 0 1px 0 #0E1017; }
-.studio-body { padding: 20px 0 18px; font: 400 13.5px/1.9 var(--font-code); counter-reset: ln; min-height: 270px; overflow-x: auto; }
-.ln { display: flex; white-space: pre; padding-right: 18px; opacity: 0; animation: lnIn .5s var(--ease) forwards; animation-delay: calc(1.1s + var(--i, 0) * .2s); }
-.ln::before { counter-increment: ln; content: counter(ln); flex: none; width: 46px; padding-right: 18px; text-align: right; color: #454C63; user-select: none; }
-@keyframes lnIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
-.kw { color: #8FA8FF; }
-.fn { color: #F4C871; }
-.str { color: #7EE0A5; }
-.com { color: #626A85; font-style: italic; }
-.type-cursor { display: inline-block; width: 8px; height: 1.15em; margin-left: 3px; vertical-align: -3px; background: #8FA8FF; animation: blink 1.05s steps(1) infinite; }
-@keyframes blink { 50% { opacity: 0; } }
-.studio-out { padding: 12px 18px 14px 18px; border-top: 1px solid rgba(255, 255, 255, .07); background: #0A0C12; font: 400 13px/1.7 var(--font-code); opacity: 0; animation: lnIn .5s var(--ease) 2.9s forwards; }
-.studio-out .out-tag { display: block; margin-bottom: 4px; font-size: 12px; font-weight: 500; color: #626A85; }
-.studio-out .out-ok { color: #7EE0A5; }
+
+.studio-topbar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px 8px 14px;
+  background: #141722;
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
+  min-height: 46px;
+}
+.studio-dots { display: flex; gap: 7px; flex: none; }
+.studio-dots span { width: 11px; height: 11px; border-radius: 50%; background: #3A4054; }
+.studio-dots span:nth-child(1) { background: #FF5F57; }
+.studio-dots span:nth-child(2) { background: #FEBC2E; }
+.studio-dots span:nth-child(3) { background: #28C840; }
+.studio-tabs { display: flex; align-items: center; gap: 2px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.studio-tabs::-webkit-scrollbar { display: none; }
+.studio-tab {
+  padding: 5px 11px; background: transparent; border: 0;
+  color: #7C849B; font: 500 12.5px var(--font-code);
+  border-radius: 6px; cursor: pointer; white-space: nowrap;
+  transition: background-color .15s, color .15s;
+}
+.studio-tab:hover { color: #B7BED2; background: rgba(255,255,255,.05); }
+.studio-tab.active { background: #0E1017; color: #E4E8F5; }
+.studio-tab-add {
+  display: grid; place-items: center; flex: none;
+  width: 26px; height: 26px; padding: 0;
+  background: transparent; border: 0;
+  color: #7C849B; cursor: pointer; border-radius: 6px;
+  transition: background-color .15s, color .15s, opacity .15s;
+}
+.studio-tab-add:hover:not(:disabled) { color: #E4E8F5; background: rgba(255,255,255,.06); }
+.studio-tab-add:disabled { opacity: .3; cursor: not-allowed; }
+
+.studio-code {
+  position: relative; display: flex;
+  height: 220px; background: #0E1017; overflow: hidden;
+}
+.studio-gutter {
+  flex: none; width: 46px;
+  padding: 20px 12px 20px 0;
+  text-align: right;
+  font: 400 13.5px/1.9 var(--font-code);
+  color: #454C63; user-select: none;
+  overflow: hidden; background: #0E1017; z-index: 2;
+}
+.studio-gutter-inner { will-change: transform; }
+.studio-gutter-inner .gl { display: block; }
+
+.studio-code-area { position: relative; flex: 1; min-width: 0; overflow: hidden; }
+
+.studio-hl, .studio-input {
+  position: absolute; inset: 0; margin: 0;
+  padding: 20px 18px 20px 0;
+  font: 400 13.5px/1.9 var(--font-code);
+  white-space: pre;
+  overflow-wrap: normal; word-break: normal;
+  tab-size: 2;
+  border: 0;
+}
+.studio-hl { pointer-events: none; color: #D5DAEA; overflow: hidden; }
+.studio-input {
+  background: transparent;
+  color: transparent;
+  caret-color: #8FA8FF;
+  resize: none;
+  outline: none;
+  overflow: auto;
+  z-index: 1;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.studio-input::-webkit-scrollbar { display: none; }
+.studio-input::selection { background: rgba(143, 168, 255, .3); }
+
+.tk-kw  { color: #FF7B72; }              /* mots-clés Lua — local, function, end… */
+.tk-str { color: #7EE0A5; }              /* chaînes de caractères */
+.tk-num { color: #F4C871; }              /* nombres */
+.tk-com { color: #626A85; font-style: italic; } /* commentaires -- */
+.tk-bi  { color: #82D2FF; }              /* globals Roblox/Lua — game, print… */
+.tk-fn  { color: #F4C871; }              /* appels de fonction */
+.tk-id  { color: #D5DAEA; }              /* identifiants */
+
+.studio-console { border-top: 1px solid rgba(255, 255, 255, .07); background: #0A0C12; }
+.studio-console-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px 6px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, .05);
+}
+.console-tag { font: 500 11.5px var(--font-code); color: #626A85; letter-spacing: .06em; text-transform: uppercase; }
+.studio-run {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px;
+  background: rgba(60, 220, 151, .12);
+  color: #7EE0A5;
+  border: 1px solid rgba(60, 220, 151, .3);
+  border-radius: 6px;
+  font: 600 12px var(--font-code);
+  cursor: pointer;
+  transition: background-color .15s, border-color .15s, transform .12s;
+}
+.studio-run:hover { background: rgba(60, 220, 151, .2); border-color: rgba(60, 220, 151, .5); }
+.studio-run:active { transform: scale(.95); }
+.studio-run:disabled { opacity: .5; cursor: wait; }
+
+.studio-console-body {
+  padding: 10px 18px 14px;
+  max-height: 96px;
+  overflow-y: auto;
+  font: 400 13px/1.7 var(--font-code);
+  color: #A8B0C7;
+  scrollbar-width: thin;
+  scrollbar-color: #2E3441 transparent;
+}
+.studio-console-body::-webkit-scrollbar { width: 6px; }
+.studio-console-body::-webkit-scrollbar-thumb { background: #2E3441; border-radius: 6px; }
+.console-line { display: flex; gap: 8px; }
+.console-line::before { content: '›'; color: #454C63; flex: none; }
+.console-line.ok { color: #7EE0A5; }
+.console-line.err { color: #FF7B7B; }
+.console-line.err::before { color: #FF7B7B; }
+.console-line.info { color: #8FA8FF; }
+.console-line.dim { color: #626A85; font-style: italic; }
+.console-empty { color: #626A85; font-style: italic; }
+
 .studio-foot { display: flex; justify-content: space-between; align-items: center; padding: 10px 18px; border-top: 1px solid rgba(255, 255, 255, .06); background: #141722; font: 400 12px var(--font-code); color: #7C849B; }
 .studio-foot .status { display: inline-flex; align-items: center; gap: 8px; }
 .studio-foot .status::before { content: ''; width: 7px; height: 7px; border-radius: 2px; background: #F4C871; }
 
 .hero-bricks { position: absolute; z-index: 3; left: 24px; bottom: -82px; display: flex; gap: 10px; }
-.brick {
-  position: relative; display: grid; justify-items: center; gap: 6px; width: 78px; padding: 18px 6px 12px;
-  background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--r-sm);
-  box-shadow: var(--shadow-md); font-size: 12.5px; font-weight: 600; color: var(--muted);
-  transition: transform .3s var(--ease), color .2s, border-color .2s;
-}
+.brick { position: relative; display: grid; justify-items: center; gap: 6px; width: 78px; padding: 18px 6px 12px; background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--r-sm); box-shadow: var(--shadow-md); font-size: 12.5px; font-weight: 600; color: var(--muted); transition: transform .3s var(--ease), color .2s, border-color .2s; }
 .brick::before { content: ''; position: absolute; top: -7px; left: 50%; width: 22px; height: 9px; transform: translateX(-50%); border-radius: 5px 5px 0 0; background: var(--surface); border: 1px solid var(--line-2); border-bottom: 0; }
 .brick svg { color: var(--accent-text); }
 .brick:hover { transform: translateY(-4px); color: var(--ink); border-color: var(--accent-line); }
 
-/* ==========================================================
-   MARQUEE
-   ========================================================== */
-.marquee-wrap {
-  overflow: hidden; border-block: 1px solid var(--line); background: var(--bg-2);
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-}
+.marquee-wrap { overflow: hidden; border-block: 1px solid var(--line); background: var(--bg-2); -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
 .marquee { display: flex; width: max-content; padding: 20px 0; animation: marquee 60s linear infinite; }
 .marquee span { display: inline-flex; align-items: center; gap: 30px; padding-left: 30px; font-family: var(--font-display); font-weight: 500; font-size: 15px; letter-spacing: -.02em; color: var(--muted); white-space: nowrap; }
 .marquee span::after { content: ''; width: 7px; height: 7px; border-radius: 2px; background: var(--accent); opacity: .55; }
 .marquee-wrap:hover .marquee { animation-play-state: paused; }
 @keyframes marquee { to { transform: translateX(-50%); } }
 
-/* ==========================================================
-   SECTIONS
-   ========================================================== */
 .sec { padding: clamp(76px, 10vw, 132px) 0; }
 .sec--tint { background: var(--bg-2); border-block: 1px solid var(--line); }
 .sec-head { max-width: 720px; margin-bottom: clamp(36px, 5vw, 56px); }
@@ -453,14 +408,12 @@ kbd {
 .sec-desc { margin-top: 18px; max-width: 58ch; font-size: clamp(16px, 1.3vw, 18px); color: var(--muted); }
 .split { display: grid; grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr); gap: clamp(36px, 6vw, 88px); }
 .split-head { position: sticky; top: 118px; align-self: start; }
-
 .reveal { opacity: 0; transform: translateY(14px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
 .reveal.visible { opacity: 1; transform: none; }
 .stagger > * { opacity: 0; }
 .stagger.visible > * { opacity: 1; animation: rise .65s var(--ease) backwards; animation-delay: calc(var(--i, 0) * 80ms); }
 @keyframes rise { from { opacity: 0; transform: translateY(16px); } }
 
-/* ----- À propos ----- */
 .about-text .lead { font-size: clamp(21px, 2.3vw, 28px); line-height: 1.4; font-weight: 500; letter-spacing: -.02em; color: var(--ink); text-wrap: pretty; }
 .about-text p:not(.lead) { margin-top: 20px; max-width: 62ch; color: var(--muted); font-size: 17px; }
 .highlights { list-style: none; margin-top: 40px; border-top: 1px solid var(--line); }
@@ -468,14 +421,11 @@ kbd {
 .check { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1px var(--accent-line); margin-top: 1px; }
 .highlights h3 { font-family: var(--font-body); font-size: 17.5px; font-weight: 600; letter-spacing: -.015em; }
 .highlights p { margin-top: 4px; color: var(--muted); font-size: 15.5px; }
-
-
 .toolbox { margin-top: 34px; max-width: 440px; padding: 22px 22px 24px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
 .tb-title { margin-bottom: 14px; font-size: 14px; font-weight: 600; color: var(--muted); }
 .toolbox .tag-row { margin-top: 0; }
 .toolbox .tag { color: var(--ink); background: var(--surface-2); }
 
-/* ----- Méthode ----- */
 .steps { list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
 .step { position: relative; padding: 28px 26px 30px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); transition: border-color .25s, box-shadow .25s; }
 .step:hover { border-color: var(--accent-line); box-shadow: var(--shadow-md); }
@@ -484,14 +434,8 @@ kbd {
 .step h3 { font-size: 19px; letter-spacing: -.03em; }
 .step p { margin-top: 10px; color: var(--muted); font-size: 15.5px; }
 
-/* ----- Compétences & onglets ----- */
 .cat-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
-.cat-tab {
-  display: inline-flex; align-items: center; gap: 10px; padding: 0 18px; height: 44px; cursor: pointer;
-  background: var(--surface); border: 1px solid var(--line); border-radius: 999px; color: var(--muted);
-  font-size: 14.5px; font-weight: 600; white-space: nowrap; text-align: left;
-  transition: background-color .2s, color .2s, border-color .2s, box-shadow .2s;
-}
+.cat-tab { display: inline-flex; align-items: center; gap: 10px; padding: 0 18px; height: 44px; cursor: pointer; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 14.5px; font-weight: 600; white-space: nowrap; text-align: left; transition: background-color .2s, color .2s, border-color .2s, box-shadow .2s; }
 .cat-tab svg { color: var(--faint); transition: color .2s; }
 .cat-tab:hover { color: var(--ink); border-color: var(--line-2); }
 .cat-tab.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
@@ -499,7 +443,6 @@ kbd {
 .cat-panel { display: none; }
 .cat-panel.active { display: block; animation: panelIn .45s var(--ease); }
 @keyframes panelIn { from { opacity: 0; transform: translateY(10px); } }
-
 .skills { display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 32px; align-items: start; }
 .skills .cat-tabs { flex-direction: column; flex-wrap: nowrap; gap: 4px; position: sticky; top: 112px; }
 .skills .cat-tab { height: 48px; border-radius: var(--r-btn); border-color: transparent; background: transparent; }
@@ -508,46 +451,24 @@ kbd {
 .skills .cat-tab.active svg { color: var(--accent-text); }
 .skill-panel-wrap { padding: clamp(24px, 3.4vw, 40px); background: var(--surface); border: 1px solid var(--line); border-radius: calc(var(--r) + 4px); }
 .panel-head { display: flex; gap: 18px; align-items: flex-start; margin-bottom: 34px; }
-.tile {
-  display: grid; place-items: center; flex: none; width: 48px; height: 48px; border-radius: var(--r-sm);
-  background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1px var(--accent-line);
-}
+.tile { display: grid; place-items: center; flex: none; width: 48px; height: 48px; border-radius: var(--r-sm); background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1px var(--accent-line); }
 .panel-head h3 { font-size: 23px; letter-spacing: -.035em; }
 .cat-desc { margin-top: 6px; max-width: 52ch; color: var(--muted); font-size: 16px; }
 .subskills { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px 44px; }
 .subskill-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 11px; font-weight: 500; font-size: 15.5px; }
 .subskill-head b { font: 500 13.5px var(--font-code); color: var(--muted); }
-.bar-track {
-  height: 12px; background: var(--line-2); opacity: 1;
-  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 calc(5% - 3px), transparent calc(5% - 3px) 5%);
-  mask-image: repeating-linear-gradient(90deg, #000 0 calc(5% - 3px), transparent calc(5% - 3px) 5%);
-  position: relative; overflow: hidden; border-radius: 2px;
-}
+.bar-track { height: 12px; background: var(--line-2); opacity: 1; -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 calc(5% - 3px), transparent calc(5% - 3px) 5%); mask-image: repeating-linear-gradient(90deg, #000 0 calc(5% - 3px), transparent calc(5% - 3px) 5%); position: relative; overflow: hidden; border-radius: 2px; }
 .bar-fill { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--accent); transition: width 1.2s var(--ease); }
 
-/* ==========================================================
-   TARIFS
-   ========================================================== */
 .pricing-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; margin-bottom: 26px; }
 #currency-note { font-size: 14px; color: var(--muted); }
-.login-hint {
-  margin-left: auto; display: inline-flex; align-items: center; gap: 12px; padding: 8px 8px 8px 16px;
-  border-radius: 999px; background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-line);
-  font-size: 14px; color: var(--ink);
-}
+.login-hint { margin-left: auto; display: inline-flex; align-items: center; gap: 12px; padding: 8px 8px 8px 16px; border-radius: 999px; background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-line); font-size: 14px; color: var(--ink); }
 .login-hint .btn { height: 34px; padding: 0 14px; font-size: 13.5px; border-radius: 999px; }
 #service-tabs { margin-bottom: 28px; }
 .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
 .service-card, .project-card, .step { --mx: 50%; --my: 0%; }
-.service-card {
-  position: relative; display: flex; flex-direction: column; padding: 28px; isolation: isolate;
-  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
-  transition: border-color .25s, box-shadow .25s;
-}
-.service-card::before, .project-card::before, .step::before {
-  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .3s;
-  background: radial-gradient(380px circle at var(--mx) var(--my), color-mix(in srgb, var(--accent) 11%, transparent), transparent 62%);
-}
+.service-card { position: relative; display: flex; flex-direction: column; padding: 28px; isolation: isolate; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); transition: border-color .25s, box-shadow .25s; }
+.service-card::before, .project-card::before, .step::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .3s; background: radial-gradient(380px circle at var(--mx) var(--my), color-mix(in srgb, var(--accent) 11%, transparent), transparent 62%); }
 .service-card:hover::before, .project-card:hover::before, .step:hover::before { opacity: 1; }
 .service-card:hover { border-color: var(--line-2); box-shadow: var(--shadow-md); }
 .service-card.popular { border-color: var(--accent-line); box-shadow: 0 0 0 1px var(--accent-line), var(--shadow-md); }
@@ -568,58 +489,33 @@ kbd {
 .btn-group { display: flex; gap: 10px; margin-top: auto; }
 .btn-group .btn-primary { flex: 1; padding: 0 16px; }
 
-/* ==========================================================
-   PROJETS
-   ========================================================== */
 .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 22px; }
-.project-card {
-  position: relative; display: flex; flex-direction: column; overflow: hidden; cursor: pointer; isolation: isolate;
-  background: var(--surface); border: 1px solid var(--line); border-radius: calc(var(--r) + 2px);
-  transition: border-color .25s, box-shadow .25s;
-}
+.project-card { position: relative; display: flex; flex-direction: column; overflow: hidden; cursor: pointer; isolation: isolate; background: var(--surface); border: 1px solid var(--line); border-radius: calc(var(--r) + 2px); transition: border-color .25s, box-shadow .25s; }
 .project-card:hover { border-color: var(--line-2); box-shadow: var(--shadow-md); }
 .project-thumb { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: var(--bg-2); border-bottom: 1px solid var(--line); }
 .project-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .8s var(--ease); }
 .project-card:hover .project-thumb img { transform: scale(1.04); }
 .project-thumb.img-fail { background: repeating-linear-gradient(45deg, var(--bg-2) 0 14px, var(--surface-2) 14px 28px); }
-.status-chip {
-  position: absolute; top: 14px; left: 14px; display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px 6px 10px; border-radius: 999px;
-  background: color-mix(in srgb, var(--surface) 86%, transparent); border: 1px solid var(--line);
-  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); font-size: 12.5px; font-weight: 600; color: var(--ink);
-}
+.status-chip { position: absolute; top: 14px; left: 14px; display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px 6px 10px; border-radius: 999px; background: color-mix(in srgb, var(--surface) 86%, transparent); border: 1px solid var(--line); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); font-size: 12.5px; font-weight: 600; color: var(--ink); }
 .status-chip::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
 .status-chip.developpement::before { background: #F2A20C; }
 .status-chip.enpause::before { background: var(--faint); }
-.project-go {
-  position: absolute; right: 14px; bottom: 14px; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%;
-  background: var(--accent); color: var(--accent-ink); box-shadow: 0 10px 24px -8px var(--accent);
-  opacity: 0; transform: translate(6px, 6px) scale(.9); transition: opacity .25s, transform .35s var(--ease);
-}
+.project-go { position: absolute; right: 14px; bottom: 14px; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); box-shadow: 0 10px 24px -8px var(--accent); opacity: 0; transform: translate(6px, 6px) scale(.9); transition: opacity .25s, transform .35s var(--ease); }
 .project-card:hover .project-go, .project-card:focus-visible .project-go { opacity: 1; transform: none; }
 .project-body { padding: 24px 26px 28px; display: flex; flex-direction: column; flex: 1; }
 .project-body h3 { font-size: 21px; letter-spacing: -.035em; }
 .project-body > p { margin-top: 10px; color: var(--muted); font-size: 15.5px; }
 .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .tag { padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line-2); font-size: 12.5px; font-weight: 500; color: var(--muted); }
-.project-cta {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; min-height: 300px; padding: 32px; text-align: center;
-  border: 1.5px dashed var(--line-2); border-radius: calc(var(--r) + 2px); color: var(--muted);
-  transition: border-color .25s, background-color .25s, color .25s;
-}
+.project-cta { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; min-height: 300px; padding: 32px; text-align: center; border: 1.5px dashed var(--line-2); border-radius: calc(var(--r) + 2px); color: var(--muted); transition: border-color .25s, background-color .25s, color .25s; }
 .project-cta:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
 .project-cta b { font-family: var(--font-display); font-size: 19px; font-weight: 600; letter-spacing: -.03em; color: var(--ink); max-width: 16ch; line-height: 1.2; }
 .project-cta span.go { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14.5px; color: var(--accent-text); }
 
-/* ==========================================================
-   FAQ
-   ========================================================== */
 .faq-list { border-top: 1px solid var(--line-2); }
 .faq-item { border-bottom: 1px solid var(--line-2); }
 .faq-item h3 { font-family: var(--font-body); font-size: inherit; letter-spacing: 0; }
-.faq-q {
-  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 24px 0; cursor: pointer;
-  background: none; border: 0; text-align: left; font-size: 18px; font-weight: 600; letter-spacing: -.02em; line-height: 1.35;
-}
+.faq-q { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 24px 0; cursor: pointer; background: none; border: 0; text-align: left; font-size: 18px; font-weight: 600; letter-spacing: -.02em; line-height: 1.35; }
 .faq-q:hover { color: var(--accent-text); }
 .plus { position: relative; flex: none; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line-2); transition: background-color .25s, border-color .25s, transform .4s var(--ease); }
 .plus::before, .plus::after { content: ''; position: absolute; top: 50%; left: 50%; width: 12px; height: 1.5px; margin: -.75px 0 0 -6px; background: currentColor; border-radius: 2px; transition: transform .35s var(--ease); }
@@ -629,9 +525,6 @@ kbd {
 .faq-a { max-height: 0; overflow: hidden; transition: max-height .45s var(--ease); }
 .faq-a p { padding: 0 56px 26px 0; max-width: 62ch; color: var(--muted); font-size: 16.5px; }
 
-/* ==========================================================
-   AVIS
-   ========================================================== */
 .reviews-summary { display: flex; align-items: center; gap: 18px; margin-top: 26px; }
 .reviews-summary:empty { display: none; }
 .rs-score { font-family: var(--font-display); font-size: 46px; font-weight: 600; letter-spacing: -.06em; line-height: 1; }
@@ -654,11 +547,7 @@ kbd {
 .stars:hover .star { color: var(--star); }
 .stars .star:hover ~ .star { color: var(--line-2); }
 .star svg { fill: currentColor; stroke: none; }
-textarea {
-  width: 100%; min-height: 118px; padding: 15px 17px; resize: vertical; background: var(--bg); color: var(--ink);
-  border: 1px solid var(--line-2); border-radius: var(--r-btn); font: inherit; font-size: 15.5px; line-height: 1.55;
-  transition: border-color .2s, box-shadow .2s;
-}
+textarea { width: 100%; min-height: 118px; padding: 15px 17px; resize: vertical; background: var(--bg); color: var(--ink); border: 1px solid var(--line-2); border-radius: var(--r-btn); font: inherit; font-size: 15.5px; line-height: 1.55; transition: border-color .2s, box-shadow .2s; }
 textarea::placeholder { color: var(--faint); }
 textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
 .review-actions { display: flex; align-items: center; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
@@ -666,10 +555,7 @@ textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4
 .reviews-carousel { position: relative; display: flex; align-items: center; gap: 14px; }
 .carousel-viewport { flex: 1; min-width: 0; overflow: hidden; padding: 4px; margin: -4px; }
 .reviews-track { display: flex; gap: 18px; transition: transform .7s var(--ease); }
-.review-card {
-  position: relative; display: flex; flex-direction: column; gap: 16px; min-height: 230px; padding: 26px;
-  flex: 0 0 calc((100% - 36px) / 3); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
-}
+.review-card { position: relative; display: flex; flex-direction: column; gap: 16px; min-height: 230px; padding: 26px; flex: 0 0 calc((100% - 36px) / 3); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
 .review-stars { display: flex; gap: 2px; color: var(--star); }
 .review-stars .off { color: var(--line-2); }
 .review-stars svg { fill: currentColor; stroke: none; }
@@ -691,28 +577,13 @@ textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4
 .skel-card { flex: 1; height: 230px; border-radius: var(--r); border: 1px solid var(--line); background: linear-gradient(100deg, var(--surface) 30%, var(--surface-2) 50%, var(--surface) 70%) 0 0 / 300% 100%; animation: shimmer 1.4s linear infinite; }
 @keyframes shimmer { to { background-position: -300% 0; } }
 
-/* ==========================================================
-   CONTACT (CTA)
-   ========================================================== */
-.cta-band {
-  position: relative; overflow: hidden; isolation: isolate; padding: clamp(40px, 7vw, 92px);
-  border-radius: calc(var(--r) + 12px); background: var(--accent); color: var(--accent-ink);
-}
-.cta-band::before {
-  content: ''; position: absolute; inset: 0; z-index: -1;
-  background-image: radial-gradient(circle, color-mix(in srgb, var(--accent-ink) 22%, transparent) 0 6px, transparent 6.5px);
-  background-size: 46px 46px;
-  -webkit-mask-image: linear-gradient(115deg, transparent 28%, #000 85%);
-  mask-image: linear-gradient(115deg, transparent 28%, #000 85%);
-}
+.cta-band { position: relative; overflow: hidden; isolation: isolate; padding: clamp(40px, 7vw, 92px); border-radius: calc(var(--r) + 12px); background: var(--accent); color: var(--accent-ink); }
+.cta-band::before { content: ''; position: absolute; inset: 0; z-index: -1; background-image: radial-gradient(circle, color-mix(in srgb, var(--accent-ink) 22%, transparent) 0 6px, transparent 6.5px); background-size: 46px 46px; -webkit-mask-image: linear-gradient(115deg, transparent 28%, #000 85%); mask-image: linear-gradient(115deg, transparent 28%, #000 85%); }
 .cta-band h2 { max-width: 14ch; font-size: clamp(32px, 5.2vw, 64px); letter-spacing: -.05em; line-height: 1.02; }
 .cta-band p { margin-top: 22px; max-width: 50ch; font-size: clamp(16px, 1.4vw, 19px); opacity: .88; }
 .cta-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
 .cta-actions .btn { height: 52px; padding: 0 28px; }
 
-/* ==========================================================
-   FOOTER
-   ========================================================== */
 footer { padding: 56px 0 40px; border-top: 1px solid var(--line); }
 .footer-top { display: flex; justify-content: space-between; align-items: center; gap: 28px; flex-wrap: wrap; }
 .footer-links { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 26px; }
@@ -721,44 +592,23 @@ footer { padding: 56px 0 40px; border-top: 1px solid var(--line); }
 .link-btn { background: none; border: 0; cursor: pointer; font-family: inherit; }
 .footer-bottom { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 36px; padding-top: 26px; border-top: 1px solid var(--line); font-size: 14px; color: var(--faint); }
 
-/* ==========================================================
-   FLOTTANTS : FAB, BARRE PANIER
-   ========================================================== */
 .float-stack { position: fixed; right: 20px; bottom: 20px; z-index: 90; display: flex; flex-direction: column; gap: 10px; transition: bottom .4s var(--ease); }
 body.has-cart-bar .float-stack { bottom: 88px; }
-.fab {
-  display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; cursor: pointer;
-  background: var(--surface); color: var(--ink); border: 1px solid var(--line-2); box-shadow: var(--shadow-md);
-  opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity .3s, transform .35s var(--ease), border-color .2s;
-}
+.fab { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; cursor: pointer; background: var(--surface); color: var(--ink); border: 1px solid var(--line-2); box-shadow: var(--shadow-md); opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity .3s, transform .35s var(--ease), border-color .2s; }
 .fab.show { opacity: 1; transform: none; pointer-events: auto; }
 .fab:hover { border-color: var(--accent); }
 .fab.contact { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
 .cart-bar { position: fixed; left: 50%; bottom: 20px; z-index: 95; transform: translate(-50%, 160%); visibility: hidden; transition: transform .5s var(--ease), visibility 0s .5s; }
 .cart-bar.show { transform: translate(-50%, 0); visibility: visible; transition: transform .5s var(--ease), visibility 0s; }
-.cart-bar button {
-  display: flex; align-items: center; gap: 14px; padding: 9px 9px 9px 12px; border: 0; border-radius: 999px; cursor: pointer;
-  background: var(--ink); color: var(--bg); font-size: 14.5px; font-weight: 500; box-shadow: var(--shadow-pop); white-space: nowrap;
-}
+.cart-bar button { display: flex; align-items: center; gap: 14px; padding: 9px 9px 9px 12px; border: 0; border-radius: 999px; cursor: pointer; background: var(--ink); color: var(--bg); font-size: 14.5px; font-weight: 500; box-shadow: var(--shadow-pop); white-space: nowrap; }
 .cb-count { display: grid; place-items: center; min-width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 14px; }
 .cart-bar b { font-family: var(--font-display); font-weight: 600; letter-spacing: -.03em; }
 .cb-go { padding: 10px 18px; border-radius: 999px; background: var(--bg); color: var(--ink); font-weight: 600; transition: transform .2s var(--ease); }
 .cart-bar button:hover .cb-go { transform: translateX(2px); }
 
-/* ==========================================================
-   OVERLAYS & MODALES
-   ========================================================== */
-.overlay {
-  position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 24px;
-  background: var(--overlay); -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px);
-  opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s;
-}
+.overlay { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 24px; background: var(--overlay); -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s; }
 .overlay.active { opacity: 1; visibility: visible; }
-.modal {
-  position: relative; width: min(100%, 740px); max-height: calc(100dvh - 48px); overflow: auto; overscroll-behavior: contain;
-  background: var(--surface); border: 1px solid var(--line-2); border-radius: calc(var(--r) + 8px); box-shadow: var(--shadow-pop);
-  transform: translateY(18px) scale(.975); transition: transform .45s var(--ease);
-}
+.modal { position: relative; width: min(100%, 740px); max-height: calc(100dvh - 48px); overflow: auto; overscroll-behavior: contain; background: var(--surface); border: 1px solid var(--line-2); border-radius: calc(var(--r) + 8px); box-shadow: var(--shadow-pop); transform: translateY(18px) scale(.975); transition: transform .45s var(--ease); }
 .overlay.active .modal { transform: none; }
 .modal-wide { padding: 34px; }
 .modal-sm { width: min(100%, 440px); padding: 30px; }
@@ -787,12 +637,8 @@ body.has-cart-bar .float-stack { bottom: 88px; }
 .modal-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
 .confirm-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 26px; }
 
-/* ----- Panier (tiroir) ----- */
 .drawer-overlay { place-items: stretch end; padding: 0; }
-.drawer {
-  display: flex; flex-direction: column; width: min(100%, 450px); height: 100%; background: var(--surface); border-left: 1px solid var(--line-2);
-  box-shadow: var(--shadow-pop); transform: translateX(100%); transition: transform .5s var(--ease);
-}
+.drawer { display: flex; flex-direction: column; width: min(100%, 450px); height: 100%; background: var(--surface); border-left: 1px solid var(--line-2); box-shadow: var(--shadow-pop); transform: translateX(100%); transition: transform .5s var(--ease); }
 .overlay.active .drawer { transform: none; }
 .drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--line); }
 .drawer-head h2 { font-size: 20px; }
@@ -810,7 +656,6 @@ body.has-cart-bar .float-stack { bottom: 88px; }
 .cart-note { margin-top: 8px; font-size: 13px; color: var(--faint); line-height: 1.5; }
 .cart-actions { display: grid; gap: 10px; margin-top: 18px; }
 
-/* ----- Commandes ----- */
 .orders-title { margin: 28px 0 14px; font-family: var(--font-display); font-size: 15px; font-weight: 600; letter-spacing: -.02em; }
 #orders-title { margin-bottom: 4px; }
 .order-card { margin-bottom: 12px; padding: 20px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface-2); }
@@ -828,14 +673,9 @@ body.has-cart-bar .float-stack { bottom: 88px; }
 .admin-delete-order { display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--r-btn); border: 1px solid var(--line-2); background: transparent; color: var(--danger); cursor: pointer; }
 .admin-delete-order:hover { background: color-mix(in srgb, var(--danger) 12%, transparent); }
 
-/* ----- Toasts ----- */
 .toasts { position: fixed; left: 50%; bottom: 24px; z-index: 400; transform: translateX(-50%); display: grid; gap: 10px; width: min(calc(100% - 32px), 460px); pointer-events: none; transition: bottom .4s var(--ease); }
 body.has-cart-bar .toasts { bottom: 92px; }
-.toast {
-  pointer-events: auto; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: var(--r-btn);
-  background: var(--ink); color: var(--bg); box-shadow: var(--shadow-pop); font-size: 14.5px; font-weight: 500; line-height: 1.4;
-  opacity: 0; transform: translateY(16px) scale(.98); transition: opacity .3s, transform .45s var(--ease);
-}
+.toast { pointer-events: auto; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: var(--r-btn); background: var(--ink); color: var(--bg); box-shadow: var(--shadow-pop); font-size: 14.5px; font-weight: 500; line-height: 1.4; opacity: 0; transform: translateY(16px) scale(.98); transition: opacity .3s, transform .45s var(--ease); }
 .toast.in { opacity: 1; transform: none; }
 .toast svg { flex: none; }
 .toast.success svg { color: #3DDC97; }
@@ -847,14 +687,8 @@ body.has-cart-bar .toasts { bottom: 92px; }
 .toast button { margin-left: auto; flex: none; padding: 7px 13px; border: 0; border-radius: 999px; cursor: pointer; font-size: 13px; font-weight: 600; background: color-mix(in srgb, currentColor 16%, transparent); color: inherit; }
 .toast button:hover { background: color-mix(in srgb, currentColor 26%, transparent); }
 
-/* ==========================================================
-   PALETTE DE COMMANDES
-   ========================================================== */
 .cmdk-overlay { place-items: start center; padding-top: min(14vh, 130px); }
-.cmdk {
-  width: min(100%, 660px); overflow: hidden; background: var(--surface); border: 1px solid var(--line-2); border-radius: calc(var(--r) + 6px); box-shadow: var(--shadow-pop);
-  transform: translateY(-10px) scale(.98); transition: transform .4s var(--ease);
-}
+.cmdk { width: min(100%, 660px); overflow: hidden; background: var(--surface); border: 1px solid var(--line-2); border-radius: calc(var(--r) + 6px); box-shadow: var(--shadow-pop); transform: translateY(-10px) scale(.98); transition: transform .4s var(--ease); }
 .overlay.active .cmdk { transform: none; }
 .cmdk-input { display: flex; align-items: center; gap: 14px; height: 60px; padding: 0 18px; border-bottom: 1px solid var(--line); color: var(--muted); }
 .cmdk-input input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent; color: var(--ink); font: 400 17px var(--font-body); }
@@ -870,22 +704,14 @@ body.has-cart-bar .toasts { bottom: 92px; }
 .cmdk-foot { display: flex; align-items: center; gap: 20px; padding: 12px 18px; border-top: 1px solid var(--line); background: var(--surface-2); font-size: 13px; color: var(--muted); }
 .cmdk-foot span { display: inline-flex; align-items: center; gap: 6px; }
 
-/* ==========================================================
-   MOUVEMENT RÉDUIT
-   ========================================================== */
-html[data-motion="reduced"] *, html[data-motion="reduced"] *::before, html[data-motion="reduced"] *::after {
-  animation-duration: .001ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; transition-delay: 0s !important; scroll-behavior: auto !important;
-}
+html[data-motion="reduced"] *, html[data-motion="reduced"] *::before, html[data-motion="reduced"] *::after { animation-duration: .001ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; transition-delay: 0s !important; scroll-behavior: auto !important; }
 html[data-motion="reduced"] .marquee { animation: none !important; }
-html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pill .dot::after { animation: none !important; }
+html[data-motion="reduced"] .status-pill .dot::after { animation: none !important; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
   .marquee { animation: none !important; }
 }
 
-/* ==========================================================
-   RESPONSIVE
-   ========================================================== */
 @media (max-width: 1180px) {
   .cmdk-trigger .ct-label, .cmdk-trigger kbd { display: none; }
   .cmdk-trigger { padding: 0; width: 40px; justify-content: center; }
@@ -933,8 +759,12 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
   .hero-actions .btn { flex: 1; padding: 0 20px; }
   .hero-bricks { left: 0; gap: 8px; }
   .brick { width: 68px; }
-  .studio-body { font-size: 12px; min-height: 0; }
-  .ln::before { width: 36px; padding-right: 12px; }
+  .studio-hl, .studio-input, .studio-gutter { font-size: 12px; line-height: 1.85; }
+  .studio-gutter { width: 36px; padding-right: 8px; padding-top: 16px; padding-bottom: 16px; }
+  .studio-hl, .studio-input { padding-top: 16px; padding-bottom: 16px; }
+  .studio-code { height: 200px; }
+  .studio-tab { padding: 5px 8px; font-size: 11.5px; }
+  .studio-console-body { max-height: 80px; font-size: 12px; }
   .steps { grid-template-columns: minmax(0, 1fr); }
   .subskills { grid-template-columns: minmax(0, 1fr); }
   .panel-head { flex-direction: column; gap: 14px; }
@@ -968,7 +798,6 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
 
 .service-card.pulse { animation: cardPulse 1.8s var(--ease); }
 @keyframes cardPulse { 0%, 55% { box-shadow: 0 0 0 3px var(--accent), 0 24px 56px -22px var(--accent); } 100% { box-shadow: 0 0 0 0 transparent; } }
-
 </style>
 </head>
 <body>
@@ -1008,382 +837,24 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
                 { "title": "Livraison", "desc": "Tests finaux, corrections, puis livraison avec support inclus." }
             ],
             "skillCategories": [
-                {
-                    "id": "scripting",
-                    "label": "Scripting",
-                    "icon": "⌨️",
-                    "desc": "Systèmes serveur/client robustes, sécurisés et optimisés pour la production.",
-                    "subskills": [
-                        { "name": "Gameplay & mécaniques", "level": 90 },
-                        { "name": "DataStores & sauvegardes", "level": 85 },
-                        { "name": "Sécurité / anti-exploit", "level": 75 },
-                        { "name": "Optimisation performance", "level": 80 }
-                    ]
-                },
-                {
-                    "id": "build",
-                    "label": "Build",
-                    "icon": "🧱",
-                    "desc": "Construction d'environnements cohérents, du terrain aux objets détaillés.",
-                    "subskills": [
-                        { "name": "Mapping", "level": 90 },
-                        { "name": "Objets (armes, props...)", "level": 40 },
-                        { "name": "Terrain / paysage", "level": 70 },
-                        { "name": "VFX & lighting", "level": 55 }
-                    ]
-                },
-                {
-                    "id": "design",
-                    "label": "Game Design",
-                    "icon": "🎯",
-                    "desc": "Boucles de gameplay pensées pour la rétention et l'équilibrage.",
-                    "subskills": [
-                        { "name": "Boucle de gameplay", "level": 80 },
-                        { "name": "Progression & économie", "level": 75 },
-                        { "name": "Équilibrage", "level": 65 },
-                        { "name": "Level design", "level": 70 }
-                    ]
-                },
-                {
-                    "id": "gfx",
-                    "label": "GFX",
-                    "icon": "🎨",
-                    "desc": "Visuels prêts à l'emploi pour habiller un profil, une chaîne ou un jeu.",
-                    "subskills": [
-                        { "name": "Photos de profil (PFP)", "level": 80 },
-                        { "name": "Bannières", "level": 75 },
-                        { "name": "Thumbnails", "level": 70 },
-                        { "name": "Composition / retouche", "level": 65 }
-                    ]
-                },
-                {
-                    "id": "discordbots",
-                    "label": "Discord",
-                    "icon": "🤖",
-                    "desc": "Bots et structures de serveur pensés pour être clairs et faciles à gérer.",
-                    "subskills": [
-                        { "name": "Bots sur mesure", "level": 70 },
-                        { "name": "Modération / automatisation", "level": 65 },
-                        { "name": "Structure de serveur", "level": 80 },
-                        { "name": "Design de serveur", "level": 70 }
-                    ]
-                },
-                {
-                    "id": "web",
-                    "label": "Web",
-                    "icon": "🌐",
-                    "desc": "Création de sites web modernes, responsives et performants avec les technologies du web.",
-                    "subskills": [
-                        { "name": "HTML5 / Structure", "level": 85 },
-                        { "name": "CSS3 / Styling", "level": 80 },
-                        { "name": "JavaScript / Interactions", "level": 75 },
-                        { "name": "Responsive / Accessibilité", "level": 70 }
-                    ]
-                },
-                {
-                    "id": "3d",
-                    "label": "3D",
-                    "icon": "🧊",
-                    "desc": "Modélisation, texturing et rendu 3D pour jeux, produits ou visuels.",
-                    "subskills": [
-                        { "name": "Modélisation 3D", "level": 75 },
-                        { "name": "Texturing / Matériaux", "level": 65 },
-                        { "name": "Rendu / Éclairage", "level": 60 },
-                        { "name": "Animation 3D", "level": 50 }
-                    ]
-                },
-                {
-                    "id": "uiux",
-                    "label": "UI/UX Design",
-                    "icon": "🖌️",
-                    "desc": "Interfaces claires et expérience utilisateur pensée pour chaque plateforme.",
-                    "subskills": [
-                        { "name": "Wireframing", "level": 80 },
-                        { "name": "Design d'interface", "level": 85 },
-                        { "name": "Prototypage interactif", "level": 70 },
-                        { "name": "Ergonomie / UX", "level": 75 }
-                    ]
-                }
+                { "id": "scripting", "label": "Scripting", "icon": "⌨️", "desc": "Systèmes serveur/client robustes, sécurisés et optimisés pour la production.", "subskills": [ { "name": "Gameplay & mécaniques", "level": 90 }, { "name": "DataStores & sauvegardes", "level": 85 }, { "name": "Sécurité / anti-exploit", "level": 75 }, { "name": "Optimisation performance", "level": 80 } ] },
+                { "id": "build", "label": "Build", "icon": "🧱", "desc": "Construction d'environnements cohérents, du terrain aux objets détaillés.", "subskills": [ { "name": "Mapping", "level": 90 }, { "name": "Objets (armes, props...)", "level": 40 }, { "name": "Terrain / paysage", "level": 70 }, { "name": "VFX & lighting", "level": 55 } ] },
+                { "id": "design", "label": "Game Design", "icon": "🎯", "desc": "Boucles de gameplay pensées pour la rétention et l'équilibrage.", "subskills": [ { "name": "Boucle de gameplay", "level": 80 }, { "name": "Progression & économie", "level": 75 }, { "name": "Équilibrage", "level": 65 }, { "name": "Level design", "level": 70 } ] },
+                { "id": "gfx", "label": "GFX", "icon": "🎨", "desc": "Visuels prêts à l'emploi pour habiller un profil, une chaîne ou un jeu.", "subskills": [ { "name": "Photos de profil (PFP)", "level": 80 }, { "name": "Bannières", "level": 75 }, { "name": "Thumbnails", "level": 70 }, { "name": "Composition / retouche", "level": 65 } ] },
+                { "id": "discordbots", "label": "Discord", "icon": "🤖", "desc": "Bots et structures de serveur pensés pour être clairs et faciles à gérer.", "subskills": [ { "name": "Bots sur mesure", "level": 70 }, { "name": "Modération / automatisation", "level": 65 }, { "name": "Structure de serveur", "level": 80 }, { "name": "Design de serveur", "level": 70 } ] },
+                { "id": "web", "label": "Web", "icon": "🌐", "desc": "Création de sites web modernes, responsives et performants avec les technologies du web.", "subskills": [ { "name": "HTML5 / Structure", "level": 85 }, { "name": "CSS3 / Styling", "level": 80 }, { "name": "JavaScript / Interactions", "level": 75 }, { "name": "Responsive / Accessibilité", "level": 70 } ] },
+                { "id": "3d", "label": "3D", "icon": "🧊", "desc": "Modélisation, texturing et rendu 3D pour jeux, produits ou visuels.", "subskills": [ { "name": "Modélisation 3D", "level": 75 }, { "name": "Texturing / Matériaux", "level": 65 }, { "name": "Rendu / Éclairage", "level": 60 }, { "name": "Animation 3D", "level": 50 } ] },
+                { "id": "uiux", "label": "UI/UX Design", "icon": "🖌️", "desc": "Interfaces claires et expérience utilisateur pensée pour chaque plateforme.", "subskills": [ { "name": "Wireframing", "level": 80 }, { "name": "Design d'interface", "level": 85 }, { "name": "Prototypage interactif", "level": 70 }, { "name": "Ergonomie / UX", "level": 75 } ] }
             ],
             "serviceCategories": [
-                {
-                    "id": "roblox",
-                    "label": "Développement Roblox",
-                    "icon": "🎮",
-                    "services": [{
-                        "icon": "⚙️",
-                        "title": "Système sur mesure",
-                        "desc": "Un système précis intégré à ton jeu existant : inventaire, combat, économie, quêtes, anti-exploit...",
-                        "priceFrom": 25,
-                        "priceNote": "selon complexité du système",
-                        "features": ["1 système complet", "Tests & corrections inclus", "Code commenté", "Support 7 jours"],
-                        "cta": "Ajouter au panier",
-                        "popular": false,
-                        "enabled": true
-                    }, {
-                        "icon": "🎮",
-                        "title": "Jeu complet",
-                        "desc": "Développement d'un jeu Roblox de A à Z : concept, mécaniques, scripts, UI et publication.",
-                        "priceFrom": 150,
-                        "priceNote": "selon ampleur du projet",
-                        "features": ["Concept & game design", "Scripting complet", "Build & UI inclus", "Suivi jusqu'à publication"],
-                        "cta": "Ajouter au panier",
-                        "popular": true,
-                        "enabled": true
-                    }, {
-                        "icon": "🛠️",
-                        "title": "Maintenance & Support",
-                        "desc": "Corrections de bugs, optimisation des performances, ajout de fonctionnalités sur un projet existant.",
-                        "priceFrom": 15,
-                        "priceNote": "selon volume de travail",
-                        "features": ["Diagnostic inclus", "Corrections rapides", "Rapport détaillé", "Facturation à la tâche"],
-                        "cta": "Ajouter au panier",
-                        "popular": false,
-                        "enabled": true
-                    }]
-                },
-                {
-                    "id": "gfx",
-                    "label": "GFX & Design",
-                    "icon": "🎨",
-                    "services": [{
-                        "icon": "🖼️",
-                        "title": "Photo de profil (PFP)",
-                        "desc": "Un visuel de profil soigné pour toi, ta chaîne ou ton groupe Roblox.",
-                        "priceFrom": 5,
-                        "priceNote": "par PFP, révisions incluses",
-                        "features": ["Format carré HD", "2 révisions incluses", "Livraison rapide"],
-                        "cta": "Ajouter au panier",
-                        "popular": false,
-                        "enabled": true
-                    }, {
-                        "icon": "🏳️",
-                        "title": "Bannière",
-                        "desc": "Bannière pour ta chaîne YouTube, ton serveur Discord ou ton groupe Roblox.",
-                        "priceFrom": 8,
-                        "priceNote": "par bannière, aux bonnes dimensions",
-                        "features": ["Dimensions adaptées à la plateforme", "2 révisions incluses", "Fichier source sur demande"],
-                        "cta": "Ajouter au panier",
-                        "popular": true,
-                        "enabled": true
-                    }, {
-                        "icon": "🎬",
-                        "title": "Thumbnail",
-                        "desc": "Miniature accrocheuse pour ton jeu, ta vidéo ou ta page Roblox.",
-                        "priceFrom": 12,
-                        "priceNote": "par thumbnail",
-                        "features": ["Composition originale", "Optimisée pour le clic", "2 révisions incluses"],
-                        "cta": "Ajouter au panier",
-                        "popular": false,
-                        "enabled": true
-                    }]
-                },
-                {
-                    "id": "discord",
-                    "label": "Discord",
-                    "icon": "💬",
-                    "services": [{
-                        "icon": "🤖",
-                        "title": "Bot Discord sur mesure",
-                        "desc": "Un bot codé pour tes besoins précis : modération, économie, niveaux, commandes custom...",
-                        "priceFrom": 10,
-                        "priceNote": "selon fonctionnalités demandées",
-                        "features": ["Fonctionnalités sur mesure", "Code source fourni", "Aide à l'hébergement", "Support 7 jours"],
-                        "cta": "Ajouter au panier",
-                        "popular": false,
-                        "enabled": true
-                    }, {
-                        "icon": "🏗️",
-                        "title": "Création de serveur Discord",
-                        "desc": "Structure complète, salons organisés, rôles, permissions et design cohérent.",
-                        "priceFrom": 15,
-                        "priceNote": "selon taille du serveur",
-                        "features": ["Structure de salons", "Rôles & permissions", "Design visuel inclus", "Bots de base configurés"],
-                        "cta": "Ajouter au panier",
-                        "popular": false,
-                        "enabled": true
-                    }]
-                },
-                {
-                    "id": "web",
-                    "label": "Web",
-                    "icon": "🌐",
-                    "services": [{
-                        "icon": "📄",
-                        "title": "Site vitrine",
-                        "desc": "Site web simple et élégant pour présenter ton activité, ton portfolio ou ton projet.",
-                        "priceFrom": 20,
-                        "priceNote": "site statique, 1-3 pages",
-                        "features": ["Design responsive", "Optimisé SEO", "1-3 pages", "Code propre"],
-                        "cta": "Ajouter au panier",
-                        "popular": false,
-                        "enabled": true
-                    }, {
-                        "icon": "🏗️",
-                        "title": "Site complet",
-                        "desc": "Site multi-pages avec navigation avancée, animations et contenu dynamique.",
-                        "priceFrom": 50,
-                        "priceNote": "site complet, 4-8 pages",
-                        "features": ["Multi-pages", "Animations CSS/JS", "Formulaire de contact", "Optimisé performance"],
-                        "cta": "Ajouter au panier",
-                        "popular": true,
-                        "enabled": true
-                    }, {
-                        "icon": "⚡",
-                        "title": "Site avec backend",
-                        "desc": "Site web avec base de données, authentification, API et fonctionnalités avancées.",
-                        "priceFrom": 80,
-                        "priceNote": "selon complexité backend",
-                        "features": ["Base de données", "Authentification", "API personnalisée", "Dashboard admin"],
-                        "cta": "Ajouter au panier",
-                        "popular": false,
-                        "enabled": true
-                    }]
-                },
-                {
-                    "id": "3d",
-                    "label": "3D",
-                    "icon": "🧊",
-                    "services": [{
-                        "icon": "🧊",
-                        "title": "Modèle 3D",
-                        "desc": "Modélisation d'un objet, prop ou personnage 3D, texturé et prêt à l'emploi.",
-                        "priceFrom": 15,
-                        "priceNote": "selon complexité du modèle",
-                        "features": ["Modélisation & texturing", "Export dans le format voulu", "2 révisions incluses"],
-                        "cta": "Ajouter au panier",
-                        "popular": true,
-                        "enabled": true
-                    }, {
-                        "icon": "🏞️",
-                        "title": "Environnement 3D",
-                        "desc": "Scène ou environnement 3D complet, avec éclairage et ambiance soignés.",
-                        "priceFrom": 40,
-                        "priceNote": "selon taille de l'environnement",
-                        "features": ["Modélisation d'ensemble", "Éclairage & ambiance", "Optimisation", "Fichier source sur demande"],
-                        "cta": "Ajouter au panier",
-                        "popular": false,
-                        "enabled": false
-                    }, {
-                        "icon": "🎞️",
-                        "title": "Rendu / Animation 3D",
-                        "desc": "Rendu final ou courte animation 3D pour présenter un objet, un produit ou une scène.",
-                        "priceFrom": 20,
-                        "priceNote": "selon durée / nombre de rendus",
-                        "features": ["Rendu HD", "Éclairage soigné", "Révisions incluses"],
-                        "cta": "Ajouter au panier",
-                        "popular": false,
-                        "enabled": false
-                    }]
-                },
-                {
-                    "id": "uiux",
-                    "label": "UI/UX Design",
-                    "icon": "🖌️",
-                    "services": [{
-                        "icon": "✏️",
-                        "title": "Wireframe / Maquette",
-                        "desc": "Structure et wireframe d'une interface, pour poser les bases avant le développement.",
-                        "priceFrom": 10,
-                        "priceNote": "selon nombre d'écrans",
-                        "features": ["Wireframes clairs", "Organisation des contenus", "1 aller-retour de révision"],
-                        "cta": "Ajouter au panier",
-                        "popular": false,
-                        "enabled": true
-                    }, {
-                        "icon": "🖥️",
-                        "title": "UI Design",
-                        "desc": "Design d'interface complet (app, site, jeu) : écrans, composants et cohérence visuelle.",
-                        "priceFrom": 25,
-                        "priceNote": "selon nombre d'écrans",
-                        "features": ["Design haute-fidélité", "Composants réutilisables", "2 révisions incluses", "Fichiers sources fournis"],
-                        "cta": "Ajouter au panier",
-                        "popular": true,
-                        "enabled": true
-                    }, {
-                        "icon": "🧭",
-                        "title": "Prototype interactif",
-                        "desc": "Prototype cliquable pour tester et valider un parcours utilisateur avant le développement.",
-                        "priceFrom": 20,
-                        "priceNote": "selon complexité du parcours",
-                        "features": ["Parcours utilisateur cliquable", "Itérations rapides", "Retours pris en compte"],
-                        "cta": "Ajouter au panier",
-                        "popular": false,
-                        "enabled": true
-                    }]
-                },
-                {
-                    "id": "script",
-                    "label": "Script",
-                    "icon": "💻",
-                    "services": [{
-                        "icon": "🧩",
-                        "title": "Script sur mesure",
-                        "desc": "Un script ou système précis développé pour tes besoins, sur Roblox ou en dehors (outil, automatisation, script web...).",
-                        "priceFrom": 15,
-                        "priceNote": "selon complexité du script",
-                        "features": ["Script commenté & organisé", "Tests & corrections inclus", "Support 7 jours"],
-                        "cta": "Ajouter au panier",
-                        "popular": true,
-                        "enabled": true
-                    }, {
-                        "icon": "🤖",
-                        "title": "Automatisation",
-                        "desc": "Automatisation d'une tâche répétitive : traitement de données, outil interne, script d'automatisation...",
-                        "priceFrom": 12,
-                        "priceNote": "selon volume de travail",
-                        "features": ["Analyse du besoin", "Script prêt à l'emploi", "Documentation incluse"],
-                        "cta": "Ajouter au panier",
-                        "popular": false,
-                        "enabled": true
-                    }, {
-                        "icon": "🛠️",
-                        "title": "Debug & Optimisation",
-                        "desc": "Correction de bugs et optimisation de performance sur un script ou projet existant, quel que soit le langage.",
-                        "priceFrom": 10,
-                        "priceNote": "selon volume de travail",
-                        "features": ["Diagnostic inclus", "Corrections rapides", "Rapport détaillé"],
-                        "cta": "Ajouter au panier",
-                        "popular": false,
-                        "enabled": true
-                    }]
-                },
-                {
-                    "id": "build",
-                    "label": "Build",
-                    "icon": "🧱",
-                    "services": [{
-                        "icon": "🧱",
-                        "title": "Build sur mesure",
-                        "desc": "Construction d'un environnement, d'une map ou d'une structure détaillée pour ton projet.",
-                        "priceFrom": 20,
-                        "priceNote": "selon taille du build",
-                        "features": ["Mapping / terrain", "Objets & détails", "Optimisation incluse"],
-                        "cta": "Ajouter au panier",
-                        "popular": true,
-                        "enabled": true
-                    }, {
-                        "icon": "💡",
-                        "title": "Lighting & VFX",
-                        "desc": "Ambiance lumineuse et effets visuels pour donner du cachet à un environnement existant.",
-                        "priceFrom": 15,
-                        "priceNote": "selon ampleur du travail",
-                        "features": ["Éclairage d'ambiance", "Effets visuels", "Révisions incluses"],
-                        "cta": "Ajouter au panier",
-                        "popular": false,
-                        "enabled": true
-                    }, {
-                        "icon": "🔧",
-                        "title": "Optimisation de build",
-                        "desc": "Optimisation des performances d'un environnement existant, trop lourd ou mal structuré.",
-                        "priceFrom": 15,
-                        "priceNote": "selon volume de travail",
-                        "features": ["Diagnostic inclus", "Corrections rapides", "Rapport détaillé"],
-                        "cta": "Ajouter au panier",
-                        "popular": false,
-                        "enabled": true
-                    }]
-                }
+                { "id": "roblox", "label": "Développement Roblox", "icon": "🎮", "services": [ { "icon": "⚙️", "title": "Système sur mesure", "desc": "Un système précis intégré à ton jeu existant : inventaire, combat, économie, quêtes, anti-exploit...", "priceFrom": 25, "priceNote": "selon complexité du système", "features": ["1 système complet", "Tests & corrections inclus", "Code commenté", "Support 7 jours"], "cta": "Ajouter au panier", "popular": false, "enabled": true }, { "icon": "🎮", "title": "Jeu complet", "desc": "Développement d'un jeu Roblox de A à Z : concept, mécaniques, scripts, UI et publication.", "priceFrom": 150, "priceNote": "selon ampleur du projet", "features": ["Concept & game design", "Scripting complet", "Build & UI inclus", "Suivi jusqu'à publication"], "cta": "Ajouter au panier", "popular": true, "enabled": true }, { "icon": "🛠️", "title": "Maintenance & Support", "desc": "Corrections de bugs, optimisation des performances, ajout de fonctionnalités sur un projet existant.", "priceFrom": 15, "priceNote": "selon volume de travail", "features": ["Diagnostic inclus", "Corrections rapides", "Rapport détaillé", "Facturation à la tâche"], "cta": "Ajouter au panier", "popular": false, "enabled": true } ] },
+                { "id": "gfx", "label": "GFX & Design", "icon": "🎨", "services": [ { "icon": "🖼️", "title": "Photo de profil (PFP)", "desc": "Un visuel de profil soigné pour toi, ta chaîne ou ton groupe Roblox.", "priceFrom": 5, "priceNote": "par PFP, révisions incluses", "features": ["Format carré HD", "2 révisions incluses", "Livraison rapide"], "cta": "Ajouter au panier", "popular": false, "enabled": true }, { "icon": "🏳️", "title": "Bannière", "desc": "Bannière pour ta chaîne YouTube, ton serveur Discord ou ton groupe Roblox.", "priceFrom": 8, "priceNote": "par bannière, aux bonnes dimensions", "features": ["Dimensions adaptées à la plateforme", "2 révisions incluses", "Fichier source sur demande"], "cta": "Ajouter au panier", "popular": true, "enabled": true }, { "icon": "🎬", "title": "Thumbnail", "desc": "Miniature accrocheuse pour ton jeu, ta vidéo ou ta page Roblox.", "priceFrom": 12, "priceNote": "par thumbnail", "features": ["Composition originale", "Optimisée pour le clic", "2 révisions incluses"], "cta": "Ajouter au panier", "popular": false, "enabled": true } ] },
+                { "id": "discord", "label": "Discord", "icon": "💬", "services": [ { "icon": "🤖", "title": "Bot Discord sur mesure", "desc": "Un bot codé pour tes besoins précis : modération, économie, niveaux, commandes custom...", "priceFrom": 10, "priceNote": "selon fonctionnalités demandées", "features": ["Fonctionnalités sur mesure", "Code source fourni", "Aide à l'hébergement", "Support 7 jours"], "cta": "Ajouter au panier", "popular": false, "enabled": true }, { "icon": "🏗️", "title": "Création de serveur Discord", "desc": "Structure complète, salons organisés, rôles, permissions et design cohérent.", "priceFrom": 15, "priceNote": "selon taille du serveur", "features": ["Structure de salons", "Rôles & permissions", "Design visuel inclus", "Bots de base configurés"], "cta": "Ajouter au panier", "popular": false, "enabled": true } ] },
+                { "id": "web", "label": "Web", "icon": "🌐", "services": [ { "icon": "📄", "title": "Site vitrine", "desc": "Site web simple et élégant pour présenter ton activité, ton portfolio ou ton projet.", "priceFrom": 20, "priceNote": "site statique, 1-3 pages", "features": ["Design responsive", "Optimisé SEO", "1-3 pages", "Code propre"], "cta": "Ajouter au panier", "popular": false, "enabled": true }, { "icon": "🏗️", "title": "Site complet", "desc": "Site multi-pages avec navigation avancée, animations et contenu dynamique.", "priceFrom": 50, "priceNote": "site complet, 4-8 pages", "features": ["Multi-pages", "Animations CSS/JS", "Formulaire de contact", "Optimisé performance"], "cta": "Ajouter au panier", "popular": true, "enabled": true }, { "icon": "⚡", "title": "Site avec backend", "desc": "Site web avec base de données, authentification, API et fonctionnalités avancées.", "priceFrom": 80, "priceNote": "selon complexité backend", "features": ["Base de données", "Authentification", "API personnalisée", "Dashboard admin"], "cta": "Ajouter au panier", "popular": false, "enabled": true } ] },
+                { "id": "3d", "label": "3D", "icon": "🧊", "services": [ { "icon": "🧊", "title": "Modèle 3D", "desc": "Modélisation d'un objet, prop ou personnage 3D, texturé et prêt à l'emploi.", "priceFrom": 15, "priceNote": "selon complexité du modèle", "features": ["Modélisation & texturing", "Export dans le format voulu", "2 révisions incluses"], "cta": "Ajouter au panier", "popular": true, "enabled": true }, { "icon": "🏞️", "title": "Environnement 3D", "desc": "Scène ou environnement 3D complet, avec éclairage et ambiance soignés.", "priceFrom": 40, "priceNote": "selon taille de l'environnement", "features": ["Modélisation d'ensemble", "Éclairage & ambiance", "Optimisation", "Fichier source sur demande"], "cta": "Ajouter au panier", "popular": false, "enabled": false }, { "icon": "🎞️", "title": "Rendu / Animation 3D", "desc": "Rendu final ou courte animation 3D pour présenter un objet, un produit ou une scène.", "priceFrom": 20, "priceNote": "selon durée / nombre de rendus", "features": ["Rendu HD", "Éclairage soigné", "Révisions incluses"], "cta": "Ajouter au panier", "popular": false, "enabled": false } ] },
+                { "id": "uiux", "label": "UI/UX Design", "icon": "🖌️", "services": [ { "icon": "✏️", "title": "Wireframe / Maquette", "desc": "Structure et wireframe d'une interface, pour poser les bases avant le développement.", "priceFrom": 10, "priceNote": "selon nombre d'écrans", "features": ["Wireframes clairs", "Organisation des contenus", "1 aller-retour de révision"], "cta": "Ajouter au panier", "popular": false, "enabled": true }, { "icon": "🖥️", "title": "UI Design", "desc": "Design d'interface complet (app, site, jeu) : écrans, composants et cohérence visuelle.", "priceFrom": 25, "priceNote": "selon nombre d'écrans", "features": ["Design haute-fidélité", "Composants réutilisables", "2 révisions incluses", "Fichiers sources fournis"], "cta": "Ajouter au panier", "popular": true, "enabled": true }, { "icon": "🧭", "title": "Prototype interactif", "desc": "Prototype cliquable pour tester et valider un parcours utilisateur avant le développement.", "priceFrom": 20, "priceNote": "selon complexité du parcours", "features": ["Parcours utilisateur cliquable", "Itérations rapides", "Retours pris en compte"], "cta": "Ajouter au panier", "popular": false, "enabled": true } ] },
+                { "id": "script", "label": "Script", "icon": "💻", "services": [ { "icon": "🧩", "title": "Script sur mesure", "desc": "Un script ou système précis développé pour tes besoins, sur Roblox ou en dehors (outil, automatisation, script web...).", "priceFrom": 15, "priceNote": "selon complexité du script", "features": ["Script commenté & organisé", "Tests & corrections inclus", "Support 7 jours"], "cta": "Ajouter au panier", "popular": true, "enabled": true }, { "icon": "🤖", "title": "Automatisation", "desc": "Automatisation d'une tâche répétitive : traitement de données, outil interne, script d'automatisation...", "priceFrom": 12, "priceNote": "selon volume de travail", "features": ["Analyse du besoin", "Script prêt à l'emploi", "Documentation incluse"], "cta": "Ajouter au panier", "popular": false, "enabled": true }, { "icon": "🛠️", "title": "Debug & Optimisation", "desc": "Correction de bugs et optimisation de performance sur un script ou projet existant, quel que soit le langage.", "priceFrom": 10, "priceNote": "selon volume de travail", "features": ["Diagnostic inclus", "Corrections rapides", "Rapport détaillé"], "cta": "Ajouter au panier", "popular": false, "enabled": true } ] },
+                { "id": "build", "label": "Build", "icon": "🧱", "services": [ { "icon": "🧱", "title": "Build sur mesure", "desc": "Construction d'un environnement, d'une map ou d'une structure détaillée pour ton projet.", "priceFrom": 20, "priceNote": "selon taille du build", "features": ["Mapping / terrain", "Objets & détails", "Optimisation incluse"], "cta": "Ajouter au panier", "popular": true, "enabled": true }, { "icon": "💡", "title": "Lighting & VFX", "desc": "Ambiance lumineuse et effets visuels pour donner du cachet à un environnement existant.", "priceFrom": 15, "priceNote": "selon ampleur du travail", "features": ["Éclairage d'ambiance", "Effets visuels", "Révisions incluses"], "cta": "Ajouter au panier", "popular": false, "enabled": true }, { "icon": "🔧", "title": "Optimisation de build", "desc": "Optimisation des performances d'un environnement existant, trop lourd ou mal structuré.", "priceFrom": 15, "priceNote": "selon volume de travail", "features": ["Diagnostic inclus", "Corrections rapides", "Rapport détaillé"], "cta": "Ajouter au panier", "popular": false, "enabled": true } ] }
             ],
             "projects": [{
                 "title": "Bomb Duels",
@@ -1394,13 +865,7 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
                 "genre": "PvP / Arène",
                 "status": "Terminé",
                 "lastUpdate": "15 août 2026",
-                "creators": [
-                    { "name": "Exiozz", "discord": "zo7q" },
-                    { "name": "Blueyy", "discord": "blueyy" },
-                    { "name": "Luckt", "discord": "luckt" },
-                    { "name": "Greys", "discord": "yogreys" },
-                    { "name": "Enetritz", "discord": "enetritz" }
-                ],
+                "creators": [ { "name": "Exiozz", "discord": "zo7q" }, { "name": "Blueyy", "discord": "blueyy" }, { "name": "Luckt", "discord": "luckt" }, { "name": "Greys", "discord": "yogreys" }, { "name": "Enetritz", "discord": "enetritz" } ],
                 "discord": "https://discord.gg/zSsgaGQafZ",
                 "roblox": "https://www.roblox.com/fr/games/120471341646635",
                 "enabled": true
@@ -1413,9 +878,7 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
                 "genre": "Site web",
                 "status": "Terminé",
                 "lastUpdate": "27 août 2026",
-                "creators": [
-                    { "name": "Exiozz", "discord": "zo7q" }
-                ],
+                "creators": [ { "name": "Exiozz", "discord": "zo7q" } ],
                 "discord": "",
                 "roblox": "https://yaskofr.vercel.app/",
                 "enabled": true
@@ -1428,10 +891,7 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
                 "genre": "Simulation",
                 "status": "En développement",
                 "lastUpdate": "20 août 2026",
-                "creators": [
-                    { "name": "Exiozz", "discord": "Exiozz#1234" },
-                    { "name": "Architecte_3D", "discord": "Arch3D#9012" }
-                ],
+                "creators": [ { "name": "Exiozz", "discord": "Exiozz#1234" }, { "name": "Architecte_3D", "discord": "Arch3D#9012" } ],
                 "discord": "https://discord.gg/example2",
                 "roblox": "https://www.roblox.com/games/987654321/Projet-2",
                 "enabled": false
@@ -1444,11 +904,7 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
                 "genre": "RP / Économie",
                 "status": "En pause",
                 "lastUpdate": "5 août 2026",
-                "creators": [
-                    { "name": "Exiozz", "discord": "Exiozz#1234" },
-                    { "name": "EcoDev", "discord": "EcoDev#3456" },
-                    { "name": "UI Designer", "discord": "UIDesigner#7890" }
-                ],
+                "creators": [ { "name": "Exiozz", "discord": "Exiozz#1234" }, { "name": "EcoDev", "discord": "EcoDev#3456" }, { "name": "UI Designer", "discord": "UIDesigner#7890" } ],
                 "discord": "https://discord.gg/example3",
                 "roblox": "https://www.roblox.com/games/456789123/Projet-3",
                 "enabled": false
@@ -1468,7 +924,6 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
 <a class="skip" href="#main">Aller au contenu</a>
 <div id="scroll-progress" aria-hidden="true"></div>
 
-<!-- ============ NAV ============ -->
 <header class="nav" id="nav">
   <div class="nav-inner">
     <a class="logo" href="#top" aria-label="Retour en haut">
@@ -1524,7 +979,6 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
   </div>
 </header>
 
-<!-- ============ PANNEAU D'AFFICHAGE ============ -->
 <div class="popover" id="settings-panel" role="dialog" aria-label="Paramètres d'affichage" aria-hidden="true">
   <div class="pop-head">
     <h2>Affichage</h2>
@@ -1568,7 +1022,6 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
 
 <main id="main">
 
-<!-- ============ HERO ============ -->
 <section class="hero" id="top">
   <div class="hero-glow" id="hero-glow"></div>
   <canvas id="particles" aria-hidden="true"></canvas>
@@ -1586,20 +1039,32 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
     </div>
     <div class="hero-visual" id="hero-visual">
       <div class="tilt-wrap">
-        <div class="studio-panel" id="tilt-panel" aria-hidden="true">
-          <div class="studio-topbar"><span></span><span></span><span></span><b>ServeurScript.lua</b></div>
-          <div class="studio-body">
-            <div class="ln" style="--i:0"><span class="com">-- Système généré pour ton projet</span></div>
-            <div class="ln" style="--i:1"><span class="kw">local</span> Joueur = <span class="fn">game</span>.Players.PlayerAdded</div>
-            <div class="ln" style="--i:2"><span class="kw">local</span> Systeme = <span class="fn">require</span>(<span class="str">"SystemeCore"</span>)</div>
-            <div class="ln" style="--i:3"> </div>
-            <div class="ln" style="--i:4">Joueur<span class="kw">:Connect</span>(<span class="kw">function</span>(player)</div>
-            <div class="ln" style="--i:5">  Systeme.Initialiser(player)</div>
-            <div class="ln" style="--i:6">  <span class="fn">print</span>(<span class="str">"✓ Joueur prêt : "</span> .. player.Name)<span class="type-cursor"></span></div>
-            <div class="ln" style="--i:7"><span class="kw">end</span>)</div>
+        <div class="studio-panel" id="tilt-panel">
+          <div class="studio-topbar">
+            <div class="studio-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="studio-tabs" id="studio-tabs" role="tablist" aria-label="Fichiers Lua"></div>
+            <button class="studio-tab-add" id="studio-tab-add" type="button" aria-label="Ajouter un script" title="Ajouter un script">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
           </div>
-          <div class="studio-out"><span class="out-tag">Sortie</span><span class="out-ok">✓ Joueur prêt : Exiozz</span></div>
-          <div class="studio-foot"><span class="status">En développement</span><span>42 lignes</span></div>
+          <div class="studio-code">
+            <div class="studio-gutter" aria-hidden="true"><div class="studio-gutter-inner" id="studio-gutter-inner"></div></div>
+            <div class="studio-code-area">
+              <pre class="studio-hl" id="studio-hl" aria-hidden="true"></pre>
+              <textarea class="studio-input" id="studio-input" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="Éditeur de code Lua"></textarea>
+            </div>
+          </div>
+          <div class="studio-console">
+            <div class="studio-console-head">
+              <span class="console-tag">Sortie</span>
+              <button class="studio-run" id="studio-run" type="button">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 3 20 12 6 21"/></svg>
+                Exécuter
+              </button>
+            </div>
+            <div class="studio-console-body" id="studio-console-body" role="log" aria-live="polite"></div>
+          </div>
+          <div class="studio-foot"><span class="status">En développement</span><span id="studio-meta">1 fichier · 8 lignes</span></div>
         </div>
       </div>
       <div class="hero-bricks">
@@ -1614,7 +1079,6 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
 
 <div class="marquee-wrap" aria-hidden="true"><div class="marquee" id="marquee"></div></div>
 
-<!-- ============ À PROPOS ============ -->
 <section class="sec" id="about">
   <div class="wrap split">
     <div class="split-head reveal">
@@ -1628,7 +1092,6 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
   </div>
 </section>
 
-<!-- ============ MÉTHODE ============ -->
 <section class="sec sec--tint" id="process">
   <div class="wrap">
     <div class="sec-head reveal">
@@ -1639,7 +1102,6 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
   </div>
 </section>
 
-<!-- ============ COMPÉTENCES ============ -->
 <section class="sec" id="skills">
   <div class="wrap">
     <div class="sec-head reveal">
@@ -1653,7 +1115,6 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
   </div>
 </section>
 
-<!-- ============ TARIFS ============ -->
 <section class="sec sec--tint" id="services">
   <div class="wrap">
     <div class="sec-head reveal">
@@ -1676,7 +1137,6 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
   </div>
 </section>
 
-<!-- ============ PROJETS ============ -->
 <section class="sec" id="projects">
   <div class="wrap">
     <div class="sec-head reveal">
@@ -1687,7 +1147,6 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
   </div>
 </section>
 
-<!-- ============ FAQ ============ -->
 <section class="sec sec--tint" id="faq">
   <div class="wrap split">
     <div class="split-head reveal">
@@ -1698,7 +1157,6 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
   </div>
 </section>
 
-<!-- ============ AVIS ============ -->
 <section class="sec" id="reviews">
   <div class="wrap">
     <div class="sec-head reveal">
@@ -1732,7 +1190,6 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
   </div>
 </section>
 
-<!-- ============ CONTACT ============ -->
 <section class="sec" id="contact" style="padding-top:0">
   <div class="wrap">
     <div class="cta-band reveal">
@@ -1777,7 +1234,6 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
   </button>
 </div>
 
-<!-- ============ MODALE PROJET ============ -->
 <div class="overlay" id="project-modal" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <button class="icon-btn modal-close" id="modal-close" aria-label="Fermer"><span data-icon="x"></span></button>
@@ -1797,7 +1253,6 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
   </div>
 </div>
 
-<!-- ============ MODALE COMMANDES ============ -->
 <div class="overlay" id="orders-modal" aria-hidden="true">
   <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="orders-title">
     <button class="icon-btn modal-close" id="orders-close" aria-label="Fermer"><span data-icon="x"></span></button>
@@ -1806,7 +1261,6 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
   </div>
 </div>
 
-<!-- ============ TIROIR PANIER ============ -->
 <div class="overlay drawer-overlay" id="cart-modal" aria-hidden="true">
   <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="cart-title">
     <div class="drawer-head">
@@ -1825,7 +1279,6 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
   </aside>
 </div>
 
-<!-- ============ CONFIRMATION ============ -->
 <div class="overlay" id="confirm-modal" aria-hidden="true">
   <div class="modal modal-sm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-text">
     <h2 id="confirm-title">Confirmer</h2>
@@ -1837,7 +1290,6 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
   </div>
 </div>
 
-<!-- ============ PALETTE DE COMMANDES ============ -->
 <div class="overlay cmdk-overlay" id="cmdk" aria-hidden="true">
   <div class="cmdk" role="dialog" aria-modal="true" aria-label="Recherche rapide">
     <div class="cmdk-input">
@@ -1856,9 +1308,6 @@ html[data-motion="reduced"] .type-cursor, html[data-motion="reduced"] .status-pi
 (function () {
 'use strict';
 
-/* ==========================================================
-   OUTILS
-   ========================================================== */
 const DATA = JSON.parse(document.getElementById('site-data').textContent);
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
@@ -1868,7 +1317,6 @@ const fmt = (n) => Number(n).toLocaleString('fr-FR');
 const root = document.documentElement;
 const reduced = () => root.dataset.motion === 'reduced' || matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* ----- Icônes ----- */
 const ICONS = {
   code: '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
   box: '<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',
@@ -1970,6 +1418,261 @@ function askConfirm(title, text, okLabel = 'Confirmer') {
 hydrateIcons();
 
 /* ==========================================================
+   ÉDITEUR STUDIO INTERACTIF
+   ========================================================== */
+(function initStudio() {
+  const tabsEl = $('#studio-tabs');
+  const addBtn = $('#studio-tab-add');
+  const hl = $('#studio-hl');
+  const input = $('#studio-input');
+  const gutterInner = $('#studio-gutter-inner');
+  const consoleBody = $('#studio-console-body');
+  const runBtn = $('#studio-run');
+  const metaEl = $('#studio-meta');
+  const MAX_TABS = 3;
+
+  const DEFAULT_CODE = [
+    '-- Système généré pour ton projet',
+    'local Joueur = game.Players.PlayerAdded',
+    'local Systeme = require("SystemeCore")',
+    '',
+    'Joueur:Connect(function(player)',
+    '  Systeme.Initialiser(player)',
+    '  print("✓ Joueur prêt : " .. player.Name)',
+    'end)'
+  ].join('\n');
+
+  const state = {
+    tabs: [{ id: 't1', name: 'ServeurScript.lua', code: DEFAULT_CODE }],
+    activeId: 't1',
+    nextIndex: 2
+  };
+  const activeTab = () => state.tabs.find(t => t.id === state.activeId);
+
+  /* ----- Coloration syntaxique Lua ----- */
+  const KEYWORDS = new Set(['and','break','do','else','elseif','end','false','for','function','goto','if','in','local','nil','not','or','repeat','return','then','true','until','while']);
+  const BUILTINS = new Set(['game','workspace','script','print','warn','error','require','pairs','ipairs','type','typeof','tostring','tonumber','math','string','table','os','task','wait','spawn','delay','Instance','Vector3','Vector2','CFrame','Color3','UDim','UDim2','Enum','Player','Players','Workspace','RunService','ReplicatedStorage','ServerStorage','ServerScriptService','StarterGui','StarterPlayer','Humanoid','TweenService','Debris']);
+
+  function escHtml(s) {
+    return s.replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
+  function highlight(code) {
+    const re = /(--\[\[[\s\S]*?\]\]|--[^\n]*)|("(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')|(\b\d+(?:\.\d+)?\b)|(\b[A-Za-z_]\w*\b)/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(code))) {
+      out += escHtml(code.slice(last, m.index));
+      if (m[1]) out += `<span class="tk-com">${escHtml(m[1])}</span>`;
+      else if (m[2]) out += `<span class="tk-str">${escHtml(m[2])}</span>`;
+      else if (m[3]) out += `<span class="tk-num">${escHtml(m[3])}</span>`;
+      else if (m[4]) {
+        const w = m[4];
+        const next = code[m.index + w.length];
+        if (KEYWORDS.has(w)) out += `<span class="tk-kw">${w}</span>`;
+        else if (BUILTINS.has(w)) out += `<span class="tk-bi">${w}</span>`;
+        else if (next === '(') out += `<span class="tk-fn">${w}</span>`;
+        else out += `<span class="tk-id">${w}</span>`;
+      }
+      last = m.index + m[0].length;
+    }
+    out += escHtml(code.slice(last));
+    return out;
+  }
+
+  function updateGutter(code) {
+    const lines = code.split('\n').length;
+    let html = '';
+    for (let i = 1; i <= lines; i++) html += `<span class="gl">${i}</span>`;
+    gutterInner.innerHTML = html;
+  }
+
+  function updateMeta() {
+    const lines = input.value.split('\n').length;
+    const n = state.tabs.length;
+    metaEl.textContent = `${n} fichier${n > 1 ? 's' : ''} · ${lines} ligne${lines > 1 ? 's' : ''}`;
+    addBtn.disabled = state.tabs.length >= MAX_TABS;
+  }
+
+  function syncScroll() {
+    hl.scrollTop = input.scrollTop;
+    hl.scrollLeft = input.scrollLeft;
+    gutterInner.style.transform = `translateY(${-input.scrollTop}px)`;
+  }
+
+  function refreshEditor() {
+    const code = input.value;
+    hl.innerHTML = highlight(code) + '\n ';
+    updateGutter(code);
+    updateMeta();
+    syncScroll();
+  }
+
+  function renderTabs() {
+    tabsEl.innerHTML = state.tabs.map(t =>
+      `<button class="studio-tab ${t.id === state.activeId ? 'active' : ''}" role="tab" data-id="${t.id}" aria-selected="${t.id === state.activeId}">${escHtml(t.name)}</button>`
+    ).join('');
+    $$('.studio-tab', tabsEl).forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.id)));
+  }
+
+  function switchTab(id) {
+    if (id === state.activeId) return;
+    activeTab().code = input.value;
+    state.activeId = id;
+    input.value = activeTab().code;
+    renderTabs();
+    refreshEditor();
+    input.focus();
+  }
+
+  function addTab() {
+    if (state.tabs.length >= MAX_TABS) return;
+    activeTab().code = input.value;
+    const id = 't' + Date.now();
+    const name = 'Script' + state.nextIndex + '.lua';
+    state.nextIndex++;
+    state.tabs.push({
+      id, name,
+      code: `-- ${name}\n-- Nouveau script\n\nprint("Hello depuis ${name} !")\n`
+    });
+    state.activeId = id;
+    input.value = activeTab().code;
+    renderTabs();
+    refreshEditor();
+    input.focus();
+  }
+
+  input.addEventListener('input', refreshEditor);
+  input.addEventListener('scroll', syncScroll, { passive: true });
+  input.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') return;
+    e.preventDefault();
+    const s = input.selectionStart, en = input.selectionEnd;
+    input.value = input.value.slice(0, s) + '  ' + input.value.slice(en);
+    input.selectionStart = input.selectionEnd = s + 2;
+    input.dispatchEvent(new Event('input'));
+  });
+  addBtn.addEventListener('click', addTab);
+
+  /* ----- Exécution simulée ----- */
+  function splitTopLevel(str, sep) {
+    const out = [];
+    let cur = '', depth = 0, quote = null;
+    for (let i = 0; i < str.length; i++) {
+      const c = str[i];
+      if (quote) {
+        cur += c;
+        if (c === '\\') { cur += str[++i] || ''; continue; }
+        if (c === quote) quote = null;
+        continue;
+      }
+      if (c === '"' || c === "'") { quote = c; cur += c; continue; }
+      if (c === '(' || c === '[' || c === '{') depth++;
+      if (c === ')' || c === ']' || c === '}') depth--;
+      if (c === sep && depth === 0) { out.push(cur); cur = ''; continue; }
+      cur += c;
+    }
+    out.push(cur);
+    return out;
+  }
+
+  function evalConcat(expr) {
+    const parts = [];
+    let cur = '', i = 0;
+    while (i < expr.length) {
+      if (expr[i] === '.' && expr[i+1] === '.') { parts.push(cur); cur = ''; i += 2; continue; }
+      if (expr[i] === '"' || expr[i] === "'") {
+        const q = expr[i];
+        cur += expr[i]; i++;
+        while (i < expr.length) {
+          cur += expr[i];
+          if (expr[i] === '\\') { i++; if (i < expr.length) { cur += expr[i]; i++; } continue; }
+          if (expr[i] === q) { i++; break; }
+          i++;
+        }
+        continue;
+      }
+      cur += expr[i]; i++;
+    }
+    parts.push(cur);
+    return parts.map(evalAtom).join('');
+  }
+
+  function unescapeLua(s) {
+    return s.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\r/g, '\r').replace(/\\"/g, '"').replace(/\\'/g, "'").replace(/\\\\/g, '\\');
+  }
+
+  function evalAtom(atom) {
+    atom = atom.trim();
+    if (!atom) return '';
+    let m = atom.match(/^"((?:\\.|[^"\\])*)"$/);
+    if (m) return unescapeLua(m[1]);
+    m = atom.match(/^'((?:\\.|[^'\\])*)'$/);
+    if (m) return unescapeLua(m[1]);
+    if (/^-?\d+(?:\.\d+)?$/.test(atom)) return atom;
+    return atom;
+  }
+
+  function extractPrintOutput(code) {
+    const results = [];
+    const re = /print\s*\(([^()]*)\)/g;
+    let m;
+    while ((m = re.exec(code))) {
+      const args = splitTopLevel(m[1], ',');
+      results.push(args.map(evalConcat).join('\t'));
+    }
+    return results;
+  }
+
+  let runToken = 0;
+  runBtn.addEventListener('click', async () => {
+    const code = input.value;
+    runToken++;
+    const myToken = runToken;
+    consoleBody.innerHTML = '';
+    runBtn.disabled = true;
+
+    const addLine = (text, cls = '') => {
+      const el = document.createElement('div');
+      el.className = 'console-line ' + cls;
+      el.textContent = text;
+      consoleBody.appendChild(el);
+      consoleBody.scrollTop = consoleBody.scrollHeight;
+    };
+    const wait = (ms) => new Promise(r => setTimeout(r, ms));
+    const delay = reduced() ? 0 : 200;
+
+    addLine('$ lua ' + activeTab().name, 'info');
+
+    const outputs = extractPrintOutput(code);
+    for (let i = 0; i < outputs.length; i++) {
+      await wait(delay);
+      if (runToken !== myToken) return;
+      addLine(outputs[i], 'ok');
+    }
+
+    if (outputs.length === 0) {
+      await wait(delay);
+      if (runToken !== myToken) return;
+      addLine('Aucun print() à afficher dans ce script.', 'dim');
+    }
+
+    await wait(reduced() ? 0 : 160);
+    if (runToken !== myToken) return;
+    addLine('✓ Exécution terminée sans erreur.', 'ok');
+    runBtn.disabled = false;
+  });
+
+  /* ----- Init ----- */
+  input.value = activeTab().code;
+  renderTabs();
+  refreshEditor();
+  const first = document.createElement('div');
+  first.className = 'console-line console-empty';
+  first.textContent = 'Clique sur « Exécuter » pour voir le résultat…';
+  consoleBody.appendChild(first);
+})();
+
+/* ==========================================================
    PARAMÈTRES D'AFFICHAGE
    ========================================================== */
 const ACCENTS = window.__ACCENTS;
@@ -2004,7 +1707,6 @@ function applyPrefs() {
   root.style.setProperty('--accent-text', c[2]);
   particleColor = c[0];
   $('#meta-theme-color').setAttribute('content', t === 'dark' ? '#090A0F' : '#F5F6FA');
-
   $$('#seg-theme button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.val === prefs.theme));
   $$('#seg-radius button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.val === prefs.radius));
   $$('.swatch').forEach((s) => {
@@ -2055,9 +1757,6 @@ $('#settings-close').addEventListener('click', () => { setSettings(false); setti
 $('#footer-settings').addEventListener('click', (e) => { e.stopPropagation(); window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => setSettings(true), reduced() ? 0 : 450); });
 settingsPanel.addEventListener('click', (e) => e.stopPropagation());
 
-/* ==========================================================
-   PARTICULES
-   ========================================================== */
 const canvas = $('#particles'), ctx = canvas.getContext('2d');
 let pw = 0, ph = 0, dots = [], heroVisible = true, raf = 0;
 const particlesOn = () => prefs.particles && !prefs.reduceMotion && !matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2089,9 +1788,6 @@ window.addEventListener('resize', () => { sizeCanvas(); });
 document.addEventListener('visibilitychange', startParticles);
 new IntersectionObserver((en) => { heroVisible = en[0].isIntersecting; startParticles(); }).observe($('.hero'));
 
-/* ==========================================================
-   NAV, SCROLL, SCROLLSPY
-   ========================================================== */
 const progressBar = $('#scroll-progress'), fabTop = $('#fab-top'), fabContact = $('#fab-contact'), navEl = $('#nav');
 let scrollTick = false;
 function onScroll() {
@@ -2124,9 +1820,6 @@ function setMobileMenu(open) {
 burger.addEventListener('click', (e) => { e.stopPropagation(); setMobileMenu(!mobileMenu.classList.contains('active')); });
 $$('#mobile-menu a').forEach((a) => a.addEventListener('click', () => setMobileMenu(false)));
 
-/* ==========================================================
-   LIENS, TEXTES, HERO
-   ========================================================== */
 $('#nav-name').textContent = DATA.name;
 $('#footer-name').textContent = DATA.name;
 $('#year').textContent = new Date().getFullYear();
@@ -2188,9 +1881,6 @@ window.addEventListener('scroll', () => {
   if (y < innerHeight) heroVisual.style.transform = `translateY(${y * 0.09}px)`;
 }, { passive: true });
 
-/* ==========================================================
-   À PROPOS / MÉTHODE
-   ========================================================== */
 const [lead, ...restP] = DATA.about.paragraphs;
 $('#about-text').innerHTML = `<p class="lead">${lead}</p>` + restP.map((p) => `<p>${p}</p>`).join('');
 $('#about-highlights').innerHTML = DATA.about.highlights.map((h) =>
@@ -2199,9 +1889,6 @@ $('#about-tools').innerHTML = `<div class="tb-title">Boîte à outils</div><div 
 $('#process-steps').innerHTML = DATA.process.map((p, i) =>
   `<li class="step"><div class="step-num">0${i + 1}</div><h3>${p.title}</h3><p>${p.desc}</p></li>`).join('');
 
-/* ==========================================================
-   ONGLETS
-   ========================================================== */
 function buildTabs(tabsEl, panelsEl, items, tabHtml, panelHtml, onActivate) {
   items.forEach((it, i) => {
     tabsEl.insertAdjacentHTML('beforeend', tabHtml(it, i));
@@ -2238,9 +1925,6 @@ buildTabs($('#skill-tabs'), $('#skill-panels'), DATA.skillCategories, tabBtn,
     <div class="subskills">${cat.subskills.map((s) => `<div class="subskill"><div class="subskill-head"><span>${s.name}</span><b>${s.level}%</b></div><div class="bar-track" role="progressbar" aria-label="${esc(s.name)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${s.level}"><div class="bar-fill" data-level="${s.level}"></div></div></div>`).join('')}</div>
   </div>`, activateBars);
 
-/* ==========================================================
-   SERVICES, DEVISES, PANIER
-   ========================================================== */
 const CART_KEY = 'exiozz_cart_v2';
 const CURRENCY_LABEL = { eur: '€', robux: 'R$' };
 let currentCurrency = 'eur';
@@ -2375,9 +2059,6 @@ $('#cart-order').addEventListener('click', async () => {
   } finally { orderBtn.textContent = original; orderBtn.disabled = cart.length === 0; }
 });
 
-/* ==========================================================
-   COMPTE DISCORD
-   ========================================================== */
 const SESSION_KEY = 'exiozz_discord_session';
 const params = new URLSearchParams(window.location.search);
 let currentUser = null;
@@ -2440,9 +2121,6 @@ $('#nav-my-cart-link').addEventListener('click', (e) => { e.preventDefault(); cl
 $('#nav-discord-logout').addEventListener('click', (e) => { e.preventDefault(); logout(); });
 document.addEventListener('click', () => { closeDropdown(); setSettings(false); setMobileMenu(false); });
 
-/* ==========================================================
-   AVIS
-   ========================================================== */
 const statusEl = $('#discord-status'), connectBtn = $('#discord-connect-btn'), reviewForm = $('#review-form');
 function renderConnectionState() {
   if (currentUser) {
@@ -2561,9 +2239,6 @@ $('#submit-review').addEventListener('click', async () => {
 });
 renderReviews();
 
-/* ==========================================================
-   PROJETS + MODALE
-   ========================================================== */
 const activeProjects = DATA.projects.filter((p) => p.enabled !== false);
 const projectsGrid = $('#projects-grid');
 const statusClass = (s) => ({ 'Terminé': 'termine', 'En développement': 'developpement', 'En pause': 'enpause' }[s] || 'termine');
@@ -2622,9 +2297,6 @@ projectsGrid.addEventListener('keydown', (e) => {
   const c = e.target.closest('.project-card'); if (c) { e.preventDefault(); openModal(+c.dataset.index); }
 });
 
-/* ==========================================================
-   COMMANDES
-   ========================================================== */
 const ordersModal = $('#orders-modal'), ordersList = $('#orders-list');
 const ORDER_STATUS_OPTIONS = ['En attente de contact', 'Confirmée', 'En construction', 'En pause', 'Payée', 'Annulée'];
 const formatOrderDate = (ts) => (ts ? new Date(ts).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : 'Date inconnue');
@@ -2700,9 +2372,6 @@ function bindOrderAdminActions() {
 $('#nav-my-orders-link').addEventListener('click', (e) => { e.preventDefault(); closeDropdown(); openOrders(); });
 $('#orders-close').addEventListener('click', () => closeOv(ordersModal));
 
-/* ==========================================================
-   FAQ
-   ========================================================== */
 const faqList = $('#faq-list');
 DATA.faq.forEach((item, i) => faqList.insertAdjacentHTML('beforeend', `
   <div class="faq-item"><h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a-${i}" id="faq-q-${i}"><span>${item.q}</span><span class="plus" aria-hidden="true"></span></button></h3>
@@ -2713,9 +2382,6 @@ $$('.faq-q').forEach((q) => q.addEventListener('click', () => {
   if (!open) { item.classList.add('open'); ans.style.maxHeight = ans.scrollHeight + 'px'; q.setAttribute('aria-expanded', 'true'); }
 }));
 
-/* ==========================================================
-   RÉVÉLATION AU SCROLL
-   ========================================================== */
 $$('.stagger').forEach((c) => Array.from(c.children).forEach((el, i) => el.style.setProperty('--i', i)));
 const io = new IntersectionObserver((entries) => {
   entries.forEach((e) => {
@@ -2727,21 +2393,6 @@ const io = new IntersectionObserver((entries) => {
 }, { threshold: 0.12 });
 $$('.reveal, .stagger').forEach((el) => io.observe(el));
 
-function attachCardEffects() {
-  $$('.magnetic:not(#cta-mail)').forEach((btn) => {
-    if (btn.dataset.mag) return; btn.dataset.mag = '1';
-    btn.addEventListener('mousemove', (e) => {
-      if (reduced()) return;
-      const r = btn.getBoundingClientRect();
-      btn.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * .15}px, ${(e.clientY - r.top - r.height / 2) * .25}px)`;
-    });
-    btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
-  });
-}attachCardEffects();
-
-/* ==========================================================
-   CLAVIER
-   ========================================================== */
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   const ovs = $$('.overlay.active');
@@ -2751,9 +2402,6 @@ document.addEventListener('keydown', (e) => {
   if (mobileMenu.classList.contains('active')) { setMobileMenu(false); burger.focus(); }
 });
 
-/* ==========================================================
-   UX PLUS : PALETTE DE COMMANDES, BARRE PANIER, SPOTLIGHT
-   ========================================================== */
 const isMac = /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent || '');
 const kbdLabel = isMac ? '⌘ K' : 'Ctrl K';
 $('#cmdk-kbd').textContent = kbdLabel;
@@ -2761,7 +2409,6 @@ $('#footer-kbd').textContent = kbdLabel;
 $('#login-hint-btn').addEventListener('click', startLogin);
 $('#login-hint').hidden = !!currentUser;
 
-/* ----- Barre panier flottante ----- */
 function updateCartBar() {
   const bar = $('#cart-bar'); if (!bar) return;
   const count = cart.reduce((s, i) => s + (i.qty || 1), 0);
@@ -2775,7 +2422,6 @@ function updateCartBar() {
 }
 $('#cart-bar-btn').addEventListener('click', openCart);
 
-/* ----- Note moyenne des avis ----- */
 function renderReviewsSummary(reviews) {
   const el = $('#reviews-summary'); if (!el) return;
   if (!reviews || !reviews.length) { el.innerHTML = ''; return; }
@@ -2786,7 +2432,6 @@ function renderReviewsSummary(reviews) {
   el.innerHTML = `<div class="rs-score">${avg.toFixed(1).replace('.', ',')}</div><div class="rs-meta"><div class="rs-stars" aria-hidden="true">${Array.from({ length: 5 }, (_, i) => `<span style="opacity:${i < full ? 1 : .25}">${starSvg(18)}</span>`).join('')}</div><div class="rs-count">${n} avis laissé${n > 1 ? 's' : ''} via Discord</div></div>`;
 }
 
-/* ----- Halo qui suit la souris sur les cartes ----- */
 document.addEventListener('mousemove', (e) => {
   const c = e.target.closest && e.target.closest('.service-card, .project-card, .step');
   if (!c || reduced()) return;
@@ -2795,7 +2440,6 @@ document.addEventListener('mousemove', (e) => {
   c.style.setProperty('--my', (e.clientY - r.top) + 'px');
 }, { passive: true });
 
-/* ----- Palette de commandes (Ctrl/⌘ + K, ou « / ») ----- */
 const cmdk = $('#cmdk'), cmdkInput = $('#cmdk-input'), cmdkList = $('#cmdk-list');
 let cmdkItems = [], cmdkSel = 0;
 const norm = (s) => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -2892,9 +2536,6 @@ document.addEventListener('keydown', (e) => {
   if (e.key === '/' && !typing && !e.ctrlKey && !e.metaKey && !e.altKey && !$('.overlay.active')) { e.preventDefault(); openCmdk(); }
 });
 
-/* ==========================================================
-   INIT
-   ========================================================== */
 applyPrefs();
 renderCart();
 hydrateIcons();

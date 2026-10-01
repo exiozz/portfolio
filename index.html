@@ -472,8 +472,12 @@ footer { padding: 56px 0 40px; border-top: 1px solid var(--line); }
 .footer-links a:hover, .link-btn:hover { color: var(--ink); }
 .link-btn { background: none; border: 0; cursor: pointer; font-family: inherit; }
 .footer-bottom { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 36px; padding-top: 26px; border-top: 1px solid var(--line); font-size: 14px; color: var(--faint); }
-.float-stack { position: fixed; right: 20px; bottom: 20px; z-index: 90; display: flex; flex-direction: column; gap: 10px; transition: bottom .4s var(--ease); }
-body.has-cart-bar .float-stack { bottom: 88px; }
+.float-stack {
+  position: fixed; right: 20px; bottom: 88px;   /* ← 88 au lieu de 20 */
+  z-index: 90; display: flex; flex-direction: column; gap: 10px;
+  transition: bottom .4s var(--ease);
+}
+body.has-cart-bar .float-stack { bottom: 156px; }   /* ← 156 au lieu de 88 */
 .fab { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; cursor: pointer; background: var(--surface); color: var(--ink); border: 1px solid var(--line-2); box-shadow: var(--shadow-md); opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity .3s, transform .35s var(--ease), border-color .2s; }
 .fab.show { opacity: 1; transform: none; pointer-events: auto; }
 .fab:hover { border-color: var(--accent); }
@@ -649,7 +653,7 @@ html[data-motion="reduced"] .marquee, html[data-motion="reduced"] .status-pill .
   .cart-bar button { width: 100%; }
   .cb-label { display: none; }
   .cb-go { margin-left: auto; }
-  .float-stack { right: 14px; bottom: 14px; }
+  .float-stack { right: 14px; bottom: 78px; }
   .toasts { bottom: 16px; }
 }
 @media (max-width: 400px) { .hero-bricks { gap: 6px; left: 0; right: 0; justify-content: center; } .brick { width: 60px; padding: 14px 4px 10px; font-size: 11px; } }
@@ -664,6 +668,434 @@ html[data-motion="reduced"] .marquee, html[data-motion="reduced"] .status-pill .
 .shop-promo-tile svg { color: var(--accent-text); }
 .shop-promo-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
 @media (max-width: 760px) { .shop-promo { grid-template-columns: minmax(0, 1fr); } .shop-promo-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* ==========================================================
+   ASSISTANT IA — CHAT FLOTTANT (LOCAL)
+   ========================================================== */
+.chat-fab {
+  position: fixed; right: 20px; bottom: 20px; z-index: 99;
+  display: grid; place-items: center;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--accent); color: var(--accent-ink);
+  border: 0; cursor: pointer;
+  box-shadow: 0 18px 40px -12px var(--accent), 0 2px 8px rgba(0,0,0,.2);
+  transition: transform .3s var(--ease), box-shadow .3s;
+}
+.chat-fab:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 22px 46px -12px var(--accent), 0 3px 10px rgba(0,0,0,.25); }
+.chat-fab:active { transform: scale(.95); }
+.chat-fab svg { width: 24px; height: 24px; }
+.chat-fab .chat-fab-close { display: none; }
+.chat-fab.open .chat-fab-open { display: none; }
+.chat-fab.open .chat-fab-close { display: block; }
+.chat-fab .chat-fab-dot {
+  position: absolute; top: 6px; right: 6px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #3DDC97; box-shadow: 0 0 0 2px var(--accent);
+  animation: chatPulse 2s ease-in-out infinite;
+}
+@keyframes chatPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.35); opacity: .7; } }
+body.has-cart-bar .chat-fab { bottom: 88px; }
+
+.chat-panel {
+  position: fixed; right: 20px; bottom: 90px; z-index: 98;
+  display: flex; flex-direction: column;
+  width: min(400px, calc(100vw - 32px));
+  height: min(620px, calc(100dvh - 120px));
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line-2); border-radius: calc(var(--r) + 6px);
+  box-shadow: var(--shadow-pop);
+  overflow: hidden;
+  opacity: 0; visibility: hidden; transform: translateY(20px) scale(.97);
+  transform-origin: bottom right;
+  transition: opacity .28s, transform .4s var(--ease), visibility .28s;
+}
+.chat-panel.open { opacity: 1; visibility: visible; transform: none; }
+body.has-cart-bar .chat-panel { bottom: 158px; }
+
+.chat-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.chat-avatar {
+  position: relative; flex: none;
+  display: grid; place-items: center;
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--accent); color: var(--accent-ink);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.25);
+}
+.chat-avatar::after {
+  content: ''; position: absolute; bottom: -1px; right: -1px;
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--ok); box-shadow: 0 0 0 2px var(--surface-2);
+}
+.chat-head-txt { flex: 1; min-width: 0; }
+.chat-head-txt b { display: block; font-size: 15px; font-weight: 600; letter-spacing: -.015em; }
+.chat-head-txt small { display: block; font-size: 12.5px; color: var(--muted); margin-top: 1px; }
+.chat-head-btn {
+  display: grid; place-items: center;
+  width: 34px; height: 34px; border-radius: var(--r-btn);
+  background: transparent; border: 1px solid transparent; color: var(--muted);
+  cursor: pointer; transition: background-color .2s, color .2s, border-color .2s;
+}
+.chat-head-btn:hover { background: var(--bg-2); color: var(--ink); border-color: var(--line); }
+
+.chat-body {
+  flex: 1; min-height: 0; overflow-y: auto; padding: 18px 16px;
+  display: flex; flex-direction: column; gap: 12px;
+  scrollbar-width: thin; scrollbar-color: var(--line-2) transparent;
+}
+.chat-body::-webkit-scrollbar { width: 6px; }
+.chat-body::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 6px; }
+
+.chat-msg { display: flex; gap: 10px; max-width: 100%; }
+.chat-msg.user { justify-content: flex-end; }
+.chat-msg .bubble {
+  max-width: 82%; padding: 11px 14px;
+  border-radius: calc(var(--r) - 2px);
+  font-size: 14.5px; line-height: 1.55;
+  overflow-wrap: anywhere;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  white-space: pre-line;
+}
+.chat-msg.user .bubble {
+  background: var(--accent); color: var(--accent-ink);
+  border-color: transparent;
+  border-bottom-right-radius: 4px;
+}
+.chat-msg.bot .bubble { border-bottom-left-radius: 4px; }
+.chat-msg.bot .bubble a { color: var(--accent-text); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.chat-msg .who {
+  flex: none; display: grid; place-items: center;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent-text);
+  box-shadow: inset 0 0 0 1px var(--accent-line);
+  font-size: 11px; font-weight: 700;
+}
+
+.chat-typing { display: flex; gap: 4px; padding: 4px 0; }
+.chat-typing span {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--muted); opacity: .5;
+  animation: chatBounce 1.4s ease-in-out infinite;
+}
+.chat-typing span:nth-child(2) { animation-delay: .15s; }
+.chat-typing span:nth-child(3) { animation-delay: .3s; }
+@keyframes chatBounce { 0%, 60%, 100% { transform: translateY(0); opacity: .4; } 30% { transform: translateY(-5px); opacity: 1; } }
+
+.chat-quick {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding: 0 16px 10px;
+}
+.chat-quick:empty { display: none; }
+.chat-quick button {
+  padding: 7px 12px; border-radius: 999px;
+  background: var(--surface-2); border: 1px solid var(--line);
+  color: var(--ink); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: border-color .2s, background-color .2s;
+}
+.chat-quick button:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-text); }
+
+.chat-foot {
+  display: flex; align-items: flex-end; gap: 8px;
+  padding: 12px 14px; border-top: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.chat-foot textarea {
+  flex: 1; min-height: 44px; max-height: 120px;
+  min-width: 0; padding: 11px 14px;
+  resize: none; overflow-y: auto;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line-2); border-radius: var(--r-btn);
+  font: inherit; font-size: 14.5px; line-height: 1.45;
+  transition: border-color .2s, box-shadow .2s;
+}
+.chat-foot textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.chat-send {
+  flex: none; display: grid; place-items: center;
+  width: 44px; height: 44px; border-radius: var(--r-btn);
+  background: var(--accent); color: var(--accent-ink);
+  border: 0; cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 8px 20px -8px var(--accent);
+  transition: transform .2s var(--ease), filter .2s;
+}
+.chat-send:hover { filter: brightness(1.06); }
+.chat-send:active { transform: scale(.94); }
+.chat-send[disabled] { opacity: .5; cursor: not-allowed; pointer-events: none; }
+
+.chat-foot-note {
+  padding: 8px 16px 12px; font-size: 11.5px; color: var(--faint);
+  text-align: center; background: var(--surface-2);
+  border-top: 1px solid var(--line);
+}
+.chat-foot-note a { color: var(--accent-text); font-weight: 600; }
+
+@media (max-width: 640px) {
+  .chat-fab { right: 14px; bottom: 14px; width: 52px; height: 52px; }
+  body.has-cart-bar .chat-fab { bottom: 82px; }
+  .chat-panel {
+    right: 8px; left: 8px; bottom: 78px; width: auto;
+    height: min(70dvh, 560px);
+  }
+  body.has-cart-bar .chat-panel { bottom: 146px; }
+}
+html[data-motion="reduced"] .chat-fab .chat-fab-dot { animation: none; }
+html[data-motion="reduced"] .chat-typing span { animation: none; }
+
+/* ==========================================================
+   PATCH RESPONSIVE GLOBAL — v2
+   ========================================================== */
+
+/* --- Reset overflow : clip au lieu de hidden (casse moins sticky) --- */
+html, body { overflow-x: clip; }
+img, svg, video, canvas, iframe { max-width: 100%; height: auto; }
+
+/* --- Container & sections fluides --- */
+.wrap           { padding-inline: clamp(16px, 4vw, 28px); }
+.sec            { padding-block: clamp(56px, 8vw, 132px); }
+.sec-title      { font-size: clamp(26px, 5vw, 46px); }
+.sec-desc       { font-size: clamp(15px, 1.4vw, 18px); }
+.sec-head       { margin-bottom: clamp(28px, 4vw, 56px); }
+
+/* --- Hero --- */
+.hero           { padding-top: clamp(112px, 18vw, 200px); padding-bottom: clamp(96px, 12vw, 132px); }
+.hero h1        { font-size: clamp(44px, 12vw, 132px); white-space: normal; letter-spacing: -.045em; line-height: 1; }
+@media (min-width: 1041px) {
+  .hero h1      { font-size: clamp(56px, 9.2vw, 132px); white-space: nowrap; letter-spacing: -.055em; }
+}
+.hero-role      { font-size: clamp(16px, 2vw, 23px); }
+.hero-sub       { font-size: clamp(15px, 1.5vw, 18.5px); margin-top: clamp(12px, 2vw, 16px); }
+.hero-actions   { gap: 10px; margin-top: clamp(22px, 4vw, 34px); }
+.hero-actions .btn { height: clamp(44px, 5vw, 52px); padding: 0 clamp(18px, 3vw, 28px); font-size: clamp(14px, 1.3vw, 15px); }
+.hero-stats     { margin-top: clamp(32px, 6vw, 52px); }
+.stat           { padding: 0 clamp(12px, 3vw, 32px); }
+.stat b         { font-size: clamp(22px, 3.4vw, 36px); }
+.stat span      { font-size: clamp(12px, 1.2vw, 14px); }
+.status-pill    { font-size: clamp(12px, 1.3vw, 13.5px); padding: 6px 12px 6px 10px; }
+
+/* --- Studio panel (éditeur Lua du hero) --- */
+.studio-code    { height: clamp(150px, 26vw, 220px); }
+
+/* --- Grilles : jamais de débordement --- */
+.services-grid  { grid-template-columns: repeat(auto-fill, minmax(min(270px, 100%), 1fr)); gap: clamp(14px, 2vw, 20px); }
+.projects-grid  { grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: clamp(14px, 2vw, 22px); }
+.steps          { gap: clamp(14px, 2vw, 20px); }
+.subskills      { gap: clamp(18px, 3vw, 44px); }
+
+/* --- Cartes : padding + typo adaptatifs --- */
+.service-card, .project-card { padding: clamp(18px, 2.8vw, 28px); }
+.service-card h3,
+.panel-head h3,
+.project-body h3 { font-size: clamp(17px, 2.4vw, 21px); }
+.service-card > p,
+.project-body > p { font-size: clamp(14px, 1.4vw, 15.5px); }
+.amount         { font-size: clamp(32px, 5.4vw, 44px); }
+.price-row      { margin-top: clamp(16px, 3vw, 26px); }
+
+/* --- Modales / overlays --- */
+.overlay        { padding: clamp(10px, 2vw, 24px); }
+.modal          { max-height: calc(100dvh - clamp(20px, 4vw, 48px)); width: min(100%, 740px); }
+.modal-body     { padding: clamp(20px, 4vw, 34px); }
+.modal-wide,
+.modal-sm       { padding: clamp(20px, 3vw, 34px); }
+.modal-body h2  { font-size: clamp(22px, 3.5vw, 30px); }
+
+/* --- Cart drawer --- */
+.drawer         { width: min(100%, 460px); }
+.drawer-body    { padding: clamp(6px, 2vw, 6px) clamp(16px, 3vw, 24px); }
+
+/* --- Footer --- */
+footer          { padding: clamp(40px, 6vw, 56px) 0 clamp(28px, 4vw, 40px); }
+.footer-top,
+.footer-bottom  { gap: clamp(16px, 3vw, 28px); }
+
+/* ==========================================================
+   FIX CHAT ASSISTANT — DÉBORDEMENT (PC + MOBILE)
+   ========================================================== */
+
+/* --- FAB + float-stack : positions cohérentes avec safe-areas iOS --- */
+.float-stack {
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  z-index: 90;
+}
+body.has-cart-bar .float-stack {
+  bottom: calc(156px + env(safe-area-inset-bottom, 0px));
+}
+
+.chat-fab {
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  z-index: 120;
+}
+body.has-cart-bar .chat-fab {
+  bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+}
+
+/* --- Panneau chat : ne déborde JAMAIS de l'écran --- */
+.chat-panel {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  z-index: 119;
+  display: flex;
+  flex-direction: column;
+  width: min(420px, calc(100vw - 32px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+  height: min(620px, calc(100vh - 112px - env(safe-area-inset-bottom, 0px)));
+  height: min(620px, calc(100dvh - 112px - env(safe-area-inset-bottom, 0px))); /* fallback moderne */
+  max-height: calc(100dvh - 112px - env(safe-area-inset-bottom, 0px));
+  min-height: 0;
+}
+body.has-cart-bar .chat-panel {
+  bottom: calc(156px + env(safe-area-inset-bottom, 0px));
+  height: min(620px, calc(100dvh - 180px - env(safe-area-inset-bottom, 0px)));
+  max-height: calc(100dvh - 180px - env(safe-area-inset-bottom, 0px));
+}
+
+/* --- Corps du chat : scroll interne propre, jamais de débordement --- */
+.chat-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+
+/* --- Bulles : largeur max, césure propre --- */
+.chat-msg        { max-width: 100%; min-width: 0; }
+.chat-msg .bubble {
+  max-width: min(82%, 480px);
+  min-width: 0;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+.chat-msg .who   { flex: none; }
+
+/* --- Quick buttons : scroll horizontal si trop nombreux --- */
+.chat-quick {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 clamp(10px, 2vw, 16px) 8px;
+  gap: 6px;
+}
+.chat-quick::-webkit-scrollbar { display: none; }
+.chat-quick button { flex: 0 0 auto; white-space: nowrap; font-size: clamp(12px, 1.3vw, 13px); padding: 6px 11px; }
+
+/* --- Header + foot : compacts --- */
+.chat-head       { padding: clamp(10px, 2vw, 14px) clamp(12px, 2.4vw, 16px); gap: 10px; }
+.chat-avatar     { width: clamp(32px, 8vw, 38px); height: clamp(32px, 8vw, 38px); }
+.chat-head-txt b { font-size: clamp(13.5px, 1.5vw, 15px); }
+.chat-head-txt small { font-size: clamp(11.5px, 1.3vw, 12.5px); }
+.chat-head-btn   { width: clamp(30px, 7vw, 34px); height: clamp(30px, 7vw, 34px); }
+
+.chat-foot       { padding: clamp(8px, 2vw, 12px) clamp(10px, 2.4vw, 14px); gap: 6px; }
+.chat-foot textarea {
+  font-size: clamp(13.5px, 1.4vw, 14.5px);
+  padding: 10px 12px;
+  min-height: 42px;
+  max-height: 96px;
+}
+.chat-send       { width: clamp(38px, 9vw, 44px); height: clamp(38px, 9vw, 44px); }
+.chat-foot-note  { padding: 6px clamp(10px, 2vw, 16px) 10px; font-size: 11px; }
+
+/* --- Toasts repositionnés au-dessus du chat --- */
+.toasts          { bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+body.has-cart-bar .toasts { bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
+
+/* ============ MOBILE ≤ 640px ============ */
+@media (max-width: 640px) {
+
+  /* FAB : plus petit, safe-area */
+  .chat-fab {
+    width: 52px; height: 52px;
+    right: 14px;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  }
+  body.has-cart-bar .chat-fab {
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Chat : marge 8px sur les côtés, jamais plus haut que l'écran */
+  .chat-panel {
+    left: 8px; right: 8px;
+    bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+    width: auto;
+    max-width: none;
+    height: auto;
+    max-height: calc(100dvh - 94px - env(safe-area-inset-bottom, 0px));
+    border-radius: 18px;
+  }
+  body.has-cart-bar .chat-panel {
+    bottom: calc(142px + env(safe-area-inset-bottom, 0px));
+    max-height: calc(100dvh - 162px - env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Empêche le body de scroller derrière le chat */
+  body.no-scroll { overflow: hidden; position: fixed; width: 100%; }
+
+  /* float-stack : au-dessus du chat */
+  .float-stack { right: 14px; bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+  body.has-cart-bar .float-stack { bottom: calc(144px + env(safe-area-inset-bottom, 0px)); }
+
+  /* Cart bar : pleine largeur avec safe-area */
+  .cart-bar {
+    left: 12px; right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    transform: translateY(160%);
+    width: auto;
+  }
+  .cart-bar.show { transform: translateY(0); }
+  .cart-bar button { width: 100%; }
+
+  /* Toasts */
+  .toasts { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: calc(100% - 24px); }
+  body.has-cart-bar .toasts { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+
+  /* Cards compactes */
+  .service-card, .project-card { padding: 18px; }
+  .btn-group { flex-wrap: wrap; gap: 8px; }
+  .btn-group .btn { min-width: 0; }
+  .btn-group .btn-primary { flex: 1 1 100%; }
+
+  /* Facts / modal compact */
+  .fact { padding: 12px 14px; }
+  .fact dd { font-size: 14.5px; }
+  .creators-list { gap: 6px; }
+  .creator-chip { font-size: 13px; padding: 4px 5px 4px 10px; }
+
+  /* Sections padding + titres */
+  .sec { padding-block: clamp(48px, 10vw, 76px); }
+  .sec-title { font-size: clamp(24px, 7vw, 34px); }
+  .hero h1 { font-size: clamp(42px, 14vw, 78px); }
+}
+
+/* ============ TRÈS PETIT ≤ 380px ============ */
+@media (max-width: 380px) {
+  .chat-panel { left: 6px; right: 6px; }
+  .chat-msg .bubble { max-width: 90%; }
+  .chat-foot-note { font-size: 10.5px; }
+  .chat-head-txt b { font-size: 13px; }
+  .chat-quick button { font-size: 11.5px; padding: 5px 10px; }
+  .hero h1 { font-size: clamp(38px, 15vw, 64px); }
+  .stat { padding: 0 8px; }
+  .stat b { font-size: clamp(18px, 6vw, 24px); }
+  .stat span { font-size: 11px; }
+}
+
+/* ============ TRÈS GRAND ÉCRAN ============ */
+@media (min-width: 1440px) {
+  .wrap { max-width: 1280px; }
+  .chat-panel { width: 440px; }
+}
+
 </style>
 </head>
 <body>
@@ -710,9 +1142,8 @@ html[data-motion="reduced"] .marquee, html[data-motion="reduced"] .status-pill .
       "date": "1er oct. 2026",
       "summary": "Le shop d'assets est en ligne : modèles 3D, scripts, UI kits, GFX packs et templates prêts à l'emploi.",
       "fullText": "Le shop d'assets est officiellement ouvert !\n\nTu y trouveras des modèles 3D, des scripts complets, des UI kits, des GFX packs et des templates — tous documentés, testés, et livrés avec un support de 14 jours.\n\nChaque asset est disponible en licence personnelle ou commerciale, payable en euros ou en Robux. Rendez-vous sur la page Shop pour découvrir le catalogue !",
-      "discordHandle": "zo7q",
-      "discordInvite": "https://discord.gg/rGcdngHsCe",
-      "image": "https://i.imgur.com/ZBu7yTj.jpeg"
+      "link": "https://exiozz.github.io/portfolio/shop.html",
+      "image": "https://i.imgur.com/LATmYRG.png"
     },
     {
       "id": "bomb-duels-beta",
@@ -842,7 +1273,7 @@ html[data-motion="reduced"] .marquee, html[data-motion="reduced"] .status-pill .
     <a href="#projects">Projets</a>
     <a href="#faq">Questions fréquentes</a>
     <a href="#reviews">Avis</a>
-
+    <a href="shop.html">Shop</a>
   </div>
 </header>
 
@@ -1130,10 +1561,63 @@ html[data-motion="reduced"] .marquee, html[data-motion="reduced"] .status-pill .
   </div>
 </footer>
 
+<!-- FAB retour en haut uniquement (le mail est remplacé par le chat IA) -->
 <div class="float-stack">
   <button class="fab" id="fab-top" aria-label="Remonter en haut"><span data-icon="arrow-up"></span></button>
-  <a class="fab contact" id="fab-contact" href="#" aria-label="Me contacter par email"><span data-icon="mail"></span></a>
 </div>
+
+<!-- ==========================================================
+     ASSISTANT IA — CHAT FLOTTANT
+     ========================================================== -->
+<button class="chat-fab" id="chat-fab" aria-label="Ouvrir l'assistant IA" aria-expanded="false" aria-controls="chat-panel">
+  <span class="chat-fab-dot" aria-hidden="true"></span>
+  <svg class="chat-fab-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/>
+    <path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>
+  </svg>
+  <svg class="chat-fab-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+  </svg>
+</button>
+
+<aside class="chat-panel" id="chat-panel" role="dialog" aria-label="Assistant IA Exiozz" aria-hidden="true">
+  <header class="chat-head">
+    <div class="chat-avatar" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/>
+        <path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>
+      </svg>
+    </div>
+    <div class="chat-head-txt">
+      <b>Assistant Exiozz</b>
+      <small id="chat-status">En ligne · répond en quelques secondes</small>
+    </div>
+    <button class="chat-head-btn" id="chat-clear" aria-label="Effacer la conversation" title="Effacer la conversation">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+      </svg>
+    </button>
+    <button class="chat-head-btn" id="chat-close" aria-label="Fermer l'assistant">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+      </svg>
+    </button>
+  </header>
+
+  <div class="chat-body" id="chat-body" role="log" aria-live="polite"></div>
+  <div class="chat-quick" id="chat-quick"></div>
+
+  <form class="chat-foot" id="chat-form">
+    <textarea id="chat-input" rows="1" placeholder="Pose ta question…" aria-label="Message"></textarea>
+    <button class="chat-send" id="chat-send" type="submit" aria-label="Envoyer">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4Z"/>
+      </svg>
+    </button>
+  </form>
+  <div class="chat-foot-note">Assistant IA · <a href="#" id="chat-human">parler à un humain</a></div>
+</aside>
 
 <div class="cart-bar" id="cart-bar">
   <button id="cart-bar-btn" aria-label="Ouvrir le panier">
@@ -1571,12 +2055,12 @@ window.addEventListener('resize', sizeCanvas);
 document.addEventListener('visibilitychange', startParticles);
 new IntersectionObserver((en) => { heroVisible = en[0].isIntersecting; startParticles(); }).observe($('.hero'));
 
-const progressBar = $('#scroll-progress'), fabTop = $('#fab-top'), fabContact = $('#fab-contact'), navEl = $('#nav');
+const progressBar = $('#scroll-progress'), fabTop = $('#fab-top'), navEl = $('#nav');
 let scrollTick = false;
 function onScroll() {
   const h = root, y = h.scrollTop;
   progressBar.style.width = (y / Math.max(1, h.scrollHeight - h.clientHeight) * 100) + '%';
-  fabTop.classList.toggle('show', y > 500); fabContact.classList.toggle('show', y > 500);
+  fabTop.classList.toggle('show', y > 500);
   navEl.classList.toggle('scrolled', y > 12);
   scrollTick = false;
 }
@@ -1610,7 +2094,6 @@ $('#footer-mail').href = 'mailto:' + DATA.contactEmail;
 $('#footer-discord').href = DATA.discord.inviteUrl;
 $('#cta-mail').href = 'mailto:' + DATA.contactEmail;
 $('#cta-discord').href = DATA.discord.inviteUrl;
-$('#fab-contact').href = 'mailto:' + DATA.contactEmail;
 const mGroup = DATA.marquee.concat(DATA.marquee).map((t) => `<span>${esc(t)}</span>`).join('');
 $('#marquee').innerHTML = mGroup + mGroup;
 const heroName = $('#hero-name');
@@ -1988,18 +2471,40 @@ const newsModal = $('#news-modal');
 function openNewsModal(index) {
   const n = newsItems[index]; if (!n) return;
   const img = $('#news-modal-img'), media = img.parentElement;
-  if (n.image && safeImg(n.image)) { img.src = n.image; img.alt = n.title; media.style.display = ''; } else { media.style.display = 'none'; }
+  if (n.image && safeImg(n.image)) { img.src = n.image; img.alt = n.title; media.style.display = ''; }
+  else { media.style.display = 'none'; }
+
   $('#news-modal-badge').textContent = n.badge || 'Actu';
   $('#news-modal-date').textContent = n.date || '';
   $('#news-modal-title').textContent = n.title;
-  $('#news-modal-text').innerHTML = String(n.fullText || n.summary || '').split('\n\n').map(p => `<p style="margin-top:14px;color:var(--muted);font-size:16.5px;line-height:1.7;max-width:62ch">${esc(p)}</p>`).join('');
-  const handle = n.discordHandle || '', invite = n.discordInvite || DATA.discord.inviteUrl;
+  $('#news-modal-text').innerHTML = String(n.fullText || n.summary || '')
+    .split('\n\n')
+    .map(p => `<p style="margin-top:14px;color:var(--muted);font-size:16.5px;line-height:1.7;max-width:62ch">${esc(p)}</p>`)
+    .join('');
+
+  const handle = n.discordHandle || '';
+  const invite = n.discordInvite || '';
+  const link   = n.link || '';
   let actions = '';
-  if (handle) actions += `<button class="btn btn-discord" id="news-copy-mp" type="button">${ic('discord', 18)} MP Discord : ${esc(handle)} ${ic('copy', 14)}</button>`;
-  if (invite) actions += `<a class="btn btn-primary" href="${esc(invite)}" target="_blank" rel="noopener">${ic('discord', 18)} Rejoindre le serveur</a>`;
+
+  if (handle) {
+    actions += `<button class="btn btn-discord" id="news-copy-mp" type="button">${ic('discord', 18)} MP Discord : ${esc(handle)} ${ic('copy', 14)}</button>`;
+  }
+  if (invite) {
+    actions += `<a class="btn btn-discord" href="${esc(invite)}" target="_blank" rel="noopener">${ic('discord', 18)} Rejoindre le serveur</a>`;
+  }
+  if (link) {
+    actions += `<a class="btn btn-primary" href="${esc(link)}" target="_blank" rel="noopener">${ic('arrow-up-right', 18)} Ouvrir le lien</a>`;
+  }
+
   $('#news-modal-actions').innerHTML = actions;
   const copyBtn = $('#news-copy-mp');
-  if (copyBtn) copyBtn.addEventListener('click', () => { (navigator.clipboard ? navigator.clipboard.writeText(handle) : Promise.reject()).then(() => toast('Pseudo Discord « ' + handle + ' » copié.', { type: 'success', duration: 2500 })).catch(() => toast('Copie impossible : ' + handle, { type: 'error' })); });
+  if (copyBtn) copyBtn.addEventListener('click', () => {
+    (navigator.clipboard ? navigator.clipboard.writeText(handle) : Promise.reject())
+      .then(() => toast('Pseudo Discord « ' + handle + ' » copié.', { type: 'success', duration: 2500 }))
+      .catch(() => toast('Copie impossible : ' + handle, { type: 'error' }));
+  });
+
   const modalEl = $('.modal', newsModal);
   if (modalEl) modalEl.scrollTop = 0;
   openOv(newsModal, '#news-modal-close');
@@ -2120,6 +2625,254 @@ document.addEventListener('mousemove', (e) => {
   c.style.setProperty('--my', (e.clientY - r.top) + 'px');
 }, { passive: true });
 
+/* ==========================================================
+   ASSISTANT IA — CHAT (MODE LOCAL)
+   ========================================================== */
+const CHAT_KB = {
+  shop: {
+    reply: 'Le **shop d\'assets** regroupe des modèles 3D, scripts, UI kits, GFX packs, templates et sound packs.\n\n👉 https://exiozz.github.io/portfolio/shop.html',
+    quick: ['Voir le shop', 'Comment acheter ?', 'Licence commerciale ?']
+  },
+  services: {
+    reply: 'Je propose :\n• Systèmes Roblox sur mesure\n• Jeux complets\n• GFX (PFP, bannières, thumbnails)\n• Bots Discord\n• Sites web\n• Modèles & UI\n\n👉 Va dans la section Tarifs pour voir les prix.',
+    quick: ['Voir les tarifs', 'Demander un devis', 'Quels délais ?']
+  },
+  prix: {
+    reply: 'Prix de départ :\n• PFP : 5 €\n• Bot Discord : 10 €\n• Système Roblox : 25 €\n• Site complet : 50 €\n• Jeu Roblox complet : 150 €\n\nPaiement en € ou en Robux. Montant final confirmé en devis.',
+    quick: ['Voir tous les tarifs', 'Payer en Robux ?']
+  },
+  paiement: {
+    reply: 'Deux options :\n• **Euros** via PayPal (acompte puis solde à la livraison)\n• **Robux** via échange / groupe Roblox\n\nTout est confirmé avant de commencer.',
+    quick: ['Voir les tarifs']
+  },
+  delai: {
+    reply: 'Délais habituels :\n• GFX : quelques heures à 1 jour\n• Système simple : quelques jours\n• Jeu complet : plusieurs semaines\n\nUn planning est toujours annoncé avant de démarrer.',
+    quick: ['Demander un devis']
+  },
+  discord: {
+    reply: 'Tu peux me rejoindre sur Discord pour discuter directement :\n👉 https://discord.gg/rGcdngHsCe',
+    quick: ['Ouvrir Discord']
+  },
+  contact: {
+    reply: 'Le plus simple c\'est l\'email : tomokari.pro@gmail.com\n\nOu Discord si tu préfères discuter en direct.',
+    quick: ['Copier l\'email', 'Ouvrir Discord']
+  },
+  licence: {
+    reply: 'Chaque asset du shop existe en 2 licences :\n• **Personnelle** : projet non monétisé\n• **Commerciale** : projet monétisé / client (× 2,5)\n\nTu choisis au moment de l\'ajout au panier.',
+    quick: ['Voir le shop']
+  },
+  telechargement: {
+    reply: 'Après paiement, tu reçois les fichiers directement sur Discord : sources, documentation et un support de 14 jours inclus.',
+    quick: ['Voir le shop']
+  },
+  remboursement: {
+    reply: 'Les assets numériques ne sont pas remboursables une fois livrés. En revanche, si un asset ne correspond pas à sa description, on trouve toujours une solution ensemble.',
+    quick: ['Contacter']
+  },
+  panier: {
+    reply: 'Tu peux ajouter des services et des assets au même panier — il est partagé entre le portfolio et le shop. Il faut te connecter avec Discord pour valider la commande.',
+    quick: ['Ouvrir mon panier', 'Me connecter']
+  },
+  apropos: {
+    reply: 'Je suis **Exiozz**, développeur Roblox & Web depuis plusieurs années. Je fais du scripting Lua, du GFX, des bots Discord et des sites web modernes.',
+    quick: ['Voir mes projets', 'Voir les compétences']
+  },
+  portfolio: {
+    reply: 'Tu es déjà sur mon portfolio 🎉 Va voir la section Projets pour découvrir mes réalisations.',
+    quick: ['Voir les projets']
+  },
+  robux: {
+    reply: 'Oui, la plupart des services et des assets peuvent être payés en Robux — le taux est de 80 R$ / €.\n\nBascule la devise en haut de la section Tarifs pour voir les prix en R$.',
+    quick: ['Voir les tarifs']
+  }
+};
+
+const CHAT_PATTERNS = [
+  { test: /\b(shop|boutique|asset|assets)\b/i, key: 'shop' },
+  { test: /\b(prix|tarif|combien|coût|cout|cher)\b/i, key: 'prix' },
+  { test: /\b(robux|r\$)\b/i, key: 'robux' },
+  { test: /\b(pai(e|er|ement)|paypal|devise)\b/i, key: 'paiement' },
+  { test: /\b(délai|delai|temps|combien de temps|quand)\b/i, key: 'delai' },
+  { test: /\b(licence|license|commercial|personnel)\b/i, key: 'licence' },
+  { test: /\b(télécharg|telecharg|fichier|livraison|recevoir)\b/i, key: 'telechargement' },
+  { test: /\b(rembours|rembourse|annul)\b/i, key: 'remboursement' },
+  { test: /\b(discord|serveur|rejoindre)\b/i, key: 'discord' },
+  { test: /\b(contact|email|mail|écrire|ecrire)\b/i, key: 'contact' },
+  { test: /\b(panier|commander|commande|acheter)\b/i, key: 'panier' },
+  { test: /\b(service|services|devis|prestation)\b/i, key: 'services' },
+  { test: /\b(à propos|a propos|qui (es|est)|exiozz|développeur|developpeur)\b/i, key: 'apropos' },
+  { test: /\b(projet|projets|portfolio|réalisation|realisation)\b/i, key: 'portfolio' }
+];
+
+const CHAT_GREETING = /^(salut|bonjour|hey|coucou|hello|yo|bonsoir|slt|bjr|hi)\b/i;
+const CHAT_THANKS = /\b(merci|thanks|thx|cimer)\b/i;
+
+const chatFab = $('#chat-fab'), chatPanel = $('#chat-panel'), chatBody = $('#chat-body');
+const chatInput = $('#chat-input'), chatForm = $('#chat-form'), chatQuick = $('#chat-quick');
+const chatStatus = $('#chat-status');
+const CHAT_KEY = 'exiozz_chat_history_v1';
+
+let chatHistory = [];
+let chatOpen = false;
+let chatBusy = false;
+
+try {
+  const saved = JSON.parse(localStorage.getItem(CHAT_KEY) || '[]');
+  if (Array.isArray(saved)) chatHistory = saved.filter(m => m && m.role && typeof m.text === 'string');
+} catch (e) {}
+const saveChat = () => { try { localStorage.setItem(CHAT_KEY, JSON.stringify(chatHistory.slice(-40))); } catch (e) {} };
+
+function chatScrollDown(smooth) {
+  requestAnimationFrame(() => {
+    chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
+  });
+}
+
+function chatLinkify(html) {
+  // Transforme les URLs en liens cliquables, sauf si déjà dans une balise <a>
+  return html.replace(/(https?:\/\/[^\s<]+)/g, (m) => `<a href="${m}" target="_blank" rel="noopener">${m}</a>`);
+}
+
+function chatBubble(role, text, isTyping) {
+  const el = document.createElement('div');
+  el.className = 'chat-msg ' + (role === 'user' ? 'user' : 'bot');
+  const avatar = role === 'user' ? '' : `<span class="who" aria-hidden="true">IA</span>`;
+  const content = isTyping
+    ? '<div class="chat-typing"><span></span><span></span><span></span></div>'
+    : (role === 'user' ? esc(text) : chatLinkify(text));
+  el.innerHTML = `${avatar}<div class="bubble">${content}</div>`;
+  return el;
+}
+
+function chatRender(animate) {
+  chatBody.innerHTML = '';
+  if (!chatHistory.length) {
+    chatHistory.push({ role: 'bot', text: `Salut 👋 Je suis l'assistant d'Exiozz. Je peux t'aider à découvrir le shop, les services, les tarifs, les délais, les licences… Pose-moi ta question !` });
+  }
+  chatHistory.forEach((m) => chatBody.appendChild(chatBubble(m.role, m.text)));
+  chatScrollDown(animate);
+}
+
+function chatSetQuick(items) {
+  chatQuick.innerHTML = (items || []).map((q) => `<button type="button">${esc(q)}</button>`).join('');
+  $$('button', chatQuick).forEach((b) => b.addEventListener('click', () => {
+    const val = b.textContent.trim();
+    if (val === 'Voir le shop') { window.open('https://exiozz.github.io/portfolio/shop.html', '_blank'); return; }
+    if (val === 'Ouvrir mon panier') { openCart && openCart(); return; }
+    if (val === 'Me connecter') { startLogin && startLogin(); return; }
+    if (val === 'Ouvrir Discord') { window.open(DATA.discord.inviteUrl, '_blank', 'noopener'); return; }
+    if (val === 'Voir les projets') { const el = $('#projects'); if (el) el.scrollIntoView({ behavior: 'smooth' }); return; }
+    if (val === 'Voir mes projets') { const el = $('#projects'); if (el) el.scrollIntoView({ behavior: 'smooth' }); return; }
+    if (val === 'Voir les compétences') { const el = $('#skills'); if (el) el.scrollIntoView({ behavior: 'smooth' }); return; }
+    if (val === 'Voir les tarifs' || val === 'Voir tous les tarifs') { const el = $('#services'); if (el) el.scrollIntoView({ behavior: 'smooth' }); return; }
+    if (val === 'Demander un devis') { window.location.href = 'mailto:' + DATA.contactEmail + '?subject=Demande de devis'; return; }
+    if (val === 'Contacter') { window.location.href = 'mailto:' + DATA.contactEmail; return; }
+    if (val === 'Copier l\'email') { (navigator.clipboard ? navigator.clipboard.writeText(DATA.contactEmail) : Promise.reject()).then(() => toast('Email copié.', { type: 'success' })).catch(() => {}); return; }
+    if (val === 'Payer en Robux ?') { chatSend('Est-ce que je peux payer en Robux ?'); return; }
+    if (val === 'Licence commerciale ?') { chatSend('Quelle est la différence entre licence personnelle et commerciale ?'); return; }
+    if (val === 'Comment acheter ?') { chatSend('Comment acheter un asset ?'); return; }
+    if (val === 'Quels délais ?') { chatSend('Quels sont les délais moyens ?'); return; }
+    chatInput.value = val; chatForm.dispatchEvent(new Event('submit', { cancelable: true }));
+  }));
+}
+
+function chatLocalReply(q) {
+  const t = q.trim();
+  if (!t) return { text: 'Je t\'écoute 👂', quick: ['Voir le shop', 'Voir les tarifs', 'Contact'] };
+  if (CHAT_GREETING.test(t)) return { text: 'Salut ! Comment puis-je t\'aider ? Tu peux me demander des infos sur le **shop**, les **tarifs**, les **délais**, les **licences**, ou me **contacter**.', quick: ['Voir le shop', 'Voir les tarifs', 'Contact'] };
+  if (CHAT_THANKS.test(t)) return { text: 'Avec plaisir 🙌 Autre chose ?', quick: ['Voir le shop', 'Ouvrir Discord'] };
+
+  for (const p of CHAT_PATTERNS) {
+    if (p.test.test(t)) {
+      const entry = CHAT_KB[p.key];
+      return { text: entry.reply, quick: entry.quick || [] };
+    }
+  }
+  return {
+    text: `Je ne suis pas sûr d'avoir bien compris. Tu peux me demander :\n• « C'est quoi le shop ? »\n• « Quels sont tes tarifs ? »\n• « Comment payer ? »\n• « Quel délai pour un site ? »\n\nOu contacte directement Exiozz : tomokari.pro@gmail.com\nOu sur Discord : zo7q`,
+    quick: ['Voir le shop', 'Voir les tarifs', 'Contact']
+  };
+}
+
+async function chatSend(question) {
+  if (chatBusy || !question.trim()) return;
+  chatBusy = true;
+  chatInput.value = '';
+  chatSetQuick([]);
+
+  chatHistory.push({ role: 'user', text: question });
+  chatBody.appendChild(chatBubble('user', question));
+  chatScrollDown(true);
+
+  const typing = chatBubble('bot', '', true);
+  chatBody.appendChild(typing);
+  chatScrollDown(true);
+  chatStatus.textContent = 'Réfléchit…';
+
+  await new Promise(r => setTimeout(r, reduced() ? 50 : 420));
+  const reply = chatLocalReply(question);
+
+  typing.remove();
+  chatHistory.push({ role: 'bot', text: reply.text });
+  saveChat();
+  chatBody.appendChild(chatBubble('bot', reply.text));
+  chatSetQuick(reply.quick);
+  chatScrollDown(true);
+  chatStatus.textContent = 'En ligne · répond en quelques secondes';
+  chatBusy = false;
+}
+
+function openChat() {
+  if (chatOpen) return;
+  chatOpen = true;
+  chatFab.classList.add('open');
+  chatFab.setAttribute('aria-expanded', 'true');
+  chatPanel.classList.add('open');
+  chatPanel.setAttribute('aria-hidden', 'false');
+  chatRender(true);
+  setTimeout(() => chatInput.focus({ preventScroll: true }), 200);
+}
+function closeChat() {
+  if (!chatOpen) return;
+  chatOpen = false;
+  chatFab.classList.remove('open');
+  chatFab.setAttribute('aria-expanded', 'false');
+  chatPanel.classList.remove('open');
+  chatPanel.setAttribute('aria-hidden', 'true');
+}
+chatFab.addEventListener('click', () => chatOpen ? closeChat() : openChat());
+$('#chat-close').addEventListener('click', closeChat);
+$('#chat-clear').addEventListener('click', async () => {
+  if (!(await askConfirm('Effacer la conversation ?', 'Ton historique de chat sera supprimé.', 'Effacer'))) return;
+  chatHistory = [];
+  try { localStorage.removeItem(CHAT_KEY); } catch (e) {}
+  chatRender(false);
+  toast('Conversation effacée.', { type: 'success', duration: 2000 });
+});
+$('#chat-human').addEventListener('click', (e) => {
+  e.preventDefault();
+  window.location.href = 'mailto:' + DATA.contactEmail + '?subject=' + encodeURIComponent('Question depuis le chat');
+});
+
+chatForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  chatSend(chatInput.value);
+});
+chatInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); chatForm.dispatchEvent(new Event('submit', { cancelable: true })); }
+});
+chatInput.addEventListener('input', () => {
+  chatInput.style.height = 'auto';
+  chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && chatOpen && !$('.overlay.active')) closeChat();
+});
+
+window.openChat = openChat;
+window.closeChat = closeChat;
+
 /* ---------- CMD+K ---------- */
 const cmdk = $('#cmdk'), cmdkInput = $('#cmdk-input'), cmdkList = $('#cmdk-list');
 let cmdkItems = [], cmdkSel = 0;
@@ -2142,7 +2895,8 @@ function cmdkCommands() {
     { g: 'Aller à', label: 'Questions fréquentes', icon: 'help', k: 'faq aide paiement delai', run: goTo('#faq') },
     { g: 'Aller à', label: 'Avis clients', icon: 'star', k: 'temoignages notes commentaires', run: goTo('#reviews') },
     { g: 'Aller à', label: 'Contact', icon: 'mail', k: 'ecrire projet', run: goTo('#contact') },
-    { g: 'Aller à', label: 'Shop d\'assets', icon: 'cart', k: 'boutique acheter assets produits', hint: 'shop.html', run: () => { window.location.href = 'shop.html'; } }
+    { g: 'Aller à', label: 'Shop d\'assets', icon: 'cart', k: 'boutique acheter assets produits', hint: 'shop.html', run: () => { window.location.href = 'shop.html'; } },
+    { g: 'Actions', label: 'Ouvrir l\'assistant IA', icon: 'bot', k: 'chat aide assistant ia question', run: () => openChat() }
   ];
   if (currentUser) {
     list.push({ g: 'Actions', label: 'Ouvrir mon panier', icon: 'cart', k: 'commander achat', run: openCart });

@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "migrate": "node migrate.js"
+    "migrate": "node migrate.js",
+    "lemon-ids": "node lemon-ids.js"
   },
   "engines": {
     "node": ">=18"

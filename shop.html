@@ -2699,6 +2699,89 @@
       vertical-align: middle;
     }
 
+    .gp-note {
+      margin-top: 24px;
+      padding: 12px 14px;
+      border-radius: var(--r-btn);
+      border: 1px solid var(--accent-line);
+      background: var(--accent-soft);
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .gp-note b {
+      color: var(--ink);
+    }
+
+    .robux-steps {
+      display: grid;
+      gap: 16px;
+      margin: 20px 0 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: step;
+    }
+
+    .robux-steps li {
+      position: relative;
+      padding-left: 40px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+      counter-increment: step;
+    }
+
+    .robux-steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: -2px;
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent-text);
+      box-shadow: inset 0 0 0 1px var(--accent-line);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .robux-steps b {
+      color: var(--ink);
+    }
+
+    .robux-steps .btn {
+      margin-top: 10px;
+    }
+
+    .gp-input {
+      display: block;
+      width: 100%;
+      height: 44px;
+      margin-top: 10px;
+      padding: 0 14px;
+      border-radius: var(--r-btn);
+      border: 1px solid var(--line-2);
+      background: var(--surface-2);
+      color: var(--ink);
+      font: 500 16px var(--font-body);
+    }
+
+    .gp-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+
+    .gp-warn {
+      margin-top: 18px;
+      font-size: 13.5px;
+      color: var(--faint);
+    }
+
     .sub-banner {
       display: flex;
       align-items: center;
@@ -2734,7 +2817,6 @@
   "tagline": "Des assets prêts à l'emploi, testés et documentés — pour lancer ton projet plus vite.",
   "robuxRate": 80,
   "commercialMultiplier": 2.5,
-  "subscription": { "label": "Abonnement Exiozz+", "monthlyPrice": 8 },
   "discord": {
     "clientId": "1540486396287000626",
     "backendAuthUrl": "https://exiozz-discord-auth--tomokari35.replit.app/auth/discord",
@@ -2760,8 +2842,8 @@
     { "q": "Comment reçois-je mon asset après l'achat ?", "a": "Après validation du paiement, tu reçois un lien de téléchargement direct sur Discord, avec les fichiers sources et la documentation." },
     { "q": "Puis-je modifier les assets ?", "a": "Oui, tu peux les modifier librement. Tu ne peux simplement pas les revendre tels quels ou les redistribuer." },
     { "q": "Y a-t-il un support après l'achat ?", "a": "Oui, un support de 14 jours est inclus pour toute question technique ou problème d'installation." },
-    { "q": "Les mises à jour sont-elles gratuites ?", "a": "Oui, toutes les mises à jour futures d'un asset que tu as acheté te sont envoyées gratuitement." },
-    { "q": "Puis-je payer en Robux ?", "a": "Oui, la plupart des assets peuvent être réglés en euros ou en Robux — bascule la devise en haut du catalogue." }
+    { "q": "Les mises à jour sont-elles gratuites ?", "a": "Un achat te donne la version actuelle de l'asset. Les futures mises à jour ne sont pas incluses : pour les avoir, il faudra racheter l'asset." },
+    { "q": "Puis-je payer en Robux ?", "a": "Oui : choisis R$ en haut du catalogue, puis « Payer en Robux » sur l'asset. Tu achètes son Game Pass sur Roblox, tu indiques ton pseudo, et Exiozz t'envoie le lien sur Discord après vérification." }
   ],
   "assets": [
     {
@@ -2829,6 +2911,8 @@
     "desc": "Un kit d'interface sombre et moderne : menus, HUD, inventaire, boutique, notifications.",
     "fullDesc": "Un pack complet de plus de 40 composants d'interface pensés pour les jeux d'école et de simulation de vie sur Roblox.\n\nChaque écran est livré en haute résolution (PNG + SVG), avec un système modulaire de panneaux, boutons, jauges et fenêtres facilement réutilisables. Les fichiers sources Figma sont inclus pour que tu puisses modifier ce que tu veux, et un thème clair/sombre est fourni pour chaque élément.",
     "price": 5,
+    "robuxPrice": 400,
+    "gamepassUrl": "",
     "tags": ["UI", "Roblox"],
     "image": "https://i.imgur.com/QG0DPKz.png",
     "formats": ["RBXL"],
@@ -3142,21 +3226,7 @@
         <h2 id="product-title"></h2>
         <div class="tag-row" id="product-tags"></div>
         <p class="modal-desc" id="product-desc"></p>
-        <div id="pay-block">
-          <div class="license-label" id="pay-label">Mode de paiement</div>
-          <div class="license-grid" id="pay-grid" role="radiogroup" aria-labelledby="pay-label">
-            <button type="button" class="license-option" data-pay="once" role="radio" aria-checked="true">
-              <b>Paiement en 1 fois</b><small>Achat définitif de cet asset</small><span class="lic-price" id="pay-once-price"></span>
-            </button>
-            <button type="button" class="license-option" data-pay="sub" role="radio" aria-checked="false">
-              <b>Abonnement<span class="sub-pill">Discord</span></b><small>Tous les liens de téléchargement gratuits</small><span class="lic-price" id="pay-sub-price"></span>
-            </button>
-          </div>
-        </div>
-        <div class="sub-banner" id="sub-banner" hidden>
-          <span data-icon="check" data-size="22"></span>
-          <div><b>Tu es abonné</b><small>Le lien de téléchargement de cet asset est gratuit pour toi.</small></div>
-        </div>
+        <p class="gp-note" id="gp-note" hidden></p>
         <dl class="facts">
           <div class="fact">
             <dt>Catégorie</dt>
@@ -3219,6 +3289,26 @@
         </div>
       </div>
     </aside>
+  </div>
+
+  <div class="overlay" id="gp-modal" aria-hidden="true">
+    <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="gp-title">
+      <button class="icon-btn modal-close" id="gp-close" aria-label="Fermer"><span data-icon="x"></span></button>
+      <h2 id="gp-title">Payer en Robux</h2>
+      <p id="gp-what"></p>
+      <ol class="robux-steps">
+        <li>Achète le Game Pass de cet asset sur Roblox.<br><a class="btn btn-ghost btn-sm" id="gp-link" href="#" target="_blank" rel="noopener"><span data-icon="robux" data-size="16"></span>Ouvrir le Game Pass</a></li>
+        <li>Indique le pseudo Roblox qui a acheté le Game Pass :
+          <input class="gp-input" id="gp-user" type="text" placeholder="Ton pseudo Roblox" autocomplete="off" spellcheck="false" maxlength="20" aria-label="Pseudo Roblox">
+        </li>
+        <li>Clique « J'ai payé ». Exiozz vérifie ton achat et t'envoie le lien de téléchargement sur Discord.</li>
+      </ol>
+      <p class="gp-warn" id="gp-warn"></p>
+      <div class="confirm-actions">
+        <button class="btn btn-ghost" id="gp-cancel">Annuler</button>
+        <button class="btn btn-primary" id="gp-done">J'ai payé</button>
+      </div>
+    </div>
   </div>
 
   <div class="overlay" id="confirm-modal" aria-hidden="true">
@@ -3547,7 +3637,7 @@ let currentSort = 'popular';
 let searchQuery = '';
 
 let cart = [];
-try { const c = JSON.parse(localStorage.getItem(CART_KEY) || '[]'); if (Array.isArray(c)) cart = c.filter((i) => i && i.id && i.title); } catch (e) {}
+try { const c = JSON.parse(localStorage.getItem(CART_KEY) || '[]'); if (Array.isArray(c)) cart = c.filter((i) => i && i.id && i.title && i.type !== 'subscription'); } catch (e) {}
 const saveCart = () => { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {} };
 
 const robuxOf = (eur) => Math.round(eur * DATA.robuxRate / 5) * 5;
@@ -3644,7 +3734,7 @@ $('#pricing-toggle').addEventListener('click', (e) => {
   currentCurrency = btn.dataset.currency;
   renderProducts();
   renderCart();
-  if (currentProductId) openProduct(currentProductId, true);
+  if (currentProductId && $('#product-modal').classList.contains('active')) openProduct(currentProductId, true);
 });
 const searchInput = $('#shop-search-input'), searchClear = $('#shop-search-clear');
 searchInput.addEventListener('input', () => {
@@ -3658,61 +3748,20 @@ searchClear.addEventListener('click', () => {
 
 let currentProductId = null;
 let currentLicense = 'personal';
-let currentPay = 'once';
-let subscription = { active: false };
-const SUB = DATA.subscription || { label: 'Abonnement', monthlyPrice: 8 };
+// L'abonnement arrive bientôt : pas encore actif sur le site.
+const subscription = { active: false };
+function checkSubscription() {}
+
+const gamepassOf = (a) => (/^https:\/\/(www\.)?roblox\.com\//i.test(a.gamepassUrl || '') ? a.gamepassUrl : '');
+const robuxPriceOf = (a) => (a.robuxPrice != null ? +a.robuxPrice : robuxOf(a.price));
+const payWithGamepass = (a) => currentCurrency === 'robux' && !!gamepassOf(a);
 
 function updatePayUI(a) {
-  $('#pay-once-price').textContent = priceLabel(a.price);
-  $('#pay-sub-price').textContent = priceLabel(SUB.monthlyPrice) + ' / mois';
-  $$('#pay-grid .license-option').forEach((b) => b.setAttribute('aria-checked', b.dataset.pay === currentPay));
-  $('#sub-banner').hidden = !subscription.active;
-  $('#pay-block').hidden = subscription.active;
-}
-
-function toggleSubscription(a) {
-  if (!currentUser) { needLogin("L'abonnement nécessite d'être connecté avec Discord."); return; }
-  const existing = cart.find((it) => it.type === 'subscription');
-  if (existing) {
-    cart = cart.filter((it) => it !== existing);
-    toast('Abonnement retiré du panier.', { duration: 2500 });
-  } else {
-    cart.push({
-      id: 'subscription', productId: 'subscription', type: 'subscription', qty: 1,
-      title: SUB.label + ' (mensuel)',
-      priceEur: SUB.monthlyPrice, priceRobux: robuxOf(SUB.monthlyPrice)
-    });
-    toast('Abonnement ajouté au panier.', { type: 'success', action: openCart, label: 'Voir le panier', duration: 4000 });
-  }
-  renderCart(); renderProducts();
-  if (a) updateModalAddState(a);
-}
-
-async function downloadAsset(a) {
-  if (!currentUser) { needLogin('Connecte-toi avec Discord pour télécharger.'); return; }
-  const btn = $('#product-add'); btn.disabled = true;
-  try {
-    const res = await fetch(`${apiBase()}/api/download/${encodeURIComponent(a.id)}?discordId=${encodeURIComponent(currentUser.id)}`);
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !/^https:\/\//i.test(data.url || '')) { toast(data.error || 'Lien de téléchargement indisponible.', { type: 'error' }); return; }
-    window.open(data.url, '_blank', 'noopener');
-    toast('Téléchargement lancé.', { type: 'success', duration: 2500 });
-  } catch (e) {
-    toast('Impossible de contacter le serveur.', { type: 'error' });
-  } finally { btn.disabled = false; }
-}
-
-async function checkSubscription() {
-  subscription = { active: false };
-  if (currentUser) {
-    try {
-      const res = await fetch(`${apiBase()}/api/subscription/${encodeURIComponent(currentUser.id)}`);
-      if (res.ok) { const d = await res.json(); subscription = { active: !!d.active, expiresAt: d.expiresAt }; }
-    } catch (e) {}
-  }
-  updateNavDiscord();
-  renderProducts();
-  if (currentProductId) openProduct(currentProductId, true);
+  const note = $('#gp-note');
+  note.hidden = currentCurrency !== 'robux';
+  note.innerHTML = gamepassOf(a)
+    ? `<b>Paiement en Robux :</b> achète le Game Pass de cet asset sur Roblox (${fmt(robuxPriceOf(a))} R$), puis indique ton pseudo Roblox. Exiozz vérifie ton achat et t'envoie le lien sur Discord.`
+    : `<b>Paiement en Robux :</b> ajoute l'asset au panier et commande. Exiozz te contacte sur Discord pour le paiement en Robux.`;
 }
 
 function openProduct(id, keepLicense) {
@@ -3734,23 +3783,14 @@ function openProduct(id, keepLicense) {
   $('#product-updated').textContent = a.updated || '—';
   $('#product-includes').innerHTML = (a.includes || []).map((f) => `<li>${ic('check', 16)}<span>${esc(f)}</span></li>`).join('') || '<li>Documentation incluse</li>';
 
-  if (!keepLicense) currentPay = 'once';
   updatePayUI(a);
 
   const q = encodeURIComponent(`Question — ${a.title}`);
   $('#product-quote').href = `mailto:${DATA.contactEmail}?subject=${q}`;
-
-  $$('.license-option', $('#pay-grid')).forEach((btn) => {
-    btn.onclick = () => { currentPay = btn.dataset.pay; updatePayUI(a); updateModalAddState(a); };
-  });
-  $('#product-add').onclick = () => {
-    if (subscription.active) return downloadAsset(a);
-    if (currentPay === 'sub') return toggleSubscription(a);
-    addToCart(a.id, currentLicense, true);
-  };
+  $('#product-add').onclick = () => (payWithGamepass(a) ? openGamepass(a) : addToCart(a.id, currentLicense, true));
 
   const modalEl = $('.modal', $('#product-modal'));
-  if (modalEl) modalEl.scrollTop = 0;
+  if (modalEl && !keepLicense) modalEl.scrollTop = 0;
   if (!$('#product-modal').classList.contains('active')) openOv($('#product-modal'), '#product-close');
   updateModalAddState(a);
 }
@@ -3758,18 +3798,54 @@ function openProduct(id, keepLicense) {
 function updateModalAddState(a) {
   const btn = $('#product-add');
   if (!btn || !a) return;
-  if (subscription.active) { btn.innerHTML = ic('download', 18) + 'Télécharger gratuitement'; return; }
-  if (currentPay === 'sub') {
-    const has = cart.some((it) => it.type === 'subscription');
-    btn.innerHTML = has ? ic('check', 18) + 'Abonnement dans le panier' : ic('discord', 18) + "S'abonner — " + priceLabel(SUB.monthlyPrice) + ' / mois';
-    return;
-  }
+  if (payWithGamepass(a)) { btn.innerHTML = ic('robux', 18) + `Payer en Robux — ${fmt(robuxPriceOf(a))} R$`; return; }
   const inCart = cart.some((it) => it.productId === a.id && it.license === currentLicense);
   btn.innerHTML = inCart
     ? ic('check', 18) + 'Dans le panier'
     : ic('cart', 18) + 'Ajouter au panier';
 }
 $('#product-close').addEventListener('click', () => { closeOv($('#product-modal')); currentProductId = null; });
+
+/* ---------- Paiement en Robux par Game Pass (vérifié à la main) ---------- */
+const gpModal = $('#gp-modal');
+let gpAsset = null;
+function openGamepass(a) {
+  if (!currentUser) { needLogin('Connecte-toi avec Discord pour payer en Robux.'); return; }
+  gpAsset = a;
+  $('#gp-what').textContent = `${a.title} — ${fmt(robuxPriceOf(a))} R$.`;
+  $('#gp-link').href = gamepassOf(a);
+  $('#gp-warn').textContent = `Achat de la version ${a.version || 'actuelle'} : les futures mises à jour ne sont pas incluses.`;
+  try { $('#gp-user').value = localStorage.getItem('exiozz_roblox_user') || ''; } catch (e) {}
+  openOv(gpModal, '#gp-link');
+}
+const closeGamepass = () => closeOv(gpModal);
+$('#gp-close').addEventListener('click', closeGamepass);
+$('#gp-cancel').addEventListener('click', closeGamepass);
+$('#gp-done').addEventListener('click', async () => {
+  const a = gpAsset, btn = $('#gp-done'), input = $('#gp-user');
+  const pseudo = input.value.trim();
+  if (!/^[A-Za-z0-9_]{3,20}$/.test(pseudo)) { toast('Indique ton pseudo Roblox (3 à 20 lettres, chiffres ou _).', { type: 'error' }); input.focus(); return; }
+  if (!currentUser) { needLogin('Connecte-toi avec Discord pour payer en Robux.'); return; }
+  try { localStorage.setItem('exiozz_roblox_user', pseudo); } catch (e) {}
+  const price = robuxPriceOf(a);
+  btn.disabled = true; btn.textContent = 'Envoi…';
+  try {
+    const res = await fetch(`${apiBase()}/api/order`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerName: currentUser.name, discordId: currentUser.id,
+        items: [{ title: `${a.title} v${a.version || ''} — Game Pass Robux (Roblox : ${pseudo})`, price, type: 'asset', productId: a.id }],
+        total: price, currency: 'R$', source: 'gamepass'
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) { toast(`Envoi impossible (${res.status}) : ${data.error || 'raison inconnue'}.`, { type: 'error', duration: 6000 }); return; }
+    closeGamepass();
+    toast('Merci ! Exiozz vérifie ton achat et t\'envoie le lien sur Discord.', { type: 'success', duration: 7000 });
+  } catch (e) {
+    toast(`Impossible de contacter le serveur (${e.message}).`, { type: 'error', duration: 6000 });
+  } finally { btn.disabled = false; btn.textContent = "J'ai payé"; }
+});
 
 function addToCart(productId, license, fromModal) {
   if (!currentUser) { needLogin('Connecte-toi avec Discord pour ajouter des assets au panier.'); return; }
@@ -3836,6 +3912,8 @@ document.addEventListener('click', (e) => {
   if (view) { const card = e.target.closest('.product-card'); if (card) { openProduct(card.dataset.id); return; } }
   const btn = e.target.closest('.btn-cart-toggle');
   if (!btn) return;
+  const asset = ASSETS.find((x) => x.id === btn.dataset.id);
+  if (asset && payWithGamepass(asset)) { openProduct(asset.id); return; }
   addToCart(btn.dataset.id, 'personal', false);
 });
 

@@ -2210,6 +2210,133 @@
       font-weight: 700;
     }
 
+    .order-files {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--line-2);
+      display: grid;
+      gap: 8px;
+    }
+
+    .of-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .order-file {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--r-btn);
+      background: var(--surface);
+      border: 1px solid var(--line);
+    }
+
+    .of-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      color: var(--accent-text);
+    }
+
+    .of-info b {
+      display: block;
+      color: var(--ink);
+      font-size: 14.5px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .of-info small {
+      display: block;
+      color: var(--faint);
+      font-size: 12.5px;
+    }
+
+    .of-actions {
+      display: flex;
+      gap: 6px;
+      flex: none;
+    }
+
+    .admin-delete-file {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--r-btn);
+      border: 1px solid var(--line-2);
+      background: transparent;
+      color: var(--danger);
+      cursor: pointer;
+    }
+
+    .of-upload-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .of-upload {
+      cursor: pointer;
+    }
+
+    .of-progress {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .sub-notice {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+      padding: 14px 16px;
+      border-radius: var(--r);
+      background: var(--surface);
+      border: 1px solid var(--accent-line);
+      color: var(--accent-text);
+    }
+
+    .sub-notice.warn {
+      border-color: color-mix(in srgb, var(--star) 45%, transparent);
+      background: color-mix(in srgb, var(--star) 10%, var(--surface));
+      color: var(--star);
+    }
+
+    .sub-notice > div {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sub-notice b {
+      display: block;
+      color: var(--ink);
+      font-size: 15px;
+    }
+
+    .sub-notice small {
+      display: block;
+      color: var(--muted);
+      font-size: 13.5px;
+    }
+
+    @media (max-width: 640px) {
+      .order-file {
+        flex-wrap: wrap;
+      }
+
+      .sub-notice {
+        flex-wrap: wrap;
+      }
+    }
+
     .admin-order-actions {
       display: flex;
       gap: 8px;
@@ -3187,6 +3314,7 @@
         </select>
           </div>
         </div>
+        <div class="sub-notice" id="sub-notice" hidden></div>
         <p class="results-line" id="results-line"></p>
         <div class="product-grid stagger" id="product-grid"></div>
       </div>
@@ -3799,8 +3927,35 @@ searchClear.addEventListener('click', () => {
 let currentProductId = null;
 let currentLicense = 'personal';
 // L'abonnement arrive bientôt : pas encore actif sur le site.
-const subscription = { active: false };
-function checkSubscription() {}
+// Statut de l'abonnement renvoyé par le serveur
+let me = null;
+const subscription = { get active() { return !!(me && me.subscription && me.subscription.active); } };
+const frDateLong = (iso) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+async function checkSubscription() {
+  me = null;
+  if (currentUser) {
+    try {
+      const res = await authFetch(`${apiBase()}/api/me`);
+      if (res.status === 401) { sessionExpired(); return; }
+      if (res.ok) me = await res.json();
+    } catch (e) {}
+  }
+  updateNavDiscord();
+  renderSubNotice();
+}
+function renderSubNotice() {
+  const el = $('#sub-notice'), sub = me && me.subscription;
+  if (!el) return;
+  if (!sub) { el.hidden = true; return; }
+  const until = new Date(sub.until).getTime(), left = until - Date.now();
+  if (!sub.active && Date.now() - until > 30 * 864e5) { el.hidden = true; return; }
+  const soon = sub.active && left <= 3 * 864e5;
+  el.hidden = false;
+  el.className = 'sub-notice' + (soon || !sub.active ? ' warn' : '');
+  el.innerHTML = `${ic(sub.active ? 'star' : 'alert', 20)}<div><b>${sub.active ? (soon ? 'Ton abonnement se termine bientôt' : 'Abonnement actif') : 'Ton abonnement est terminé'}</b><small>${sub.active ? `Accès à tout le catalogue jusqu'au ${frDateLong(sub.until)}.` : `Terminé depuis le ${frDateLong(sub.until)}.`}${soon || !sub.active ? ' Recommande-le pour continuer.' : ''}</small></div>${soon || !sub.active ? `<button class="btn btn-primary btn-sm" id="sub-renew">${sub.active ? 'Renouveler' : 'Le reprendre'}</button>` : ''}`;
+  const btn = $('#sub-renew');
+  if (btn) btn.onclick = () => { if (!cart.some((it) => it.offer === 'subscription')) addToCart(null, 'sub', false); openCart(); };
+}
 
 const gamepassOf = (a) => (/^https:\/\/(www\.)?roblox\.com\//i.test(a.gamepassUrl || '') ? a.gamepassUrl : '');
 const robuxPriceOf = (a) => (a.robuxPrice != null ? +a.robuxPrice : robuxOf(a.price));
@@ -3909,7 +4064,7 @@ $('#gp-done').addEventListener('click', async () => {
   const price = robuxPriceOf(a);
   btn.disabled = true; btn.textContent = 'Envoi…';
   try {
-    const res = await fetch(`${apiBase()}/api/order`, {
+    const res = await authFetch(`${apiBase()}/api/order`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         customerName: currentUser.name, discordId: currentUser.id,
@@ -4040,7 +4195,7 @@ $('#cart-order').addEventListener('click', async () => {
   const original = orderBtn.textContent;
   orderBtn.textContent = 'Envoi en cours…'; orderBtn.disabled = true;
   try {
-    const res = await fetch(`${apiBase()}/api/order`, {
+    const res = await authFetch(`${apiBase()}/api/order`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ customerName: currentUser.name, discordId: currentUser.id, items, total, currency: CURRENCY_LABEL[currentCurrency], source: 'shop' })
     });
@@ -4067,33 +4222,37 @@ function updateCartBar() {
 
 /* ---------- AUTH ---------- */
 const SESSION_KEY = 'exiozz_discord_session';
-const params = new URLSearchParams(window.location.search);
+// Au retour de Discord, les infos de connexion arrivent dans le # de l'URL.
+const hashParams = new URLSearchParams(window.location.hash.slice(1));
 let currentUser = null;
-if (params.get('discord_id')) {
-  currentUser = { id: params.get('discord_id'), name: params.get('discord_user'), avatar: params.get('discord_avatar'), discordHandle: params.get('discord_user') };
+if (hashParams.get('token')) {
+  currentUser = { id: hashParams.get('discord_id'), name: hashParams.get('discord_user'), avatar: hashParams.get('discord_avatar'), token: hashParams.get('token') };
   try { localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser)); } catch (e) {}
-  window.history.replaceState({}, '', window.location.pathname);
-} else { try { const saved = localStorage.getItem(SESSION_KEY); if (saved) currentUser = JSON.parse(saved); } catch (e) {} }
+} else {
+  try { const saved = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); if (saved && saved.token) currentUser = saved; } catch (e) {}
+}
+if (hashParams.get('login_error')) setTimeout(() => toast('Connexion Discord impossible, réessaie.', { type: 'error' }), 400);
+if (hashParams.get('token') || hashParams.get('login_error')) history.replaceState({}, '', location.pathname + location.search);
 const apiBase = () => DATA.discord.backendAuthUrl.replace('/auth/discord', '');
+const authFetch = (url, opts = {}) => fetch(url, {
+  ...opts,
+  headers: { ...(opts.headers || {}), ...(currentUser && currentUser.token ? { Authorization: 'Bearer ' + currentUser.token } : {}) }
+});
 const isAdmin = () => currentUser && currentUser.id === DATA.adminDiscordId;
 function startLogin() {
-  if (!DATA.discord.clientId || DATA.discord.clientId === 'TON_CLIENT_ID') {
-    const name = prompt('Entrez votre pseudo Discord (pour tester) :', 'zo7q');
-    if (name && name.trim()) {
-      currentUser = { id: 'test_' + Date.now(), name: name.trim(), avatar: '', discordHandle: name.trim() };
-      try { localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser)); } catch (e) {}
-      updateNavDiscord(); renderCart(); checkSubscription();
-    }
-    return;
-  }
   const redirect = encodeURIComponent(DATA.discord.backendAuthUrl);
-  window.location.href = `https://discord.com/oauth2/authorize?client_id=${DATA.discord.clientId}&redirect_uri=${redirect}&response_type=code&scope=identify`;
+  window.location.href = `https://discord.com/oauth2/authorize?client_id=${DATA.discord.clientId}&redirect_uri=${redirect}&response_type=code&scope=identify&state=shop`;
 }
 function needLogin(msg) { toast(msg, { action: startLogin, label: 'Se connecter', duration: 6000 }); }
 function logout() {
   currentUser = null;
   try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
-  updateNavDiscord(); renderCart(); checkSubscription();
+  me = null;
+  updateNavDiscord(); renderCart(); renderSubNotice();
+}
+function sessionExpired() {
+  logout();
+  toast('Ta session a expiré : reconnecte-toi avec Discord.', { action: startLogin, label: 'Se connecter', duration: 6000 });
 }
 const navDiscordBtn = $('#nav-discord-btn'), navDiscordLabel = $('#nav-discord-label'), navDropdown = $('#nav-discord-dropdown');
 function closeDropdown() { navDropdown.classList.remove('active'); navDiscordBtn.setAttribute('aria-expanded', 'false'); }
@@ -4129,17 +4288,32 @@ const ordersModal = $('#orders-modal'), ordersList = $('#orders-list');
 const ORDER_STATUS_OPTIONS = ['En attente de contact', 'Confirmée', 'En construction', 'En pause', 'Payée', 'Annulée'];
 const formatOrderDate = (ts) => (ts ? new Date(ts).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : 'Date inconnue');
 const orderStatusClass = (s) => (s === 'Annulée' ? 'st-cancel' : s === 'Payée' ? 'st-paid' : (s === 'Confirmée' || s === 'En construction') ? 'st-active' : '');
+const fmtSize = (b) => (!b ? '' : b < 1048576 ? Math.max(1, Math.round(b / 1024)) + ' Ko' : (b / 1048576).toFixed(b < 10485760 ? 1 : 0).replace('.', ',') + ' Mo');
+function timeLeft(ts) {
+  const m = Math.max(0, Math.round((ts - Date.now()) / 60000));
+  return m >= 60 ? `supprimé dans ${Math.floor(m / 60)} h${m % 60 ? ' ' + String(m % 60).padStart(2, '0') : ''}` : `supprimé dans ${m} min`;
+}
+function orderFilesHtml(order, admin) {
+  const files = Array.isArray(order.files) ? order.files : [];
+  const rows = files.map((f) => `<div class="order-file">
+      <span class="of-info">${ic('folder', 18)}<span><b>${esc(f.name)}</b><small>${[fmtSize(f.size), timeLeft(f.expiresAt)].filter(Boolean).join(' · ')}</small></span></span>
+      <span class="of-actions"><button class="btn btn-primary btn-sm file-dl" data-file-id="${esc(f.id)}">${ic('download', 16)}Télécharger</button>${admin ? `<button class="admin-delete-file" data-order-id="${esc(order.id)}" data-file-id="${esc(f.id)}" aria-label="Supprimer ${esc(f.name)}">${ic('trash', 16)}</button>` : ''}</span>
+    </div>`).join('');
+  const upload = admin ? `<label class="btn btn-ghost btn-sm of-upload">${ic('plus', 16)}Ajouter des fichiers<input type="file" multiple hidden data-order-id="${esc(order.id)}"></label><span class="of-progress" data-progress="${esc(order.id)}"></span>` : '';
+  if (!rows && !upload) return '';
+  return `<div class="order-files"><div class="of-title">${rows ? 'Tes fichiers — disponibles 24 h après l\'envoi' : 'Fichiers'}</div>${rows}${upload ? `<div class="of-upload-row">${upload}</div>` : ''}</div>`;
+}
 function orderCardHtml(order, admin) {
   const items = Array.isArray(order.items) ? order.items.map((it) => `<div class="order-item-row"><span>${esc(it.title || 'Article')}</span><span>${fmt(it.price || 0)} ${esc(order.currency || '')}</span></div>`).join('') : '';
   const adminActions = admin ? `<div class="admin-order-actions"><select class="admin-order-status" data-order-id="${esc(order.id)}" aria-label="Statut">${ORDER_STATUS_OPTIONS.map((s) => `<option value="${esc(s)}" ${s === order.status ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select><button class="admin-delete-order" data-order-id="${esc(order.id)}" aria-label="Supprimer">${ic('trash', 16)}</button></div>` : '';
-  return `<div class="order-card"><div class="order-head"><div><b>${admin ? esc(order.customerName || 'Client') : 'Commande'}</b><div class="order-id">#${esc(order.id)} · ${formatOrderDate(order.timestamp)}</div>${admin ? `<div class="order-id">Discord : ${esc(order.discordId || 'inconnu')}</div>` : ''}</div><span class="order-status ${orderStatusClass(order.status)}">${esc(order.status || 'En attente de contact')}</span></div><div class="order-items">${items || '<div class="order-item-row"><span>Aucun article</span></div>'}</div><div class="order-footer"><span>Total</span><span>${fmt(order.total || 0)} ${esc(order.currency || '')}</span></div>${adminActions}</div>`;
+  return `<div class="order-card"><div class="order-head"><div><b>${admin ? esc(order.customerName || 'Client') : 'Commande'}</b><div class="order-id">#${esc(order.id)} · ${formatOrderDate(order.timestamp)}</div>${admin ? `<div class="order-id">Discord : ${esc(order.discordId || 'inconnu')}</div>` : ''}${admin && order.subscription ? `<div class="order-id">Abonnement : ${order.subscription.active ? 'actif jusqu\'au' : 'terminé le'} ${frDateLong(order.subscription.until)}</div>` : ''}</div><span class="order-status ${orderStatusClass(order.status)}">${esc(order.status || 'En attente de contact')}</span></div><div class="order-items">${items || '<div class="order-item-row"><span>Aucun article</span></div>'}</div><div class="order-footer"><span>Total</span><span>${fmt(order.total || 0)} ${esc(order.currency || '')}</span></div>${orderFilesHtml(order, admin)}${adminActions}</div>`;
 }
 async function fetchMyOrders() {
-  const res = await fetch(`${apiBase()}/api/orders/${encodeURIComponent(currentUser.id)}`);
+  const res = await authFetch(`${apiBase()}/api/orders/${encodeURIComponent(currentUser.id)}`);
   if (!res.ok) throw new Error('Impossible de charger tes commandes.'); return res.json();
 }
 async function fetchAdminOrders() {
-  const res = await fetch(`${apiBase()}/api/admin/orders?requesterId=${encodeURIComponent(currentUser.id)}`);
+  const res = await authFetch(`${apiBase()}/api/admin/orders`);
   if (!res.ok) throw new Error('Impossible de charger les commandes admin.'); return res.json();
 }
 async function renderOrders() {
@@ -4154,23 +4328,71 @@ async function renderOrders() {
       html += '<div class="orders-title">Administration — toutes les commandes</div>';
       html += all.length ? all.map((o) => orderCardHtml(o, true)).join('') : '<div class="cart-empty">Aucune commande.</div>';
     }
-    ordersList.innerHTML = html; bindOrderAdminActions();
+    ordersList.innerHTML = html; bindOrderFiles(); bindOrderAdminActions();
   } catch (e) { ordersList.innerHTML = `<div class="cart-empty">${esc(e.message)}</div>`; }
 }
 function openOrders() {
   if (!currentUser) { needLogin('Connecte-toi avec Discord pour voir tes commandes.'); return; }
   openOv(ordersModal, '#orders-close'); renderOrders();
 }
+function bindOrderFiles() {
+  $$('.file-dl', ordersList).forEach((btn) => btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    try {
+      const res = await authFetch(`${apiBase()}/api/files/${encodeURIComponent(btn.dataset.fileId)}/link`);
+      if (res.status === 401) { sessionExpired(); return; }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !/^https?:\/\//i.test(data.url || '')) { toast(data.error || 'Fichier indisponible.', { type: 'error' }); return; }
+      window.location.href = data.url; // téléchargement direct, la page reste ouverte
+    } catch (e) { toast('Impossible de contacter le serveur.', { type: 'error' }); }
+    finally { btn.disabled = false; }
+  }));
+  if (!isAdmin()) return;
+  $$('.of-upload input', ordersList).forEach((input) => input.addEventListener('change', async () => {
+    const list = Array.from(input.files || []), orderId = input.dataset.orderId;
+    const prog = $(`[data-progress="${CSS.escape(orderId)}"]`, ordersList);
+    for (let i = 0; i < list.length; i++) {
+      const f = list[i];
+      try {
+        await new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', `${apiBase()}/api/orders/${encodeURIComponent(orderId)}/files?name=${encodeURIComponent(f.name)}`);
+          xhr.setRequestHeader('Authorization', 'Bearer ' + currentUser.token);
+          xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+          xhr.upload.onprogress = (e) => { if (e.lengthComputable && prog) prog.textContent = `Envoi de ${f.name}${list.length > 1 ? ` (${i + 1}/${list.length})` : ''} : ${Math.round(e.loaded / e.total * 100)} %`; };
+          xhr.onload = () => {
+            let data = {}; try { data = JSON.parse(xhr.responseText); } catch (e) {}
+            xhr.status >= 200 && xhr.status < 300 ? resolve(data) : reject(new Error(data.error || `Erreur ${xhr.status}`));
+          };
+          xhr.onerror = () => reject(new Error('connexion interrompue'));
+          xhr.send(f);
+        });
+        toast(`« ${f.name} » envoyé : le client est prévenu sur Discord.`, { type: 'success', duration: 3500 });
+      } catch (e) { toast(`« ${f.name} » non envoyé : ${e.message}`, { type: 'error', duration: 6000 }); }
+    }
+    await renderOrders();
+  }));
+  $$('.admin-delete-file', ordersList).forEach((btn) => btn.addEventListener('click', async () => {
+    if (!(await askConfirm('Supprimer ce fichier ?', 'Le client ne pourra plus le télécharger.', 'Supprimer'))) return;
+    btn.disabled = true;
+    try {
+      const res = await authFetch(`${apiBase()}/api/orders/${encodeURIComponent(btn.dataset.orderId)}/files/${encodeURIComponent(btn.dataset.fileId)}`, { method: 'DELETE' });
+      if (!res.ok) { const d = await res.json().catch(() => ({})); toast(d.error || `Erreur ${res.status}`, { type: 'error' }); btn.disabled = false; return; }
+      await renderOrders();
+    } catch (e) { toast('Impossible de contacter le serveur.', { type: 'error' }); btn.disabled = false; }
+  }));
+}
 function bindOrderAdminActions() {
   if (!isAdmin()) return;
   $$('.admin-order-status', ordersList).forEach((sel) => sel.addEventListener('change', async () => {
     sel.disabled = true;
     try {
-      const res = await fetch(`${apiBase()}/api/orders/${encodeURIComponent(sel.dataset.orderId)}`, {
+      const res = await authFetch(`${apiBase()}/api/orders/${encodeURIComponent(sel.dataset.orderId)}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requesterId: currentUser.id, status: sel.value })
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) toast(data.error || `Erreur ${res.status}`, { type: 'error' });
+      else if (sel.value === 'Payée') toast('Commande payée : si elle contient un abonnement, il est activé pour 30 jours.', { type: 'success', duration: 4000 });
       await renderOrders();
     } catch (e) { toast('Impossible de contacter le serveur.', { type: 'error' }); sel.disabled = false; }
   }));
@@ -4178,7 +4400,7 @@ function bindOrderAdminActions() {
     if (!(await askConfirm('Supprimer cette commande ?', 'Cette action est irréversible.', 'Supprimer'))) return;
     btn.disabled = true;
     try {
-      const res = await fetch(`${apiBase()}/api/orders/${encodeURIComponent(btn.dataset.orderId)}`, {
+      const res = await authFetch(`${apiBase()}/api/orders/${encodeURIComponent(btn.dataset.orderId)}`, {
         method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requesterId: currentUser.id })
       });
       const data = await res.json().catch(() => ({}));
@@ -4189,6 +4411,7 @@ function bindOrderAdminActions() {
 }
 $('#nav-my-orders-link').addEventListener('click', (e) => { e.preventDefault(); closeDropdown(); openOrders(); });
 $('#orders-close').addEventListener('click', () => closeOv(ordersModal));
+if (location.hash === '#orders') { history.replaceState({}, '', location.pathname + location.search); setTimeout(openOrders, 300); }
 
 /* ---------- CMD+K ---------- */
 const cmdk = $('#cmdk'), cmdkInput = $('#cmdk-input'), cmdkList = $('#cmdk-list');

@@ -2742,6 +2742,97 @@
       color: var(--ink);
     }
 
+    .robux-steps {
+      display: grid;
+      gap: 14px;
+      margin: 20px 0 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: step;
+    }
+
+    .robux-steps li {
+      position: relative;
+      padding-left: 40px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+      counter-increment: step;
+    }
+
+    .robux-steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: -2px;
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent-text);
+      box-shadow: inset 0 0 0 1px var(--accent-line);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .robux-steps li.done::before {
+      content: '✓';
+      background: color-mix(in srgb, var(--ok) 16%, transparent);
+      color: var(--ok);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ok) 42%, transparent);
+    }
+
+    .robux-steps b {
+      color: var(--ink);
+    }
+
+    .robux-steps .btn {
+      margin-top: 10px;
+    }
+
+    .robux-code {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 8px 14px;
+      border-radius: var(--r-btn);
+      border: 1px dashed var(--accent);
+      background: var(--accent-soft);
+      color: var(--ink);
+      font: 600 22px/1 var(--font-code);
+      letter-spacing: .18em;
+      user-select: all;
+    }
+
+    .robux-wait {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 22px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .robux-wait::before {
+      content: '';
+      width: 14px;
+      height: 14px;
+      flex: none;
+      border-radius: 50%;
+      border: 2px solid var(--line-2);
+      border-top-color: var(--accent);
+      animation: spin .9s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
     .sub-band {
       display: flex;
       align-items: center;
@@ -2814,6 +2905,7 @@
   "commercialMultiplier": 2.5,
   "subscription": { "label": "Abonnement total", "monthlyPrice": 15 },
   "passMultiplier": 1.6,
+  "roblox": { "gameUrl": "https://www.roblox.com/games/TON_ID_DE_JEU", "gameName": "Exiozz Shop", "subscriptionDays": 30 },
   "discord": {
     "clientId": "1540486396287000626",
     "backendAuthUrl": "https://exiozz-discord-auth--tomokari35.replit.app/auth/discord",
@@ -2836,12 +2928,12 @@
     { "value": 100, "suffix": "%", "label": "Documentés" }
   ],
   "faq": [
-    { "q": "Comment reçois-je mon asset après l'achat ?", "a": "Paiement par carte : ton accès est débloqué tout de suite (bouton « Télécharger » sur le shop) et le lien t'est aussi envoyé en MP sur Discord. Commande via Discord : le lien est débloqué dès que Exiozz a validé ton paiement." },
+    { "q": "Comment reçois-je mon asset après l'achat ?", "a": "Paiement PayPal ou Robux : ton accès est débloqué tout de suite (bouton « Télécharger » sur le shop) et le lien t'est aussi envoyé en MP sur Discord. Commande via Discord : le lien est débloqué dès que Exiozz a validé ton paiement." },
     { "q": "Puis-je modifier les assets ?", "a": "Oui, tu peux les modifier librement. Tu ne peux simplement pas les revendre tels quels ou les redistribuer." },
     { "q": "Y a-t-il un support après l'achat ?", "a": "Oui, un support de 14 jours est inclus pour toute question technique ou problème d'installation." },
     { "q": "Les mises à jour sont-elles incluses ?", "a": "Ça dépend de l'offre. Achat simple : tu reçois la version actuelle uniquement, il faudra racheter l'asset pour avoir les versions suivantes. Pass asset : l'asset + toutes ses futures mises à jour, à vie, payé une seule fois. Abonnement total : tous les assets et toutes leurs mises à jour, tant que tu es abonné." },
-    { "q": "Comment me désabonner ?", "a": "En un clic : menu Discord en haut à droite → « Gérer mon abonnement ». Tu gardes l'accès jusqu'à la fin du mois déjà payé." },
-    { "q": "Puis-je payer en Robux ?", "a": "Oui, en passant par « Commander via Discord » : Exiozz valide ton paiement à la main et ton accès est débloqué ensuite. Le paiement par carte se fait en euros." }
+    { "q": "Comment me désabonner ?", "a": "Abonnement PayPal : menu Discord en haut à droite → « Gérer mon abonnement » → « Me désabonner ». Tu gardes l'accès jusqu'à la fin du mois déjà payé. Abonnement Robux : rien à faire, l'accès s'arrête tout seul après 30 jours si tu ne le rachètes pas." },
+    { "q": "Puis-je payer en Robux ?", "a": "Oui : choisis R$ en haut du catalogue, puis « Payer en Robux » sur l'asset. Tu lies ton compte Roblox avec un code, tu achètes l'offre dans notre jeu Roblox, et ton accès se débloque tout seul sur le site." }
   ],
   "assets": [
     {
@@ -3304,13 +3396,27 @@
       <div class="drawer-foot">
         <div class="cart-total"><span>Total estimé</span><strong id="cart-total-value">0 €</strong></div>
         <p class="cart-note">Commande via Discord : Exiozz te contacte pour le paiement (Robux, PayPal…). Ton
-          accès est débloqué dès que le paiement est validé. Pour payer par carte tout de suite, passe par la fiche de l'asset.</p>
+          accès est débloqué dès que le paiement est validé. Pour payer tout de suite (PayPal ou Robux), passe par la fiche de l'asset.</p>
         <div class="cart-actions">
           <button class="btn btn-primary btn-block" id="cart-order">Commander via Discord</button>
           <button class="btn btn-ghost btn-block" id="cart-clear">Vider le panier</button>
         </div>
       </div>
     </aside>
+  </div>
+
+  <div class="overlay" id="robux-modal" aria-hidden="true">
+    <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="robux-title">
+      <button class="icon-btn modal-close" id="robux-close" aria-label="Fermer"><span data-icon="x"></span></button>
+      <h2 id="robux-title">Payer en Robux</h2>
+      <p id="robux-what"></p>
+      <ol class="robux-steps">
+        <li id="robux-step-link"></li>
+        <li>Ouvre le jeu <b id="robux-game-name">Exiozz Shop</b> sur Roblox.<br><a class="btn btn-ghost btn-sm" id="robux-game" href="#" target="_blank" rel="noopener"><span data-icon="gamepad" data-size="16"></span>Ouvrir le jeu</a></li>
+        <li>Dans le jeu, ouvre le Shop et achète « <b id="robux-product"></b> ». Ton accès se débloque ici automatiquement.</li>
+      </ol>
+      <p class="robux-wait">En attente de ton achat dans le jeu…</p>
+    </div>
   </div>
 
   <div class="overlay" id="confirm-modal" aria-hidden="true">
@@ -3734,6 +3840,7 @@ $('#pricing-toggle').addEventListener('click', (e) => {
   currentCurrency = btn.dataset.currency;
   renderProducts();
   renderCart();
+  renderSubBand();
   if (currentProductId) openProduct(currentProductId, true);
 });
 const searchInput = $('#shop-search-input'), searchClear = $('#shop-search-clear');
@@ -3753,6 +3860,17 @@ const SUB = DATA.subscription || { label: 'Abonnement total', monthlyPrice: 15 }
 const PASS_MULT = DATA.passMultiplier || 1.6;
 const passPriceOf = (a) => (a.passPrice != null ? +a.passPrice : Math.round(a.price * PASS_MULT));
 const eurLabel = (n) => fmt(n) + ' €';
+const RBX = DATA.roblox || {};
+const RBX_DAYS = RBX.subscriptionDays || 30;
+const isRobux = () => currentCurrency === 'robux';
+// Prix en Robux : celui indiqué dans l'asset (« robux »: { "single": 400, "pass": 640 }) sinon conversion automatique
+const robuxPriceOf = (a, offer) => (a && a.robux && a.robux[offer] != null ? +a.robux[offer] : robuxOf(offer === 'pass' ? passPriceOf(a) : a.price));
+const subRobux = () => (SUB.robuxPrice != null ? +SUB.robuxPrice : robuxOf(SUB.monthlyPrice));
+const rbxLabel = (n) => fmt(n) + ' R$';
+const offerPriceLabel = (a, offer) => (offer === 'sub'
+  ? (isRobux() ? rbxLabel(subRobux()) + ` / ${RBX_DAYS} j` : eurLabel(SUB.monthlyPrice) + ' / mois')
+  : (isRobux() ? rbxLabel(robuxPriceOf(a, offer)) : eurLabel(offer === 'pass' ? passPriceOf(a) : a.price)));
+const frDate = (iso) => (iso ? new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '');
 const subActive = () => !!(me && me.subscription && me.subscription.active);
 
 // Même règle que le serveur : 'latest' = accès à la dernière version, 'old' = seulement une ancienne version achetée
@@ -3770,13 +3888,15 @@ function accessFor(a) {
 function offerNote(a) {
   if (currentPay === 'single') return { warn: true, html: `<b>Achat simple :</b> tu reçois la version ${esc(a.version || 'actuelle')} uniquement. Les futures mises à jour <b>ne sont pas incluses</b> : pour les avoir, il faudra racheter l'asset (ou prendre le Pass).` };
   if (currentPay === 'pass') return { html: `<b>Pass asset :</b> ${esc(a.title)} + toutes ses futures mises à jour, à vie. Tu paies une seule fois.` };
-  return { html: `<b>${esc(SUB.label)} :</b> tous les assets du shop (modèles, scripts, UI…) et toutes leurs mises à jour, tant que tu es abonné. ${eurLabel(SUB.monthlyPrice)} par mois, connexion Discord obligatoire, désabonnement en 1 clic.` };
+  return isRobux()
+    ? { html: `<b>${esc(SUB.label)} en Robux :</b> tous les assets et leurs mises à jour pendant <b>${RBX_DAYS} jours</b> par achat. Rachète-le dans le jeu pour prolonger, sinon l'accès s'arrête tout seul.` }
+    : { html: `<b>${esc(SUB.label)} :</b> tous les assets du shop (modèles, scripts, UI…) et toutes leurs mises à jour, tant que tu es abonné. ${eurLabel(SUB.monthlyPrice)} par mois avec PayPal, connexion Discord obligatoire, désabonnement en 1 clic.` };
 }
 
 function updatePayUI(a) {
-  $('#pay-single-price').textContent = eurLabel(a.price);
-  $('#pay-pass-price').textContent = eurLabel(passPriceOf(a));
-  $('#pay-sub-price').textContent = eurLabel(SUB.monthlyPrice) + ' / mois';
+  $('#pay-single-price').textContent = offerPriceLabel(a, 'single');
+  $('#pay-pass-price').textContent = offerPriceLabel(a, 'pass');
+  $('#pay-sub-price').textContent = offerPriceLabel(a, 'sub');
   $$('#pay-grid .license-option').forEach((b) => b.setAttribute('aria-checked', b.dataset.pay === currentPay));
   const note = offerNote(a), noteEl = $('#offer-note');
   noteEl.innerHTML = note.html;
@@ -3809,13 +3929,11 @@ function updateModalButtons(a) {
     add.hidden = true;
     return;
   }
-  if (currentPay === 'sub') {
-    pay.innerHTML = ic('discord', 18) + `S'abonner — ${eurLabel(SUB.monthlyPrice)} / mois`;
-    add.hidden = true;
-    return;
-  }
-  pay.innerHTML = ic('cart', 18) + `Payer par carte — ${eurLabel(currentPay === 'pass' ? passPriceOf(a) : a.price)}`;
-  add.hidden = false;
+  const price = offerPriceLabel(a, currentPay);
+  if (isRobux()) pay.innerHTML = ic('robux', 18) + (currentPay === 'sub' ? `S'abonner en Robux — ${price}` : `Payer en Robux — ${price}`);
+  else pay.innerHTML = ic('cart', 18) + (currentPay === 'sub' ? `S'abonner avec PayPal — ${price}` : `Payer avec PayPal — ${price}`);
+  add.hidden = currentPay === 'sub';
+  if (add.hidden) return;
   const inCart = cart.some((it) => it.productId === a.id && it.offer === currentPay);
   add.innerHTML = inCart ? ic('check', 18) + 'Dans ta commande Discord' : ic('discord', 18) + 'Commander via Discord';
 }
@@ -3826,15 +3944,20 @@ async function apiJson(res) {
   return data;
 }
 
-async function startCheckout(a, offer, btn) {
-  if (!currentUser) { needLogin(offer === 'subscription' ? "L'abonnement nécessite d'être connecté avec Discord." : 'Connecte-toi avec Discord pour acheter.'); return; }
+// offer : 'single' | 'pass' | 'sub'
+function startCheckout(a, offer, btn) {
+  if (!currentUser) { needLogin(offer === 'sub' ? "L'abonnement nécessite d'être connecté avec Discord." : 'Connecte-toi avec Discord pour acheter.'); return; }
+  if (isRobux()) return openRobux(a, offer);
+  return paypalCheckout(a, offer, btn);
+}
+
+async function paypalCheckout(a, offer, btn) {
   const old = btn.innerHTML;
-  btn.disabled = true; btn.textContent = 'Redirection vers le paiement…';
+  btn.disabled = true; btn.textContent = 'Redirection vers PayPal…';
   try {
-    const res = await authFetch(`${apiBase()}/api/checkout`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ offer, assetId: a ? a.id : undefined })
-    });
+    const res = offer === 'sub'
+      ? await authFetch(`${apiBase()}/api/paypal/subscription`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+      : await authFetch(`${apiBase()}/api/paypal/order`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ offer, assetId: a.id }) });
     const data = await apiJson(res);
     if (!res.ok || !/^https:\/\//i.test(data.url || '')) { toast(data.error || `Paiement indisponible (${res.status}).`, { type: 'error', duration: 6000 }); return; }
     window.location.href = data.url;
@@ -3842,6 +3965,74 @@ async function startCheckout(a, offer, btn) {
     if (!e.silent) toast('Impossible de contacter le serveur.', { type: 'error' });
   } finally { btn.disabled = false; btn.innerHTML = old; }
 }
+
+/* ---------- Paiement en Robux (jeu Roblox) ---------- */
+const robuxModal = $('#robux-modal');
+let robuxTarget = null, robuxTimer = 0, robuxCode = null, robuxRelinkFrom = null;
+const robuxProductName = (a, offer) => (offer === 'sub'
+  ? `${SUB.label} — ${RBX_DAYS} jours`
+  : `${a.title} — ${offer === 'pass' ? 'Pass mises à jour' : `Achat simple (v${a.version})`}`);
+const robuxDone = () => {
+  if (!robuxTarget) return false;
+  if (robuxTarget.offer === 'sub') return subActive() && me.subscription.provider === 'robux';
+  const acc = accessFor(robuxTarget.a);
+  return !!acc && acc.level === 'latest';
+};
+function renderRobuxLink() {
+  const li = $('#robux-step-link');
+  const linked = me && me.roblox && me.roblox.userId !== robuxRelinkFrom ? me.roblox : null;
+  li.classList.toggle('done', !!linked);
+  if (linked) {
+    li.innerHTML = `Ton compte Roblox <b>${esc(linked.name || linked.userId)}</b> est lié. <button class="link-btn" id="robux-relink" type="button">Changer de compte</button>`;
+    $('#robux-relink').onclick = () => { robuxRelinkFrom = linked.userId; fetchRobuxCode(); };
+  } else if (robuxCode) {
+    li.innerHTML = `Pour lier ton compte Roblox, entre ce code dans le jeu (valable 15 min) :<br><span class="robux-code">${esc(robuxCode)}</span>`;
+  } else {
+    li.innerHTML = 'Création de ton code de liaison…';
+  }
+}
+async function fetchRobuxCode() {
+  if (robuxCode) { renderRobuxLink(); return; }
+  renderRobuxLink();
+  try {
+    const res = await authFetch(`${apiBase()}/api/roblox/link-code`, { method: 'POST' });
+    const data = await apiJson(res);
+    if (!res.ok) { toast(data.error || 'Impossible de créer le code.', { type: 'error' }); return; }
+    robuxCode = data.code;
+    setTimeout(() => { robuxCode = null; }, 14 * 60e3);
+  } catch (e) { if (!e.silent) toast('Impossible de contacter le serveur.', { type: 'error' }); }
+  renderRobuxLink();
+}
+async function openRobux(a, offer) {
+  robuxTarget = { a, offer };
+  $('#robux-what').textContent = offer === 'sub'
+    ? `${SUB.label} : ${rbxLabel(subRobux())} pour ${RBX_DAYS} jours d'accès à tout le catalogue.`
+    : `${a.title} — ${offer === 'pass' ? 'Pass mises à jour' : `achat simple (v${a.version}, sans mises à jour)`} : ${rbxLabel(robuxPriceOf(a, offer))}.`;
+  $('#robux-product').textContent = robuxProductName(a, offer);
+  $('#robux-game-name').textContent = RBX.gameName || 'Exiozz Shop';
+  $('#robux-game').href = safeImg(RBX.gameUrl) || '#';
+  robuxRelinkFrom = null;
+  renderRobuxLink();
+  openOv(robuxModal, '#robux-close');
+  if (!(me && me.roblox)) fetchRobuxCode();
+  clearInterval(robuxTimer);
+  robuxTimer = setInterval(async () => {
+    if (!robuxModal.classList.contains('active')) { clearInterval(robuxTimer); return; }
+    const before = me && me.roblox ? me.roblox.userId : null;
+    await refreshMe();
+    const after = me && me.roblox ? me.roblox.userId : null;
+    if (after && after !== before && after !== robuxRelinkFrom) {
+      robuxCode = null; robuxRelinkFrom = null; renderRobuxLink();
+      toast('Compte Roblox lié !', { type: 'success', duration: 2500 });
+    }
+    if (robuxDone()) {
+      clearInterval(robuxTimer);
+      closeOv(robuxModal);
+      toast("Achat reçu, ton accès est débloqué ! Le lien t'a aussi été envoyé en MP sur Discord.", { type: 'success', duration: 7000 });
+    }
+  }, 4000);
+}
+$('#robux-close').addEventListener('click', () => { clearInterval(robuxTimer); closeOv(robuxModal); });
 
 async function downloadAsset(a, btn) {
   if (!currentUser) { needLogin('Connecte-toi avec Discord pour télécharger.'); return; }
@@ -3859,25 +4050,36 @@ async function downloadAsset(a, btn) {
   } finally { if (btn) btn.disabled = false; }
 }
 
-async function openPortal() {
+async function manageSubscription() {
   if (!currentUser) { needLogin('Connecte-toi avec Discord pour gérer ton abonnement.'); return; }
-  try {
-    const res = await authFetch(`${apiBase()}/api/subscription/portal`);
-    const data = await apiJson(res);
-    if (!res.ok || !/^https:\/\//i.test(data.url || '')) { toast(data.error || 'Page de gestion indisponible.', { type: 'error' }); return; }
-    window.location.href = data.url;
-  } catch (e) { if (!e.silent) toast('Impossible de contacter le serveur.', { type: 'error' }); }
+  const sub = me && me.subscription;
+  if (!sub) { toast("Tu n'as pas d'abonnement en cours.", { duration: 3000 }); return; }
+  if (sub.canCancel) {
+    const ok = await askConfirm('Se désabonner ?', `Ton abonnement PayPal sera arrêté et tu ne seras plus prélevé. Tu gardes l'accès jusqu'au ${frDate(sub.until)}.`, 'Me désabonner');
+    if (!ok) return;
+    try {
+      const res = await authFetch(`${apiBase()}/api/subscription/cancel`, { method: 'POST' });
+      const data = await apiJson(res);
+      if (!res.ok) { toast(data.error || 'Désabonnement impossible.', { type: 'error' }); return; }
+      toast(`C'est fait : tu ne seras plus prélevé. Accès jusqu'au ${frDate(sub.until)}.`, { type: 'success', duration: 6000 });
+      await refreshMe();
+    } catch (e) { if (!e.silent) toast('Impossible de contacter le serveur.', { type: 'error' }); }
+    return;
+  }
+  toast(sub.active
+    ? `Ton accès est actif jusqu'au ${frDate(sub.until)}. ${sub.provider === 'robux' ? "Rachète l'abonnement dans le jeu Roblox pour le prolonger." : "Il ne sera pas renouvelé."}`
+    : 'Ton abonnement est terminé.', { duration: 7000 });
 }
 
 function renderSubBand() {
-  const active = subActive(), btn = $('#sub-band-btn');
-  $('#sub-band-title').textContent = active ? 'Tu es abonné' : `${SUB.label} — ${eurLabel(SUB.monthlyPrice)} / mois`;
+  const sub = me && me.subscription, active = !!(sub && sub.active), btn = $('#sub-band-btn');
+  $('#sub-band-title').textContent = active ? 'Tu es abonné' : `${SUB.label} — ${isRobux() ? rbxLabel(subRobux()) + ` / ${RBX_DAYS} jours` : eurLabel(SUB.monthlyPrice) + ' / mois'}`;
   $('#sub-band-text').textContent = active
-    ? 'Tous les assets et leurs mises à jour sont en téléchargement gratuit pour toi.'
-    : 'Tous les assets (modèles, scripts, UI…) et toutes leurs mises à jour. Désabonnement en 1 clic.';
+    ? `Tous les assets et leurs mises à jour sont en téléchargement gratuit pour toi. ${sub.renews ? `Prochain renouvellement le ${frDate(sub.until)}.` : `Accès jusqu'au ${frDate(sub.until)}.`}`
+    : 'Tous les assets (modèles, scripts, UI…) et toutes leurs mises à jour. ' + (isRobux() ? `${RBX_DAYS} jours par achat dans le jeu Roblox.` : 'Avec PayPal, désabonnement en 1 clic.');
   btn.className = active ? 'btn btn-ghost btn-sm' : 'btn btn-primary btn-sm';
-  btn.innerHTML = active ? 'Gérer mon abonnement' : ic('discord', 16) + "S'abonner";
-  btn.onclick = () => (active ? openPortal() : startCheckout(null, 'subscription', btn));
+  btn.innerHTML = active ? 'Gérer mon abonnement' : (isRobux() ? ic('robux', 16) + "S'abonner en Robux" : ic('cart', 16) + "S'abonner avec PayPal");
+  btn.onclick = () => (active ? manageSubscription() : startCheckout(null, 'sub', btn));
 }
 
 async function refreshMe() {
@@ -3939,7 +4141,7 @@ function openProduct(id, keepState) {
   $('#product-pay').onclick = (e) => {
     const access = accessFor(a);
     if (access && access.level === 'latest') return downloadAsset(a, e.currentTarget);
-    startCheckout(a, currentPay === 'sub' ? 'subscription' : currentPay, e.currentTarget);
+    startCheckout(a, currentPay, e.currentTarget);
   };
   $('#product-add').onclick = () => addToCart(a.id, currentPay, true);
   $('#own-download').onclick = (e) => downloadAsset(a, e.currentTarget);
@@ -4077,7 +4279,7 @@ function updateCartBar() {
 const SESSION_KEY = 'exiozz_discord_session';
 // Au retour de Discord ou du paiement, les infos arrivent dans le # de l'URL.
 const hashParams = new URLSearchParams(window.location.hash.slice(1));
-const paidReturn = hashParams.get('paid') === '1';
+const paidStatus = hashParams.get('paid'); // '1' payé, 'cancel' annulé, 'error' échec
 let currentUser = null;
 if (hashParams.get('token')) {
   currentUser = { id: hashParams.get('discord_id'), name: hashParams.get('discord_user'), avatar: hashParams.get('discord_avatar'), token: hashParams.get('token') };
@@ -4086,7 +4288,7 @@ if (hashParams.get('token')) {
   try { const saved = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); if (saved && saved.token) currentUser = saved; } catch (e) {}
 }
 if (hashParams.get('login_error')) setTimeout(() => toast('Connexion Discord impossible, réessaie.', { type: 'error' }), 400);
-if (hashParams.get('token') || paidReturn || hashParams.get('login_error')) history.replaceState({}, '', location.pathname + location.search);
+if (hashParams.get('token') || paidStatus || hashParams.get('login_error')) history.replaceState({}, '', location.pathname + location.search);
 
 const apiBase = () => DATA.discord.backendAuthUrl.replace('/auth/discord', '');
 const authFetch = (url, opts = {}) => fetch(url, {
@@ -4127,7 +4329,11 @@ function updateNavDiscord() {
 }
 updateNavDiscord();
 renderSubBand();
-refreshMe().then(() => { if (paidReturn && currentUser) waitForAccess(); });
+refreshMe().then(() => {
+  if (paidStatus === '1' && currentUser) waitForAccess();
+  else if (paidStatus === 'cancel') toast('Paiement annulé : tu n\'as pas été débité.', { duration: 4000 });
+  else if (paidStatus === 'error') toast("Le paiement n'a pas abouti. Si tu as été débité, contacte Exiozz sur Discord avec ton reçu PayPal.", { type: 'error', duration: 9000 });
+});
 navDiscordBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   if (!currentUser) { startLogin(); return; }
@@ -4136,7 +4342,7 @@ navDiscordBtn.addEventListener('click', (e) => {
   if (open) setSettings(false);
 });
 $('#nav-my-cart-link').addEventListener('click', (e) => { e.preventDefault(); closeDropdown(); openCart(); });
-$('#nav-sub-link').addEventListener('click', (e) => { e.preventDefault(); closeDropdown(); openPortal(); });
+$('#nav-sub-link').addEventListener('click', (e) => { e.preventDefault(); closeDropdown(); manageSubscription(); });
 $('#nav-discord-logout').addEventListener('click', (e) => { e.preventDefault(); logout(); });
 document.addEventListener('click', () => { closeDropdown(); setSettings(false); setMobileMenu(false); });
 
@@ -4229,7 +4435,7 @@ function cmdkCommands() {
   if (currentUser) {
     list.push({ g: 'Actions', label: 'Ouvrir mon panier', icon: 'cart', k: 'commander achat', run: openCart });
     list.push({ g: 'Actions', label: 'Mes commandes', icon: 'box', k: 'suivi historique', run: openOrders });
-    if (me && me.subscription) list.push({ g: 'Actions', label: 'Gérer mon abonnement', icon: 'star', k: 'abonnement desabonner resilier', run: openPortal });
+    if (me && me.subscription) list.push({ g: 'Actions', label: 'Gérer mon abonnement', icon: 'star', k: 'abonnement desabonner resilier', run: manageSubscription });
   } else {
     list.push({ g: 'Actions', label: 'Se connecter avec Discord', icon: 'discord', k: 'login compte connexion', run: startLogin });
   }

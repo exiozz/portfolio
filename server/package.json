@@ -2,12 +2,12 @@
   "name": "exiozz-server",
   "version": "1.0.0",
   "private": true,
-  "description": "Serveur du shop Exiozz : connexion Discord, commandes, avis, paiements Lemon Squeezy et téléchargements.",
+  "description": "Serveur du shop Exiozz : connexion Discord, commandes, avis, paiements PayPal et Robux, téléchargements.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "migrate": "node migrate.js",
-    "lemon-ids": "node lemon-ids.js"
+    "paypal-setup": "node paypal-setup.js"
   },
   "engines": {
     "node": ">=18"

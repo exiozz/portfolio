@@ -1648,6 +1648,27 @@
       color: var(--faint);
     }
 
+    .footer-legal {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 18px;
+    }
+
+    .footer-legal a {
+      color: var(--faint);
+      transition: color .2s;
+    }
+
+    .footer-legal a:hover,
+    .cart-note a:hover {
+      color: var(--ink);
+    }
+
+    .cart-note a {
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
     .float-stack {
       position: fixed;
       right: 20px;
@@ -3595,7 +3616,9 @@
         </div>
       </div>
       <div class="footer-bottom"><span>© <span id="year"></span> — Shop d'assets Roblox &amp;
-        Web.</span><span>Astuce : <kbd id="footer-kbd">Ctrl K</kbd> pour naviguer rapidement</span></div>
+        Web.</span><nav class="footer-legal" aria-label="Informations légales"><a href="mentions-legales.html">Mentions légales</a><a
+          href="cgu.html">CGU</a><a href="cgv.html">CGV</a><a href="confidentialite.html">Confidentialité</a><a
+          href="confidentialite.html#cookies">Cookies</a></nav><span>Astuce : <kbd id="footer-kbd">Ctrl K</kbd> pour naviguer rapidement</span></div>
     </div>
   </footer>
 
@@ -3689,7 +3712,8 @@
       <div class="drawer-foot">
         <div class="cart-total"><span>Total estimé</span><strong id="cart-total-value">0 €</strong></div>
         <p class="cart-note">Le paiement est confirmé sur Discord avant l'envoi des fichiers. Les liens de
-          téléchargement te sont transmis après validation.</p>
+          téléchargement te sont transmis après validation. Tout achat payé est définitif et non remboursable. En commandant, tu acceptes les <a href="cgv.html"
+            target="_blank">conditions de vente</a>.</p>
         <div class="cart-actions">
           <button class="btn btn-primary btn-block" id="cart-order">Commander</button>
           <button class="btn btn-ghost btn-block" id="cart-clear">Vider le panier</button>

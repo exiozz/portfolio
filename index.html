@@ -472,6 +472,10 @@ footer { padding: 56px 0 40px; border-top: 1px solid var(--line); }
 .footer-links a:hover, .link-btn:hover { color: var(--ink); }
 .link-btn { background: none; border: 0; cursor: pointer; font-family: inherit; }
 .footer-bottom { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 36px; padding-top: 26px; border-top: 1px solid var(--line); font-size: 14px; color: var(--faint); }
+.footer-legal { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.footer-legal a { color: var(--faint); transition: color .2s; }
+.footer-legal a:hover, .cart-note a:hover { color: var(--ink); }
+.cart-note a { text-decoration: underline; text-underline-offset: 2px; }
 .float-stack {
   position: fixed; right: 20px; bottom: 88px;   /* ← 88 au lieu de 20 */
   z-index: 90; display: flex; flex-direction: column; gap: 10px;
@@ -1490,7 +1494,7 @@ body.has-cart-bar .toasts { bottom: calc(92px + env(safe-area-inset-bottom, 0px)
         <button class="link-btn" id="footer-settings">Personnaliser l'affichage</button>
       </div>
     </div>
-    <div class="footer-bottom"><span>© <span id="year"></span> — Portfolio développeur Roblox &amp; Web.</span><span>Astuce : <kbd id="footer-kbd">Ctrl K</kbd> pour naviguer rapidement</span></div>
+    <div class="footer-bottom"><span>© <span id="year"></span> — Portfolio développeur Roblox &amp; Web.</span><nav class="footer-legal" aria-label="Informations légales"><a href="mentions-legales.html">Mentions légales</a><a href="cgu.html">CGU</a><a href="cgv.html">CGV</a><a href="confidentialite.html">Confidentialité</a><a href="confidentialite.html#cookies">Cookies</a></nav><span>Astuce : <kbd id="footer-kbd">Ctrl K</kbd> pour naviguer rapidement</span></div>
   </div>
 </footer>
 
@@ -1613,7 +1617,7 @@ body.has-cart-bar .toasts { bottom: calc(92px + env(safe-area-inset-bottom, 0px)
     <div class="drawer-body" id="cart-items"></div>
     <div class="drawer-foot">
       <div class="cart-total"><span>Total estimé</span><strong id="cart-total-value">0 €</strong></div>
-      <p class="cart-note">Prix de départ : le montant final est confirmé avec toi sur Discord avant le début du travail.</p>
+      <p class="cart-note">Prix de départ : le montant final est confirmé avec toi sur Discord avant le début du travail. Tout paiement est définitif et non remboursable. En commandant, tu acceptes les <a href="cgv.html" target="_blank">conditions de vente</a>.</p>
       <div class="cart-actions">
         <button class="btn btn-primary btn-block" id="cart-order">Commander</button>
         <button class="btn btn-ghost btn-block" id="cart-clear">Vider le panier</button>

@@ -2686,6 +2686,43 @@
         gap: 4px;
       }
     }
+    .sub-pill {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 8px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #5865F2;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      vertical-align: middle;
+    }
+
+    .sub-banner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 24px;
+      padding: 16px 18px;
+      border-radius: var(--r-btn);
+      background: color-mix(in srgb, var(--ok) 12%, transparent);
+      border: 1px solid color-mix(in srgb, var(--ok) 40%, transparent);
+    }
+
+    .sub-banner svg {
+      color: var(--ok);
+    }
+
+    .sub-banner b {
+      display: block;
+      font-size: 15px;
+    }
+
+    .sub-banner small {
+      color: var(--muted);
+      font-size: 13px;
+    }
   </style>
 </head>
 
@@ -2697,6 +2734,7 @@
   "tagline": "Des assets prêts à l'emploi, testés et documentés — pour lancer ton projet plus vite.",
   "robuxRate": 80,
   "commercialMultiplier": 2.5,
+  "subscription": { "label": "Abonnement Exiozz+", "monthlyPrice": 8 },
   "discord": {
     "clientId": "1540486396287000626",
     "backendAuthUrl": "https://exiozz-discord-auth--tomokari35.replit.app/auth/discord",
@@ -2791,7 +2829,7 @@
     "category": "ui",
     "desc": "Un kit d'interface sombre et moderne : menus, HUD, inventaire, boutique, notifications.",
     "fullDesc": "Un pack complet de plus de 40 composants d'interface pensés pour les jeux d'école et de simulation de vie sur Roblox.\n\nChaque écran est livré en haute résolution (PNG + SVG), avec un système modulaire de panneaux, boutons, jauges et fenêtres facilement réutilisables. Les fichiers sources Figma sont inclus pour que tu puisses modifier ce que tu veux, et un thème clair/sombre est fourni pour chaque élément.",
-    "price": 8,
+    "price": 5,
     "tags": ["UI", "Roblox"],
     "image": "https://i.imgur.com/QG0DPKz.png",
     "formats": ["RBXL"],
@@ -3105,14 +3143,31 @@
         <h2 id="product-title"></h2>
         <div class="tag-row" id="product-tags"></div>
         <p class="modal-desc" id="product-desc"></p>
-        <div class="license-label" id="license-label">Choisis ta licence</div>
-        <div class="license-grid" id="license-grid" role="radiogroup" aria-labelledby="license-label">
-          <button type="button" class="license-option" data-license="personal" role="radio" aria-checked="true">
-          <b>Personnelle</b><small>Projet non monétisé</small><span class="lic-price" data-lic="personal"></span>
-        </button>
-          <button type="button" class="license-option" data-license="commercial" role="radio" aria-checked="false">
-          <b>Commerciale</b><small>Projet monétisé / client</small><span class="lic-price" data-lic="commercial"></span>
-        </button>
+        <div id="license-block">
+          <div class="license-label" id="license-label">Choisis ta licence</div>
+          <div class="license-grid" id="license-grid" role="radiogroup" aria-labelledby="license-label">
+            <button type="button" class="license-option" data-license="personal" role="radio" aria-checked="true">
+              <b>Personnelle</b><small>Projet non monétisé</small><span class="lic-price" data-lic="personal"></span>
+            </button>
+            <button type="button" class="license-option" data-license="commercial" role="radio" aria-checked="false">
+              <b>Commerciale</b><small>Projet monétisé / client</small><span class="lic-price" data-lic="commercial"></span>
+            </button>
+          </div>
+        </div>
+        <div id="pay-block">
+          <div class="license-label" id="pay-label">Mode de paiement</div>
+          <div class="license-grid" id="pay-grid" role="radiogroup" aria-labelledby="pay-label">
+            <button type="button" class="license-option" data-pay="once" role="radio" aria-checked="true">
+              <b>Paiement en 1 fois</b><small>Achat définitif de cet asset</small><span class="lic-price" id="pay-once-price"></span>
+            </button>
+            <button type="button" class="license-option" data-pay="sub" role="radio" aria-checked="false">
+              <b>Abonnement<span class="sub-pill">Discord</span></b><small>Tous les liens de téléchargement gratuits</small><span class="lic-price" id="pay-sub-price"></span>
+            </button>
+          </div>
+        </div>
+        <div class="sub-banner" id="sub-banner" hidden>
+          <span data-icon="check" data-size="22"></span>
+          <div><b>Tu es abonné</b><small>Le lien de téléchargement de cet asset est gratuit pour toi.</small></div>
         </div>
         <dl class="facts">
           <div class="fact">
@@ -3568,9 +3623,11 @@ function productCard(a, i) {
         ${old}
       </div>
       <div class="product-actions">
-        <button class="btn btn-primary btn-sm btn-cart-toggle ${inCart ? 'in-cart' : ''}" data-id="${esc(a.id)}" aria-pressed="${inCart}">
+        ${subscription.active
+          ? `<button class="btn btn-primary btn-sm btn-view" data-id="${esc(a.id)}">${ic('download', 16)} Télécharger</button>`
+          : `<button class="btn btn-primary btn-sm btn-cart-toggle ${inCart ? 'in-cart' : ''}" data-id="${esc(a.id)}" aria-pressed="${inCart}">
           ${inCart ? ic('check', 16) + ' Dans le panier' : ic('plus', 16) + ' Ajouter'}
-        </button>
+        </button>`}
         <button class="btn btn-ghost btn-sm btn-view" data-id="${esc(a.id)}">Détails</button>
       </div>
     </div>
@@ -3613,6 +3670,64 @@ searchClear.addEventListener('click', () => {
 
 let currentProductId = null;
 let currentLicense = 'personal';
+let currentPay = 'once';
+let subscription = { active: false };
+const SUB = DATA.subscription || { label: 'Abonnement', monthlyPrice: 8 };
+
+function updatePayUI(a) {
+  const mult = currentLicense === 'commercial' ? COMMERCIAL_MULT : 1;
+  $('#pay-once-price').textContent = priceLabel(a.price * mult);
+  $('#pay-sub-price').textContent = priceLabel(SUB.monthlyPrice) + ' / mois';
+  $$('#pay-grid .license-option').forEach((b) => b.setAttribute('aria-checked', b.dataset.pay === currentPay));
+  $('#sub-banner').hidden = !subscription.active;
+  $('#pay-block').hidden = subscription.active;
+  $('#license-block').hidden = subscription.active || currentPay === 'sub';
+}
+
+function toggleSubscription(a) {
+  if (!currentUser) { needLogin("L'abonnement nécessite d'être connecté avec Discord."); return; }
+  const existing = cart.find((it) => it.type === 'subscription');
+  if (existing) {
+    cart = cart.filter((it) => it !== existing);
+    toast('Abonnement retiré du panier.', { duration: 2500 });
+  } else {
+    cart.push({
+      id: 'subscription', productId: 'subscription', type: 'subscription', qty: 1,
+      title: SUB.label + ' (mensuel)',
+      priceEur: SUB.monthlyPrice, priceRobux: robuxOf(SUB.monthlyPrice)
+    });
+    toast('Abonnement ajouté au panier.', { type: 'success', action: openCart, label: 'Voir le panier', duration: 4000 });
+  }
+  renderCart(); renderProducts();
+  if (a) updateModalAddState(a);
+}
+
+async function downloadAsset(a) {
+  if (!currentUser) { needLogin('Connecte-toi avec Discord pour télécharger.'); return; }
+  const btn = $('#product-add'); btn.disabled = true;
+  try {
+    const res = await fetch(`${apiBase()}/api/download/${encodeURIComponent(a.id)}?discordId=${encodeURIComponent(currentUser.id)}`);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !/^https:\/\//i.test(data.url || '')) { toast(data.error || 'Lien de téléchargement indisponible.', { type: 'error' }); return; }
+    window.open(data.url, '_blank', 'noopener');
+    toast('Téléchargement lancé.', { type: 'success', duration: 2500 });
+  } catch (e) {
+    toast('Impossible de contacter le serveur.', { type: 'error' });
+  } finally { btn.disabled = false; }
+}
+
+async function checkSubscription() {
+  subscription = { active: false };
+  if (currentUser) {
+    try {
+      const res = await fetch(`${apiBase()}/api/subscription/${encodeURIComponent(currentUser.id)}`);
+      if (res.ok) { const d = await res.json(); subscription = { active: !!d.active, expiresAt: d.expiresAt }; }
+    } catch (e) {}
+  }
+  updateNavDiscord();
+  renderProducts();
+  if (currentProductId) openProduct(currentProductId, true);
+}
 
 function openProduct(id, keepLicense) {
   const a = ASSETS.find((x) => x.id === id); if (!a) return;
@@ -3633,7 +3748,9 @@ function openProduct(id, keepLicense) {
   $('#product-updated').textContent = a.updated || '—';
   $('#product-includes').innerHTML = (a.includes || []).map((f) => `<li>${ic('check', 16)}<span>${esc(f)}</span></li>`).join('') || '<li>Documentation incluse</li>';
 
+  if (!keepLicense) currentPay = 'once';
   updateLicenseUI(a);
+  updatePayUI(a);
 
   const q = encodeURIComponent(`Question — ${a.title}`);
   $('#product-quote').href = `mailto:${DATA.contactEmail}?subject=${q}`;
@@ -3642,10 +3759,18 @@ function openProduct(id, keepLicense) {
     btn.onclick = () => {
       currentLicense = btn.dataset.license;
       updateLicenseUI(a);
+      updatePayUI(a);
       updateModalAddState(a);
     };
   });
-  $('#product-add').onclick = () => addToCart(a.id, currentLicense, true);
+  $$('.license-option', $('#pay-grid')).forEach((btn) => {
+    btn.onclick = () => { currentPay = btn.dataset.pay; updatePayUI(a); updateModalAddState(a); };
+  });
+  $('#product-add').onclick = () => {
+    if (subscription.active) return downloadAsset(a);
+    if (currentPay === 'sub') return toggleSubscription(a);
+    addToCart(a.id, currentLicense, true);
+  };
 
   const modalEl = $('.modal', $('#product-modal'));
   if (modalEl) modalEl.scrollTop = 0;
@@ -3665,6 +3790,12 @@ function updateLicenseUI(a) {
 function updateModalAddState(a) {
   const btn = $('#product-add');
   if (!btn || !a) return;
+  if (subscription.active) { btn.innerHTML = ic('download', 18) + 'Télécharger gratuitement'; return; }
+  if (currentPay === 'sub') {
+    const has = cart.some((it) => it.type === 'subscription');
+    btn.innerHTML = has ? ic('check', 18) + 'Abonnement dans le panier' : ic('discord', 18) + "S'abonner — " + priceLabel(SUB.monthlyPrice) + ' / mois';
+    return;
+  }
   const inCart = cart.some((it) => it.productId === a.id && it.license === currentLicense);
   btn.innerHTML = inCart
     ? ic('check', 18) + 'Dans le panier'
@@ -3718,7 +3849,9 @@ function renderCart() {
     box.innerHTML = cart.map((item, idx) => {
       const price = (currentCurrency === 'robux' ? (item.priceRobux || Math.round((item.priceEur || 0) * DATA.robuxRate / 5) * 5) : (item.priceEur || 0)) * (item.qty || 1);
       total += price;
-      const lic = item.license ? `<span class="lic">${item.license === 'commercial' ? 'Licence commerciale' : 'Licence personnelle'}</span>` : '';
+      const lic = item.type === 'subscription'
+        ? '<span class="lic">Mensuel · liens de téléchargement gratuits</span>'
+        : item.license ? `<span class="lic">${item.license === 'commercial' ? 'Licence commerciale' : 'Licence personnelle'}</span>` : '';
       return `<div class="cart-item">
         <span class="title">${esc(item.title)}${lic}</span>
         <span class="price">${fmt(price)} ${cur}</span>
@@ -3767,7 +3900,7 @@ $('#cart-order').addEventListener('click', async () => {
     const price = (currentCurrency === 'robux' ? (item.priceRobux || Math.round((item.priceEur || 0) * DATA.robuxRate / 5) * 5) : (item.priceEur || 0)) * (item.qty || 1);
     total += price;
     const licLabel = item.license === 'commercial' ? ' (commerciale)' : '';
-    return { title: item.title + licLabel, price };
+    return { title: item.title + licLabel, price, type: item.type || 'asset', productId: item.productId };
   });
   const original = orderBtn.textContent;
   orderBtn.textContent = 'Envoi en cours…'; orderBtn.disabled = true;
@@ -3814,7 +3947,7 @@ function startLogin() {
     if (name && name.trim()) {
       currentUser = { id: 'test_' + Date.now(), name: name.trim(), avatar: '', discordHandle: name.trim() };
       try { localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser)); } catch (e) {}
-      updateNavDiscord(); renderCart();
+      updateNavDiscord(); renderCart(); checkSubscription();
     }
     return;
   }
@@ -3825,7 +3958,7 @@ function needLogin(msg) { toast(msg, { action: startLogin, label: 'Se connecter'
 function logout() {
   currentUser = null;
   try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
-  updateNavDiscord(); renderCart();
+  updateNavDiscord(); renderCart(); checkSubscription();
 }
 const navDiscordBtn = $('#nav-discord-btn'), navDiscordLabel = $('#nav-discord-label'), navDropdown = $('#nav-discord-dropdown');
 function closeDropdown() { navDropdown.classList.remove('active'); navDiscordBtn.setAttribute('aria-expanded', 'false'); }
@@ -3834,7 +3967,7 @@ function updateNavDiscord() {
   if (currentUser) {
     navDiscordLabel.textContent = currentUser.name;
     const avatar = safeImg(currentUser.avatar) || 'https://cdn.discordapp.com/embed/avatars/0.png';
-    headerEl.innerHTML = `<img src="${esc(avatar)}" alt=""><div><div class="dh-name">${esc(currentUser.name)}</div>${isAdmin() ? '<span class="dh-badge">Admin</span>' : ''}</div>`;
+    headerEl.innerHTML = `<img src="${esc(avatar)}" alt=""><div><div class="dh-name">${esc(currentUser.name)}</div>${isAdmin() ? '<span class="dh-badge">Admin</span>' : ''}${subscription.active ? ' <span class="dh-badge">Abonné</span>' : ''}</div>`;
   } else {
     navDiscordLabel.textContent = 'Se connecter'; headerEl.innerHTML = '';
   }
@@ -3844,6 +3977,7 @@ function updateNavDiscord() {
   updateCartBar();
 }
 updateNavDiscord();
+checkSubscription();
 navDiscordBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   if (!currentUser) { startLogin(); return; }

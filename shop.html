@@ -1850,6 +1850,68 @@
       padding: 30px 34px 34px;
     }
 
+    .modal-media video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+      display: block;
+    }
+
+    .media-strip {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 12px 34px 2px;
+      scrollbar-width: thin;
+    }
+
+    .media-thumb {
+      position: relative;
+      flex: none;
+      width: 76px;
+      height: 56px;
+      padding: 0;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--bg-2);
+      opacity: .7;
+      transition: opacity .2s, border-color .2s;
+    }
+
+    .media-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .media-thumb:hover {
+      opacity: 1;
+    }
+
+    .media-thumb[aria-selected="true"] {
+      opacity: 1;
+      border-color: var(--accent);
+    }
+
+    .media-thumb .play {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: rgba(0, 0, 0, .35);
+      color: #fff;
+    }
+
+    @media (max-width: 640px) {
+      .media-strip {
+        padding: 10px 16px 2px;
+      }
+    }
+
     .modal-body h2 {
       font-size: 30px;
     }
@@ -2870,7 +2932,7 @@
     { "id": "discord",   "label": "Discord",    "icon": "bot" }
   ],
   "stats": [
-    { "value": 1,  "suffix": "",  "label": "Assets en ligne" },
+    { "value": 2,  "suffix": "",  "label": "Assets en ligne" },
     { "value": 20, "suffix": "+", "label": "Téléchargements" },
     { "value": 100, "suffix": "%", "label": "Documentés" }
   ],
@@ -2883,6 +2945,58 @@
     { "q": "Puis-je payer en Robux ?", "a": "Oui : choisis R$ en haut du catalogue, puis « Payer en Robux » sur l'asset. Tu achètes son Game Pass sur Roblox, tu indiques ton pseudo, et Exiozz t'envoie le lien sur Discord après vérification." }
   ],
   "assets": [
+    {
+      "id": "stylized-forest-pack",
+      "title": "Stylized Forest Pack",
+      "category": "models",
+      "desc": "18 assets nature stylisés : arbres, buissons, rochers, champignons, fleurs… prêts pour Roblox.",
+      "fullDesc": "Un pack de 18 assets nature au style cartoon pour habiller tes maps Roblox : 6 arbres (chêne, pin, bouleau, automne…), buissons, souche, tronc, 3 rochers, champignons, fleurs, herbe et fougère.\n\nChaque modèle est exporté en FBX prêt à importer dans Roblox Studio, avec ses textures Color et Normal intégrées. Le nombre de triangles est maîtrisé pour garder de bonnes performances, même sur mobile.\n\nRegarde la vidéo de présentation et les rendus de chaque asset dans la galerie ci-dessus.",
+      "price": 10,
+      "tags": [
+        "Low Poly",
+        "Nature",
+        "FBX"
+      ],
+      "image": "assets/forest-pack/hero.jpg",
+      "video": "assets/forest-pack/presentation.mp4",
+      "videoPoster": "assets/forest-pack/presentation-poster.jpg",
+      "gallery": [
+        "assets/forest-pack/planche.jpg",
+        "assets/forest-pack/renders/tree-oak-01.webp",
+        "assets/forest-pack/renders/tree-oak-02.webp",
+        "assets/forest-pack/renders/tree-autumn-01.webp",
+        "assets/forest-pack/renders/tree-birch-01.webp",
+        "assets/forest-pack/renders/tree-pine-01.webp",
+        "assets/forest-pack/renders/tree-pine-02.webp",
+        "assets/forest-pack/renders/bush-01.webp",
+        "assets/forest-pack/renders/bush-berry-01.webp",
+        "assets/forest-pack/renders/stump-01.webp",
+        "assets/forest-pack/renders/log-01.webp",
+        "assets/forest-pack/renders/rock-large-01.webp",
+        "assets/forest-pack/renders/rock-medium-01.webp",
+        "assets/forest-pack/renders/rock-small-01.webp",
+        "assets/forest-pack/renders/mushroom-red-01.webp",
+        "assets/forest-pack/renders/mushroom-brown-cluster-01.webp",
+        "assets/forest-pack/renders/flowers-01.webp",
+        "assets/forest-pack/renders/grass-01.webp",
+        "assets/forest-pack/renders/fern-01.webp"
+      ],
+      "formats": [
+        "FBX"
+      ],
+      "version": "1.0",
+      "updated": "12 nov. 2026",
+      "includes": [
+        "18 modèles 3D stylisés",
+        "FBX prêts pour Roblox",
+        "Textures Color + Normal",
+        "Optimisés pour le mobile"
+      ],
+      "badge": "Nouveau",
+      "badgeType": "new",
+      "sales": 0,
+      "enabled": true
+    },
     {
       "id": "lowpoly-weapons",
       "title": "Low Poly Weapons Pack",
@@ -3258,7 +3372,8 @@
   <div class="overlay" id="product-modal" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="product-title">
       <button class="icon-btn modal-close" id="product-close" aria-label="Fermer"><span data-icon="x"></span></button>
-      <div class="modal-media"><img id="product-img" src="" alt=""></div>
+      <div class="modal-media"><img id="product-img" src="" alt=""><video id="product-video" controls playsinline preload="none" hidden></video></div>
+      <div class="media-strip" id="media-strip" role="tablist" aria-label="Galerie" hidden></div>
       <div class="modal-body">
         <h2 id="product-title"></h2>
         <div class="tag-row" id="product-tags"></div>
@@ -3396,6 +3511,13 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const safeImg = (u) => (/^https:\/\//i.test(u || '') ? u : '');
+// Avatar Discord : lien complet, ou simple code d'avatar à transformer en lien
+const avatarUrl = (id, av) => {
+  if (/^https:\/\//i.test(av || '') && !/\/null\.(png|gif|webp)/i.test(av)) return av;
+  if (/^(a_)?[0-9a-f]{32}$/i.test(av || '') && /^\d+$/.test(id || '')) return `https://cdn.discordapp.com/avatars/${id}/${av}.png?size=128`;
+  return '';
+};
+const AVATAR_FALLBACK = "this.onerror=null;this.src='https://cdn.discordapp.com/embed/avatars/0.png'";
 const fmt = (n) => Number(n).toLocaleString('fr-FR');
 const root = document.documentElement;
 const reduced = () => root.dataset.motion === 'reduced' || matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -3462,6 +3584,7 @@ function openOv(el, focusSel) {
   setTimeout(() => { const f = focusSel ? $(focusSel, el) : $('button, a[href]', el); if (f) f.focus({ preventScroll: true }); }, 60);
 }
 function closeOv(el) {
+  $$('video', el).forEach((v) => v.pause());
   el.classList.remove('active');
   el.setAttribute('aria-hidden', 'true');
   if (!$('.overlay.active')) document.body.classList.remove('no-scroll');
@@ -3838,14 +3961,41 @@ function updatePayUI(a) {
   updateModalAddState(a);
 }
 
+// Images et vidéo de la fiche : chemins du site (assets/...) ou liens https
+const safeMedia = (u) => (/^https:\/\//i.test(u || '') || (/^[\w\-./]+$/.test(u || '') && !String(u).includes('..')) ? u : '');
+let currentProductMedia = null;
+function renderProductMedia(a) {
+  currentProductMedia = a.id;
+  const img = $('#product-img'), video = $('#product-video'), strip = $('#media-strip');
+  const media = [];
+  if (safeMedia(a.image)) media.push({ type: 'image', src: a.image });
+  if (safeMedia(a.video)) media.push({ type: 'video', src: a.video, poster: safeMedia(a.videoPoster) || safeMedia(a.image) });
+  (a.gallery || []).filter(safeMedia).forEach((src) => media.push({ type: 'image', src }));
+  img.parentElement.style.display = media.length ? '' : 'none';
+  const show = (i) => {
+    const m = media[i]; if (!m) return;
+    if (m.type === 'video') {
+      img.hidden = true; video.hidden = false;
+      if (video.getAttribute('src') !== m.src) { video.poster = m.poster || ''; video.src = m.src; }
+    } else {
+      video.pause(); video.hidden = true; img.hidden = false;
+      img.src = m.src; img.alt = a.title;
+    }
+    $$('.media-thumb', strip).forEach((t) => t.setAttribute('aria-selected', +t.dataset.i === i));
+  };
+  video.pause(); video.removeAttribute('src'); video.load();
+  strip.hidden = media.length < 2;
+  strip.innerHTML = media.length < 2 ? '' : media.map((m, i) => `<button type="button" class="media-thumb" role="tab" data-i="${i}" aria-label="${m.type === 'video' ? 'Vidéo de présentation' : 'Image ' + (i + 1)}"><img src="${esc(m.type === 'video' ? (m.poster || '') : m.src)}" alt="" loading="lazy">${m.type === 'video' ? `<span class="play">${ic('arrow-right', 20)}</span>` : ''}</button>`).join('');
+  $$('.media-thumb', strip).forEach((t) => t.addEventListener('click', () => show(+t.dataset.i)));
+  show(0);
+}
+
 function openProduct(id, keepLicense) {
   const a = ASSETS.find((x) => x.id === id); if (!a) return;
   currentProductId = id;
   if (!keepLicense) currentOffer = 'single';
 
-  const img = $('#product-img');
-  if (safeImg(a.image)) { img.src = a.image; img.alt = a.title; img.parentElement.style.display = ''; }
-  else img.parentElement.style.display = 'none';
+  if (!keepLicense || currentProductMedia !== a.id) renderProductMedia(a);
 
   $('#product-title').textContent = a.title;
   $('#product-tags').innerHTML = (a.tags || []).map((t) => `<span class="tag">${esc(t)}</span>`).join('');
@@ -4101,8 +4251,8 @@ function updateNavDiscord() {
   const headerEl = $('#dropdown-header');
   if (currentUser) {
     navDiscordLabel.textContent = currentUser.name;
-    const avatar = safeImg(currentUser.avatar) || 'https://cdn.discordapp.com/embed/avatars/0.png';
-    headerEl.innerHTML = `<img src="${esc(avatar)}" alt=""><div><div class="dh-name">${esc(currentUser.name)}</div>${isAdmin() ? '<span class="dh-badge">Admin</span>' : ''}${subscription.active ? ' <span class="dh-badge">Abonné</span>' : ''}</div>`;
+    const avatar = avatarUrl(currentUser.id, currentUser.avatar) || 'https://cdn.discordapp.com/embed/avatars/0.png';
+    headerEl.innerHTML = `<img src="${esc(avatar)}" alt="" onerror="${AVATAR_FALLBACK}"><div><div class="dh-name">${esc(currentUser.name)}</div>${isAdmin() ? '<span class="dh-badge">Admin</span>' : ''}${subscription.active ? ' <span class="dh-badge">Abonné</span>' : ''}</div>`;
   } else {
     navDiscordLabel.textContent = 'Se connecter'; headerEl.innerHTML = '';
   }

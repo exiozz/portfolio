@@ -2699,8 +2699,42 @@
       vertical-align: middle;
     }
 
+    .offer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 640px) {
+      .offer-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .offer-note {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: var(--r-btn);
+      border: 1px solid var(--line);
+      background: var(--bg-2);
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .offer-note b {
+      color: var(--ink);
+    }
+
+    .offer-note.warn {
+      background: color-mix(in srgb, var(--star) 12%, transparent);
+      border-color: color-mix(in srgb, var(--star) 42%, transparent);
+      color: var(--ink);
+    }
+
     .gp-note {
-      margin-top: 24px;
+      margin-top: 12px;
       padding: 12px 14px;
       border-radius: var(--r-btn);
       border: 1px solid var(--accent-line);
@@ -2817,6 +2851,8 @@
   "tagline": "Des assets prêts à l'emploi, testés et documentés — pour lancer ton projet plus vite.",
   "robuxRate": 80,
   "commercialMultiplier": 2.5,
+  "passMultiplier": 1.6,
+  "subscription": { "label": "Abonnement total", "monthlyPrice": 15 },
   "discord": {
     "clientId": "1540486396287000626",
     "backendAuthUrl": "https://exiozz-discord-auth--tomokari35.replit.app/auth/discord",
@@ -2842,7 +2878,8 @@
     { "q": "Comment reçois-je mon asset après l'achat ?", "a": "Après validation du paiement, tu reçois un lien de téléchargement direct sur Discord, avec les fichiers sources et la documentation." },
     { "q": "Puis-je modifier les assets ?", "a": "Oui, tu peux les modifier librement. Tu ne peux simplement pas les revendre tels quels ou les redistribuer." },
     { "q": "Y a-t-il un support après l'achat ?", "a": "Oui, un support de 14 jours est inclus pour toute question technique ou problème d'installation." },
-    { "q": "Les mises à jour sont-elles gratuites ?", "a": "Un achat te donne la version actuelle de l'asset. Les futures mises à jour ne sont pas incluses : pour les avoir, il faudra racheter l'asset." },
+    { "q": "Les mises à jour sont-elles incluses ?", "a": "Ça dépend de l'offre. Achat simple : la version actuelle uniquement, il faudra racheter l'asset pour les versions suivantes. Pass asset : l'asset + toutes ses futures mises à jour, à vie. Abonnement total : tous les assets et toutes leurs mises à jour, tant que ton abonnement est actif." },
+    { "q": "Comment marche l'abonnement total ?", "a": "Tu le commandes via le panier : Exiozz te contacte sur Discord pour le paiement, puis te donne accès à tout le catalogue et aux mises à jour pendant un mois. Il n'y a aucun prélèvement automatique : pour continuer, tu le recommandes le mois suivant." },
     { "q": "Puis-je payer en Robux ?", "a": "Oui : choisis R$ en haut du catalogue, puis « Payer en Robux » sur l'asset. Tu achètes son Game Pass sur Roblox, tu indiques ton pseudo, et Exiozz t'envoie le lien sur Discord après vérification." }
   ],
   "assets": [
@@ -3226,6 +3263,19 @@
         <h2 id="product-title"></h2>
         <div class="tag-row" id="product-tags"></div>
         <p class="modal-desc" id="product-desc"></p>
+        <div class="license-label" id="offer-label">Choisis ton offre</div>
+        <div class="offer-grid" id="offer-grid" role="radiogroup" aria-labelledby="offer-label">
+          <button type="button" class="license-option" data-offer="single" role="radio" aria-checked="true">
+            <b>Achat simple</b><small>Version actuelle uniquement</small><span class="lic-price" id="offer-single-price"></span>
+          </button>
+          <button type="button" class="license-option" data-offer="pass" role="radio" aria-checked="false">
+            <b>Pass asset</b><small>+ toutes les mises à jour, à vie</small><span class="lic-price" id="offer-pass-price"></span>
+          </button>
+          <button type="button" class="license-option" data-offer="sub" role="radio" aria-checked="false">
+            <b>Abonnement total</b><small>Tout le catalogue + mises à jour</small><span class="lic-price" id="offer-sub-price"></span>
+          </button>
+        </div>
+        <p class="offer-note" id="offer-note"></p>
         <p class="gp-note" id="gp-note" hidden></p>
         <dl class="facts">
           <div class="fact">
@@ -3637,7 +3687,7 @@ let currentSort = 'popular';
 let searchQuery = '';
 
 let cart = [];
-try { const c = JSON.parse(localStorage.getItem(CART_KEY) || '[]'); if (Array.isArray(c)) cart = c.filter((i) => i && i.id && i.title && i.type !== 'subscription'); } catch (e) {}
+try { const c = JSON.parse(localStorage.getItem(CART_KEY) || '[]'); if (Array.isArray(c)) cart = c.filter((i) => i && i.id && i.title && (i.offer || i.type !== 'subscription')).map((i) => (i.offer ? i : { ...i, offer: 'single', id: i.productId + '::single' })); } catch (e) {}
 const saveCart = () => { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {} };
 
 const robuxOf = (eur) => Math.round(eur * DATA.robuxRate / 5) * 5;
@@ -3754,20 +3804,44 @@ function checkSubscription() {}
 
 const gamepassOf = (a) => (/^https:\/\/(www\.)?roblox\.com\//i.test(a.gamepassUrl || '') ? a.gamepassUrl : '');
 const robuxPriceOf = (a) => (a.robuxPrice != null ? +a.robuxPrice : robuxOf(a.price));
-const payWithGamepass = (a) => currentCurrency === 'robux' && !!gamepassOf(a);
+// Offres : 'single' (achat simple), 'pass' (avec mises à jour), 'sub' (abonnement total). Tout passe par une commande Discord.
+let currentOffer = 'single';
+const SUB = DATA.subscription || { label: 'Abonnement total', monthlyPrice: 15 };
+const passPriceOf = (a) => (a.passPrice != null ? +a.passPrice : Math.round(a.price * (DATA.passMultiplier || 1.6)));
+const offerPriceEur = (a, offer) => (offer === 'sub' ? SUB.monthlyPrice : offer === 'pass' ? passPriceOf(a) : a.price);
+const offerPriceLabel = (a, offer) => (offer === 'single' && currentCurrency === 'robux'
+  ? fmt(robuxPriceOf(a)) + ' R$'
+  : priceLabel(offerPriceEur(a, offer))) + (offer === 'sub' ? ' / mois' : '');
+// Le Game Pass ne concerne que l'achat simple
+const payWithGamepass = (a) => currentCurrency === 'robux' && currentOffer === 'single' && !!gamepassOf(a);
+
+function offerNoteHtml(a) {
+  if (currentOffer === 'single') return `<b>Achat simple :</b> tu reçois la version ${esc(a.version || 'actuelle')} uniquement. Les futures mises à jour <b>ne sont pas incluses</b> : pour les avoir, il faudra racheter l'asset (ou prendre le Pass).`;
+  if (currentOffer === 'pass') return `<b>Pass asset :</b> ${esc(a.title)} + toutes ses futures mises à jour, à vie. Tu paies une seule fois.`;
+  return `<b>${esc(SUB.label)} :</b> tous les assets du shop (modèles, scripts, UI…) et toutes leurs mises à jour pendant un mois. Exiozz te contacte sur Discord pour le paiement. Aucun prélèvement automatique : tu le recommandes chaque mois si tu veux continuer.`;
+}
 
 function updatePayUI(a) {
+  $('#offer-single-price').textContent = offerPriceLabel(a, 'single');
+  $('#offer-pass-price').textContent = offerPriceLabel(a, 'pass');
+  $('#offer-sub-price').textContent = offerPriceLabel(a, 'sub');
+  $$('#offer-grid .license-option').forEach((b) => b.setAttribute('aria-checked', b.dataset.offer === currentOffer));
+  const offerNote = $('#offer-note');
+  offerNote.innerHTML = offerNoteHtml(a);
+  offerNote.classList.toggle('warn', currentOffer === 'single');
+
   const note = $('#gp-note');
   note.hidden = currentCurrency !== 'robux';
-  note.innerHTML = gamepassOf(a)
+  note.innerHTML = payWithGamepass(a)
     ? `<b>Paiement en Robux :</b> achète le Game Pass de cet asset sur Roblox (${fmt(robuxPriceOf(a))} R$), puis indique ton pseudo Roblox. Exiozz vérifie ton achat et t'envoie le lien sur Discord.`
-    : `<b>Paiement en Robux :</b> ajoute l'asset au panier et commande. Exiozz te contacte sur Discord pour le paiement en Robux.`;
+    : `<b>Paiement en Robux :</b> ajoute l'offre au panier et commande. Exiozz te contacte sur Discord pour le paiement en Robux.`;
+  updateModalAddState(a);
 }
 
 function openProduct(id, keepLicense) {
   const a = ASSETS.find((x) => x.id === id); if (!a) return;
   currentProductId = id;
-  if (!keepLicense) currentLicense = 'personal';
+  if (!keepLicense) currentOffer = 'single';
 
   const img = $('#product-img');
   if (safeImg(a.image)) { img.src = a.image; img.alt = a.title; img.parentElement.style.display = ''; }
@@ -3787,7 +3861,10 @@ function openProduct(id, keepLicense) {
 
   const q = encodeURIComponent(`Question — ${a.title}`);
   $('#product-quote').href = `mailto:${DATA.contactEmail}?subject=${q}`;
-  $('#product-add').onclick = () => (payWithGamepass(a) ? openGamepass(a) : addToCart(a.id, currentLicense, true));
+  $$('#offer-grid .license-option').forEach((btn) => {
+    btn.onclick = () => { currentOffer = btn.dataset.offer; updatePayUI(a); };
+  });
+  $('#product-add').onclick = () => (payWithGamepass(a) ? openGamepass(a) : addToCart(a.id, currentOffer, true));
 
   const modalEl = $('.modal', $('#product-modal'));
   if (modalEl && !keepLicense) modalEl.scrollTop = 0;
@@ -3799,7 +3876,9 @@ function updateModalAddState(a) {
   const btn = $('#product-add');
   if (!btn || !a) return;
   if (payWithGamepass(a)) { btn.innerHTML = ic('robux', 18) + `Payer en Robux — ${fmt(robuxPriceOf(a))} R$`; return; }
-  const inCart = cart.some((it) => it.productId === a.id && it.license === currentLicense);
+  const inCart = currentOffer === 'sub'
+    ? cart.some((it) => it.offer === 'subscription')
+    : cart.some((it) => it.productId === a.id && it.offer === currentOffer);
   btn.innerHTML = inCart
     ? ic('check', 18) + 'Dans le panier'
     : ic('cart', 18) + 'Ajouter au panier';
@@ -3847,30 +3926,38 @@ $('#gp-done').addEventListener('click', async () => {
   } finally { btn.disabled = false; btn.textContent = "J'ai payé"; }
 });
 
-function addToCart(productId, license, fromModal) {
-  if (!currentUser) { needLogin('Connecte-toi avec Discord pour ajouter des assets au panier.'); return; }
-  const a = ASSETS.find((x) => x.id === productId); if (!a) return;
-  const existing = cart.find((it) => it.productId === productId && it.license === license);
+// offer : 'single' | 'pass' | 'sub'
+function addToCart(productId, offer, fromModal) {
+  if (!currentUser) { needLogin('Connecte-toi avec Discord pour ajouter au panier.'); return; }
+  const refreshModal = () => { if (fromModal && currentProductId) updateModalAddState(ASSETS.find((x) => x.id === currentProductId)); };
+  if (offer === 'sub') {
+    const existing = cart.find((it) => it.offer === 'subscription');
+    if (existing) {
+      cart = cart.filter((it) => it !== existing);
+      toast(`${SUB.label} retiré du panier.`, { duration: 2500 });
+    } else {
+      cart.push({ id: 'subscription', productId: 'subscription', offer: 'subscription', title: SUB.label, priceEur: SUB.monthlyPrice, priceRobux: robuxOf(SUB.monthlyPrice), qty: 1, type: 'subscription' });
+      toast(`${SUB.label} ajouté au panier.`, { type: 'success', action: openCart, label: 'Voir le panier', duration: 4000 });
+    }
+    renderCart(); refreshModal(); updateCartBar();
+    return;
+  }
+  const a = ASSETS.find((x) => x.id === productId); if (!a || (offer !== 'single' && offer !== 'pass')) return;
+  const existing = cart.find((it) => it.productId === productId && it.offer === offer);
+  cart = cart.filter((it) => it.productId !== productId); // une seule offre par asset
   if (existing) {
-    cart = cart.filter((it) => it !== existing);
     toast(`« ${a.title} » retiré du panier.`, { duration: 2500 });
   } else {
-    const priceEur = Math.round(a.price * (license === 'commercial' ? COMMERCIAL_MULT : 1));
+    const priceEur = offerPriceEur(a, offer);
     cart.push({
-      id: productId + '::' + license,
-      productId,
-      title: a.title,
-      license,
-      priceEur,
-      priceRobux: Math.round(priceEur * DATA.robuxRate / 5) * 5,
-      qty: 1,
-      type: 'asset'
+      id: productId + '::' + offer, productId, offer, version: a.version, title: a.title,
+      priceEur, priceRobux: offer === 'single' ? robuxPriceOf(a) : robuxOf(priceEur), qty: 1, type: 'asset'
     });
     toast(`« ${a.title} » ajouté au panier.`, { type: 'success', action: openCart, label: 'Voir le panier', duration: 4000 });
   }
   renderProducts();
   renderCart();
-  if (fromModal) updateModalAddState(a);
+  refreshModal();
   updateCartBar();
 }
 
@@ -3893,7 +3980,11 @@ function renderCart() {
     box.innerHTML = cart.map((item, idx) => {
       const price = (currentCurrency === 'robux' ? (item.priceRobux || Math.round((item.priceEur || 0) * DATA.robuxRate / 5) * 5) : (item.priceEur || 0)) * (item.qty || 1);
       total += price;
-      const lic = item.type === 'subscription' ? '<span class="lic">Mensuel · liens de téléchargement gratuits</span>' : '';
+      const lic = item.offer === 'subscription'
+        ? '<span class="lic">1 mois · tout le catalogue + mises à jour</span>'
+        : item.offer === 'pass'
+          ? '<span class="lic">Pass — mises à jour incluses</span>'
+          : `<span class="lic">Achat simple — v${esc(item.version || '')} uniquement, sans mises à jour</span>`;
       return `<div class="cart-item">
         <span class="title">${esc(item.title)}${lic}</span>
         <span class="price">${fmt(price)} ${cur}</span>
@@ -3914,7 +4005,7 @@ document.addEventListener('click', (e) => {
   if (!btn) return;
   const asset = ASSETS.find((x) => x.id === btn.dataset.id);
   if (asset && payWithGamepass(asset)) { openProduct(asset.id); return; }
-  addToCart(btn.dataset.id, 'personal', false);
+  addToCart(btn.dataset.id, 'single', false);
 });
 
 $('#product-grid').addEventListener('click', (e) => {
@@ -3943,8 +4034,8 @@ $('#cart-order').addEventListener('click', async () => {
   const items = cart.map((item) => {
     const price = (currentCurrency === 'robux' ? (item.priceRobux || Math.round((item.priceEur || 0) * DATA.robuxRate / 5) * 5) : (item.priceEur || 0)) * (item.qty || 1);
     total += price;
-    const licLabel = item.license === 'commercial' ? ' (commerciale)' : '';
-    return { title: item.title + licLabel, price, type: item.type || 'asset', productId: item.productId };
+    const label = item.offer === 'subscription' ? ' (1 mois)' : item.offer === 'pass' ? ' (Pass mises à jour)' : ` (achat simple v${item.version || ''})`;
+    return { title: item.title + label, price, type: item.type || 'asset', productId: item.productId, offer: item.offer };
   });
   const original = orderBtn.textContent;
   orderBtn.textContent = 'Envoi en cours…'; orderBtn.disabled = true;

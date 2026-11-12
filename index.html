@@ -391,6 +391,16 @@ kbd { font: 500 12px/1 var(--font-code); padding: 4px 7px; border-radius: 6px; b
 .project-body { padding: 24px 26px 28px; display: flex; flex-direction: column; flex: 1; }
 .project-body h3 { font-size: 21px; letter-spacing: -.035em; }
 .project-body > p { margin-top: 10px; color: var(--muted); font-size: 15.5px; }
+.photos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.photo-card { position: relative; aspect-ratio: 4 / 3; padding: 0; overflow: hidden; cursor: zoom-in; background: var(--bg-2); border: 1px solid var(--line); border-radius: calc(var(--r) + 2px); transition: border-color .25s, box-shadow .25s; }
+.photo-card:hover { border-color: var(--line-2); box-shadow: var(--shadow-md); }
+.photo-card img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .8s var(--ease); }
+.photo-card:hover img { transform: scale(1.04); }
+.photo-card figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 28px 16px 12px; font-size: 14px; font-weight: 600; text-align: left; color: #fff; background: linear-gradient(transparent, rgba(0, 0, 0, .65)); }
+.photo-modal { width: min(100%, 1100px); }
+.photo-modal .modal-media { aspect-ratio: auto; border-bottom: 0; }
+.photo-modal .modal-media img { height: auto; max-height: calc(100dvh - 120px); object-fit: contain; }
+.photo-modal figcaption { padding: 14px 20px; font-weight: 600; border-top: 1px solid var(--line); }
 .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .tag { padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line-2); font-size: 12.5px; font-weight: 500; color: var(--muted); }
 .project-cta { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; min-height: 300px; padding: 32px; text-align: center; border: 1.5px dashed var(--line-2); border-radius: calc(var(--r) + 2px); color: var(--muted); transition: border-color .25s, background-color .25s, color .25s; }
@@ -1137,6 +1147,16 @@ body.has-cart-bar .toasts { bottom: calc(92px + env(safe-area-inset-bottom, 0px)
     "roblox": "https://yaskofr.vercel.app/",
     "enabled": true
   }],
+  "photos": [
+    { "src": "assets/lava-mounts-pack/hero.jpg", "title": "Lava Mounts Pack", "enabled": true },
+    { "src": "assets/forest-pack/hero.jpg", "title": "Forest Pack", "enabled": true },
+    { "src": "assets/lava-mounts-pack/renders/dragon-side.webp", "title": "Dragon de lave", "enabled": true },
+    { "src": "assets/lava-mounts-pack/renders/horse-side.webp", "title": "Cheval de lave", "enabled": true },
+    { "src": "assets/lava-mounts-pack/renders/portal.webp", "title": "Portail", "enabled": true },
+    { "src": "assets/forest-pack/renders/tree-autumn-01.webp", "title": "Arbre d'automne", "enabled": true },
+    { "src": "assets/forest-pack/planche.jpg", "title": "Forest Pack — planche", "enabled": true },
+    { "src": "assets/lava-mounts-pack/planche.jpg", "title": "Lava Mounts Pack — planche", "enabled": true }
+  ],
   "faq": [
     { "q": "Comment se passe le paiement ?", "a": "Un acompte est demandé avant le début du projet, le solde à la livraison. Détails précisés dans le devis." },
     { "q": "Quels sont les délais moyens ?", "a": "Un GFX prend quelques heures à un jour, un système simple quelques jours, un jeu complet plusieurs semaines — le délai est toujours annoncé avant de commencer." },
@@ -1414,9 +1434,16 @@ body.has-cart-bar .toasts { bottom: calc(92px + env(safe-area-inset-bottom, 0px)
   <div class="wrap">
     <div class="sec-head reveal">
       <h2 class="sec-title">Quelques réalisations</h2>
-      <p class="sec-desc">Clique sur un projet pour voir les détails.</p>
+      <p class="sec-desc" id="projects-desc">Clique sur un projet pour voir les détails.</p>
+    </div>
+    <div class="pricing-bar reveal">
+      <div class="seg" id="projects-toggle" role="group" aria-label="Affichage des réalisations">
+        <button data-view="projects" aria-pressed="true"><span data-icon="gamepad" data-size="15"></span>Projets</button>
+        <button data-view="photos" aria-pressed="false"><span data-icon="image" data-size="15"></span>Photos</button>
+      </div>
     </div>
     <div class="projects-grid stagger" id="projects-grid"></div>
+    <div class="photos-grid" id="photos-grid" hidden></div>
   </div>
 </section>
 
@@ -1559,6 +1586,14 @@ body.has-cart-bar .toasts { bottom: calc(92px + env(safe-area-inset-bottom, 0px)
     <b id="cb-total">0 €</b>
     <span class="cb-go">Voir le panier</span>
   </button>
+</div>
+
+<div class="overlay" id="photo-modal" aria-hidden="true">
+  <figure class="modal photo-modal" role="dialog" aria-modal="true" aria-label="Photo agrandie">
+    <button class="icon-btn modal-close" id="photo-close" aria-label="Fermer"><span data-icon="x"></span></button>
+    <div class="modal-media"><img id="photo-img" src="" alt=""></div>
+    <figcaption id="photo-caption"></figcaption>
+  </figure>
 </div>
 
 <div class="overlay" id="project-modal" aria-hidden="true">
@@ -1706,6 +1741,7 @@ const ICONS = {
   workflow: '<rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/>',
   help: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
   tag: '<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5"/>',
+  image: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/>',
   folder: '<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
   newspaper: '<path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/>',
   robux: '<path d="M12 2 3 7v10l9 5 9-5V7l-9-5zm0 2.3 6.5 3.6L12 11.6 5.5 7.9 12 4.3zM5 9.5l6 3.4v7.2l-6-3.4V9.5zm8 10.6v-7.2l6-3.4v7.2l-6 3.4z" fill="currentColor" stroke="none"/>',
@@ -2499,6 +2535,30 @@ function openModal(index) {
 $('#modal-close').addEventListener('click', () => closeOv(projectModal));
 projectsGrid.addEventListener('click', (e) => { const c = e.target.closest('.project-card'); if (c) openModal(+c.dataset.index); });
 projectsGrid.addEventListener('keydown', (e) => { if (e.key !== 'Enter' && e.key !== ' ') return; const c = e.target.closest('.project-card'); if (c) { e.preventDefault(); openModal(+c.dataset.index); } });
+
+/* ---------- PHOTOS ---------- */
+const activePhotos = (DATA.photos || []).filter((p) => p.enabled !== false);
+const photosGrid = $('#photos-grid'), photoModal = $('#photo-modal');
+photosGrid.innerHTML = activePhotos.length
+  ? activePhotos.map((p, i) => `<figure><button type="button" class="photo-card" data-index="${i}" aria-label="Agrandir la photo ${esc(p.title || '')}"><img src="${esc(p.src)}" alt="${esc(p.title || '')}" loading="lazy">${p.title ? `<figcaption>${esc(p.title)}</figcaption>` : ''}</button></figure>`).join('')
+  : '<div class="empty-note" style="grid-column:1/-1">Aucune photo pour le moment.</div>';
+photosGrid.addEventListener('click', (e) => {
+  const c = e.target.closest('.photo-card'); if (!c) return;
+  const p = activePhotos[+c.dataset.index];
+  const img = $('#photo-img'); img.src = p.src; img.alt = p.title || '';
+  $('#photo-caption').textContent = p.title || '';
+  $('#photo-caption').hidden = !p.title;
+  openOv(photoModal, '#photo-close');
+});
+$('#photo-close').addEventListener('click', () => closeOv(photoModal));
+$('#projects-toggle').addEventListener('click', (e) => {
+  const btn = e.target.closest('button'); if (!btn) return;
+  const photos = btn.dataset.view === 'photos';
+  $$('#projects-toggle button').forEach((b) => b.setAttribute('aria-pressed', b === btn));
+  projectsGrid.hidden = photos;
+  photosGrid.hidden = !photos;
+  $('#projects-desc').textContent = photos ? 'Clique sur une photo pour l\'agrandir.' : 'Clique sur un projet pour voir les détails.';
+});
 
 /* ---------- COMMANDES ---------- */
 const ordersModal = $('#orders-modal'), ordersList = $('#orders-list');

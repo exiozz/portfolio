@@ -2763,7 +2763,7 @@
 
     .offer-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
       margin-top: 10px;
     }
@@ -2914,7 +2914,6 @@
   "robuxRate": 80,
   "commercialMultiplier": 2.5,
   "passMultiplier": 1.6,
-  "subscription": { "label": "Abonnement total", "monthlyPrice": 15 },
   "discord": {
     "clientId": "1540486396287000626",
     "backendAuthUrl": "https://exiozz-discord-auth--tomokari35.replit.app/auth/discord",
@@ -2940,8 +2939,7 @@
     { "q": "Comment reçois-je mon asset après l'achat ?", "a": "Après validation du paiement, tu reçois un lien de téléchargement direct sur Discord, avec les fichiers sources et la documentation." },
     { "q": "Puis-je modifier les assets ?", "a": "Oui, tu peux les modifier librement. Tu ne peux simplement pas les revendre tels quels ou les redistribuer." },
     { "q": "Y a-t-il un support après l'achat ?", "a": "Oui, un support de 14 jours est inclus pour toute question technique ou problème d'installation." },
-    { "q": "Les mises à jour sont-elles incluses ?", "a": "Ça dépend de l'offre. Achat simple : la version actuelle uniquement, il faudra racheter l'asset pour les versions suivantes. Pass asset : l'asset + toutes ses futures mises à jour, à vie. Abonnement total : tous les assets et toutes leurs mises à jour, tant que ton abonnement est actif." },
-    { "q": "Comment marche l'abonnement total ?", "a": "Tu le commandes via le panier : Exiozz te contacte sur Discord pour le paiement, puis te donne accès à tout le catalogue et aux mises à jour pendant un mois. Il n'y a aucun prélèvement automatique : pour continuer, tu le recommandes le mois suivant." },
+    { "q": "Les mises à jour sont-elles incluses ?", "a": "Ça dépend de l'offre. Achat simple : la version actuelle uniquement, il faudra racheter l'asset pour les versions suivantes. Pass asset : l'asset + toutes ses futures mises à jour, à vie, payé une seule fois." },
     { "q": "Puis-je payer en Robux ?", "a": "Oui : choisis R$ en haut du catalogue, puis « Payer en Robux » sur l'asset. Tu achètes son Game Pass sur Roblox, tu indiques ton pseudo, et Exiozz t'envoie le lien sur Discord après vérification." }
   ],
   "assets": [
@@ -3387,9 +3385,6 @@
           <button type="button" class="license-option" data-offer="pass" role="radio" aria-checked="false">
             <b>Pass asset</b><small>+ toutes les mises à jour, à vie</small><span class="lic-price" id="offer-pass-price"></span>
           </button>
-          <button type="button" class="license-option" data-offer="sub" role="radio" aria-checked="false">
-            <b>Abonnement total</b><small>Tout le catalogue + mises à jour</small><span class="lic-price" id="offer-sub-price"></span>
-          </button>
         </div>
         <p class="offer-note" id="offer-note"></p>
         <p class="gp-note" id="gp-note" hidden></p>
@@ -3811,7 +3806,7 @@ let currentSort = 'popular';
 let searchQuery = '';
 
 let cart = [];
-try { const c = JSON.parse(localStorage.getItem(CART_KEY) || '[]'); if (Array.isArray(c)) cart = c.filter((i) => i && i.id && i.title && (i.offer || i.type !== 'subscription')).map((i) => (i.offer ? i : { ...i, offer: 'single', id: i.productId + '::single' })); } catch (e) {}
+try { const c = JSON.parse(localStorage.getItem(CART_KEY) || '[]'); if (Array.isArray(c)) cart = c.filter((i) => i && i.id && i.title && i.offer !== 'subscription' && i.type !== 'subscription').map((i) => (i.offer ? i : { ...i, offer: 'single', id: i.productId + '::single' })); } catch (e) {}
 const saveCart = () => { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {} };
 
 const robuxOf = (eur) => Math.round(eur * DATA.robuxRate / 5) * 5;
@@ -3948,7 +3943,6 @@ function offerNoteHtml(a) {
 function updatePayUI(a) {
   $('#offer-single-price').textContent = offerPriceLabel(a, 'single');
   $('#offer-pass-price').textContent = offerPriceLabel(a, 'pass');
-  $('#offer-sub-price').textContent = offerPriceLabel(a, 'sub');
   $$('#offer-grid .license-option').forEach((b) => b.setAttribute('aria-checked', b.dataset.offer === currentOffer));
   const offerNote = $('#offer-note');
   offerNote.innerHTML = offerNoteHtml(a);
@@ -4352,7 +4346,7 @@ function cmdkCommands() {
   const list = [
     { g: 'Aller à', label: 'Accueil', icon: 'home', k: 'haut top debut', run: () => window.scrollTo({ top: 0, behavior: smooth() }) },
     { g: 'Aller à', label: 'Catalogue complet', icon: 'blocks', k: 'shop produits assets', run: goTo('#catalog') },
-    { g: 'Aller à', label: 'Questions fréquentes', icon: 'help', k: 'faq aide paiement abonnement', run: goTo('#faq') },
+    { g: 'Aller à', label: 'Questions fréquentes', icon: 'help', k: 'faq aide paiement mises a jour', run: goTo('#faq') },
     { g: 'Aller à', label: 'Contact', icon: 'mail', k: 'ecrire projet devis', run: goTo('#contact') },
     { g: 'Aller à', label: 'Retour au portfolio', icon: 'user', k: 'accueil services projets', run: () => { window.location.href = 'index.html'; } }
   ];

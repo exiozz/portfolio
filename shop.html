@@ -2966,6 +2966,28 @@
       color: var(--ink);
     }
 
+    .offer-tag {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 8px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--ok) 16%, transparent);
+      border: 1px solid color-mix(in srgb, var(--ok) 45%, transparent);
+      color: var(--ok);
+      font-size: 11px;
+      font-weight: 600;
+      vertical-align: 2px;
+    }
+
+    .offer-tag[hidden] {
+      display: none;
+    }
+
+    .offer-tip {
+      display: block;
+      margin-top: 8px;
+    }
+
     .offer-note.warn {
       background: color-mix(in srgb, var(--star) 12%, transparent);
       border-color: color-mix(in srgb, var(--star) 42%, transparent);
@@ -3161,6 +3183,7 @@
       "badge": "Nouveau",
       "badgeType": "new",
       "sales": 0,
+      "recommendSingle": true,
       "enabled": true
     },
     {
@@ -3214,6 +3237,7 @@
       "badge": "Nouveau",
       "badgeType": "new",
       "sales": 0,
+      "recommendSingle": true,
       "enabled": true
     },
     {
@@ -3293,6 +3317,7 @@
     "badge": "Best-seller",
     "badgeType": "hot",
     "sales": 10,
+    "recommendSingle": true,
     "enabled": true
     },
     {
@@ -3601,7 +3626,7 @@
         <div class="license-label" id="offer-label">Choisis ton offre</div>
         <div class="offer-grid" id="offer-grid" role="radiogroup" aria-labelledby="offer-label">
           <button type="button" class="license-option" data-offer="single" role="radio" aria-checked="true">
-            <b>Achat simple</b><small>Version actuelle uniquement</small><span class="lic-price" id="offer-single-price"></span>
+            <b>Achat simple <span class="offer-tag" id="offer-single-tag" hidden>Conseillé</span></b><small>Version actuelle uniquement</small><span class="lic-price" id="offer-single-price"></span>
           </button>
           <button type="button" class="license-option" data-offer="pass" role="radio" aria-checked="false">
             <b>Pass asset</b><small>+ toutes les mises à jour, à vie</small><span class="lic-price" id="offer-pass-price"></span>
@@ -4182,9 +4207,14 @@ const offerPriceLabel = (a, offer) => (offer === 'single' && currentCurrency ===
 // Le Game Pass ne concerne que l'achat simple
 const payWithGamepass = (a) => currentCurrency === 'robux' && currentOffer === 'single' && !!gamepassOf(a);
 
+// Conseil affiché sur les assets qui ne recevront que peu de mises à jour ("recommendSingle": true)
+const singleTip = (a) => (a.recommendSingle
+  ? `<span class="offer-tip"><b>Conseil :</b> le mieux est de prendre l'<b>Achat simple</b>. Cet asset ne recevra que peu de mises à jour, le Pass n'est donc pas vraiment utile ici.</span>`
+  : '');
+
 function offerNoteHtml(a) {
-  if (currentOffer === 'single') return `<b>Achat simple :</b> tu reçois la version ${esc(a.version || 'actuelle')} uniquement. Les futures mises à jour <b>ne sont pas incluses</b> : pour les avoir, il faudra racheter l'asset (ou prendre le Pass).`;
-  if (currentOffer === 'pass') return `<b>Pass asset :</b> ${esc(a.title)} + toutes ses futures mises à jour, à vie. Tu paies une seule fois.`;
+  if (currentOffer === 'single') return `<b>Achat simple :</b> tu reçois la version ${esc(a.version || 'actuelle')} uniquement. Les futures mises à jour <b>ne sont pas incluses</b> : pour les avoir, il faudra racheter l'asset (ou prendre le Pass).` + singleTip(a);
+  if (currentOffer === 'pass') return `<b>Pass asset :</b> ${esc(a.title)} + toutes ses futures mises à jour, à vie. Tu paies une seule fois.` + singleTip(a);
   return `<b>${esc(SUB.label)} :</b> tous les assets du shop (modèles, scripts, UI…) et toutes leurs mises à jour pendant un mois. Exiozz te contacte sur Discord pour le paiement. Aucun prélèvement automatique : tu le recommandes chaque mois si tu veux continuer.`;
 }
 
@@ -4192,6 +4222,7 @@ function updatePayUI(a) {
   $('#offer-single-price').textContent = offerPriceLabel(a, 'single');
   $('#offer-pass-price').textContent = offerPriceLabel(a, 'pass');
   $$('#offer-grid .license-option').forEach((b) => b.setAttribute('aria-checked', b.dataset.offer === currentOffer));
+  $('#offer-single-tag').hidden = !a.recommendSingle;
   const offerNote = $('#offer-note');
   offerNote.innerHTML = offerNoteHtml(a);
   offerNote.classList.toggle('warn', currentOffer === 'single');

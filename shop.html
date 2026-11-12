@@ -3841,7 +3841,7 @@ $('#pricing-toggle').addEventListener('click', (e) => {
   renderProducts();
   renderCart();
   renderSubBand();
-  if (currentProductId) openProduct(currentProductId, true);
+  if (currentProductId && $('#product-modal').classList.contains('active')) openProduct(currentProductId, true);
 });
 const searchInput = $('#shop-search-input'), searchClear = $('#shop-search-clear');
 searchInput.addEventListener('input', () => {

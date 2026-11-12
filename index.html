@@ -2523,7 +2523,7 @@ async function renderOrders() {
     ordersList.innerHTML = html; bindOrderAdminActions();
   } catch (e) { ordersList.innerHTML = `<div class="cart-empty">${esc(e.message)}</div>`; }
 }
-function openOrders() { if (!currentUser) { needLogin('Connecte-toi avec Discord pour voir tes commandes.'); return; } window.location.href = 'shop.html#orders'; }
+function openOrders() { if (!currentUser) { needLogin('Connecte-toi avec Discord pour voir tes commandes.'); return; } window.location.href = 'shop.html?commandes=1'; }
 function bindOrderAdminActions() {
   if (!isAdmin()) return;
   $$('.admin-order-status', ordersList).forEach((sel) => sel.addEventListener('change', async () => {

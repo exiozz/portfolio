@@ -4556,7 +4556,7 @@ function bindOrderAdminActions() {
 }
 $('#nav-my-orders-link').addEventListener('click', (e) => { e.preventDefault(); closeDropdown(); openOrders(); });
 $('#orders-close').addEventListener('click', () => closeOv(ordersModal));
-if (location.hash === '#orders') { history.replaceState({}, '', location.pathname + location.search); setTimeout(openOrders, 300); }
+if (location.hash === '#orders' || new URLSearchParams(location.search).get('commandes') === '1') { history.replaceState({}, '', location.pathname); setTimeout(openOrders, 300); }
 
 /* ---------- CMD+K ---------- */
 const cmdk = $('#cmdk'), cmdkInput = $('#cmdk-input'), cmdkList = $('#cmdk-list');

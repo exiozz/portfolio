@@ -2710,6 +2710,84 @@
       border: 1px solid color-mix(in srgb, var(--ok) 40%, transparent);
     }
 
+    .sub-banner .btn {
+      margin-left: auto;
+    }
+
+    .offer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .offer-note {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: var(--r-btn);
+      border: 1px solid var(--line);
+      background: var(--bg-2);
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .offer-note b {
+      color: var(--ink);
+    }
+
+    .offer-note.warn {
+      background: color-mix(in srgb, var(--star) 12%, transparent);
+      border-color: color-mix(in srgb, var(--star) 42%, transparent);
+      color: var(--ink);
+    }
+
+    .sub-band {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 22px;
+      padding: 16px 18px;
+      border-radius: var(--r);
+      background: var(--surface);
+      border: 1px solid var(--accent-line);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sub-band .sb-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sub-band b {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -.02em;
+    }
+
+    .sub-band small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 640px) {
+      .offer-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .sub-band {
+        flex-wrap: wrap;
+      }
+
+      .sub-band .btn {
+        width: 100%;
+      }
+    }
+
     .sub-banner svg {
       color: var(--ok);
     }
@@ -2734,7 +2812,8 @@
   "tagline": "Des assets prêts à l'emploi, testés et documentés — pour lancer ton projet plus vite.",
   "robuxRate": 80,
   "commercialMultiplier": 2.5,
-  "subscription": { "label": "Abonnement Exiozz+", "monthlyPrice": 8 },
+  "subscription": { "label": "Abonnement total", "monthlyPrice": 15 },
+  "passMultiplier": 1.6,
   "discord": {
     "clientId": "1540486396287000626",
     "backendAuthUrl": "https://exiozz-discord-auth--tomokari35.replit.app/auth/discord",
@@ -2757,11 +2836,12 @@
     { "value": 100, "suffix": "%", "label": "Documentés" }
   ],
   "faq": [
-    { "q": "Comment reçois-je mon asset après l'achat ?", "a": "Après validation du paiement, tu reçois un lien de téléchargement direct sur Discord, avec les fichiers sources et la documentation." },
+    { "q": "Comment reçois-je mon asset après l'achat ?", "a": "Paiement par carte : ton accès est débloqué tout de suite (bouton « Télécharger » sur le shop) et le lien t'est aussi envoyé en MP sur Discord. Commande via Discord : le lien est débloqué dès que Exiozz a validé ton paiement." },
     { "q": "Puis-je modifier les assets ?", "a": "Oui, tu peux les modifier librement. Tu ne peux simplement pas les revendre tels quels ou les redistribuer." },
     { "q": "Y a-t-il un support après l'achat ?", "a": "Oui, un support de 14 jours est inclus pour toute question technique ou problème d'installation." },
-    { "q": "Les mises à jour sont-elles gratuites ?", "a": "Oui, toutes les mises à jour futures d'un asset que tu as acheté te sont envoyées gratuitement." },
-    { "q": "Puis-je payer en Robux ?", "a": "Oui, la plupart des assets peuvent être réglés en euros ou en Robux — bascule la devise en haut du catalogue." }
+    { "q": "Les mises à jour sont-elles incluses ?", "a": "Ça dépend de l'offre. Achat simple : tu reçois la version actuelle uniquement, il faudra racheter l'asset pour avoir les versions suivantes. Pass asset : l'asset + toutes ses futures mises à jour, à vie, payé une seule fois. Abonnement total : tous les assets et toutes leurs mises à jour, tant que tu es abonné." },
+    { "q": "Comment me désabonner ?", "a": "En un clic : menu Discord en haut à droite → « Gérer mon abonnement ». Tu gardes l'accès jusqu'à la fin du mois déjà payé." },
+    { "q": "Puis-je payer en Robux ?", "a": "Oui, en passant par « Commander via Discord » : Exiozz valide ton paiement à la main et ton accès est débloqué ensuite. Le paiement par carte se fait en euros." }
   ],
   "assets": [
     {
@@ -2970,6 +3050,7 @@
             <div class="dropdown-header" id="dropdown-header"></div>
             <a href="#" id="nav-my-cart-link" role="menuitem" hidden><span data-icon="cart"></span>Mon panier</a>
             <a href="#" id="nav-my-orders-link" role="menuitem" hidden><span data-icon="box"></span>Mes commandes</a>
+            <a href="#" id="nav-sub-link" role="menuitem" hidden><span data-icon="star"></span>Gérer mon abonnement</a>
             <a href="#" id="nav-discord-logout" role="menuitem"><span data-icon="logout"></span>Se déconnecter</a>
           </div>
         </div>
@@ -3066,6 +3147,11 @@
         </select>
           </div>
         </div>
+        <div class="sub-band" id="sub-band">
+          <span class="tile"><span data-icon="star" data-size="22"></span></span>
+          <div class="sb-text"><b id="sub-band-title"></b><small id="sub-band-text"></small></div>
+          <button class="btn btn-primary btn-sm" id="sub-band-btn"></button>
+        </div>
         <p class="results-line" id="results-line"></p>
         <div class="product-grid stagger" id="product-grid"></div>
       </div>
@@ -3143,19 +3229,24 @@
         <div class="tag-row" id="product-tags"></div>
         <p class="modal-desc" id="product-desc"></p>
         <div id="pay-block">
-          <div class="license-label" id="pay-label">Mode de paiement</div>
-          <div class="license-grid" id="pay-grid" role="radiogroup" aria-labelledby="pay-label">
-            <button type="button" class="license-option" data-pay="once" role="radio" aria-checked="true">
-              <b>Paiement en 1 fois</b><small>Achat définitif de cet asset</small><span class="lic-price" id="pay-once-price"></span>
+          <div class="license-label" id="pay-label">Choisis ton offre</div>
+          <div class="offer-grid" id="pay-grid" role="radiogroup" aria-labelledby="pay-label">
+            <button type="button" class="license-option" data-pay="single" role="radio" aria-checked="true">
+              <b>Achat simple</b><small>Version actuelle uniquement</small><span class="lic-price" id="pay-single-price"></span>
+            </button>
+            <button type="button" class="license-option" data-pay="pass" role="radio" aria-checked="false">
+              <b>Pass asset</b><small>+ toutes les mises à jour, à vie</small><span class="lic-price" id="pay-pass-price"></span>
             </button>
             <button type="button" class="license-option" data-pay="sub" role="radio" aria-checked="false">
-              <b>Abonnement<span class="sub-pill">Discord</span></b><small>Tous les liens de téléchargement gratuits</small><span class="lic-price" id="pay-sub-price"></span>
+              <b>Abonnement total</b><small>Tout le catalogue + mises à jour</small><span class="lic-price" id="pay-sub-price"></span>
             </button>
           </div>
+          <p class="offer-note" id="offer-note"></p>
         </div>
-        <div class="sub-banner" id="sub-banner" hidden>
+        <div class="sub-banner" id="own-banner" hidden>
           <span data-icon="check" data-size="22"></span>
-          <div><b>Tu es abonné</b><small>Le lien de téléchargement de cet asset est gratuit pour toi.</small></div>
+          <div><b id="own-title"></b><small id="own-text"></small></div>
+          <button type="button" class="btn btn-ghost btn-sm" id="own-download" hidden></button>
         </div>
         <dl class="facts">
           <div class="fact">
@@ -3186,7 +3277,8 @@
           </div>
         </dl>
         <div class="modal-actions">
-          <button class="btn btn-primary" id="product-add"><span data-icon="cart" data-size="18"></span>Ajouter au panier</button>
+          <button class="btn btn-primary" id="product-pay"></button>
+          <button class="btn btn-ghost" id="product-add"></button>
           <a class="btn btn-ghost" id="product-quote" href="#"><span data-icon="mail" data-size="18"></span>Poser une
             question</a>
         </div>
@@ -3211,10 +3303,10 @@
       <div class="drawer-body" id="cart-items"></div>
       <div class="drawer-foot">
         <div class="cart-total"><span>Total estimé</span><strong id="cart-total-value">0 €</strong></div>
-        <p class="cart-note">Le paiement est confirmé sur Discord avant l'envoi des fichiers. Les liens de
-          téléchargement te sont transmis après validation.</p>
+        <p class="cart-note">Commande via Discord : Exiozz te contacte pour le paiement (Robux, PayPal…). Ton
+          accès est débloqué dès que le paiement est validé. Pour payer par carte tout de suite, passe par la fiche de l'asset.</p>
         <div class="cart-actions">
-          <button class="btn btn-primary btn-block" id="cart-order">Commander</button>
+          <button class="btn btn-primary btn-block" id="cart-order">Commander via Discord</button>
           <button class="btn btn-ghost btn-block" id="cart-clear">Vider le panier</button>
         </div>
       </div>
@@ -3547,7 +3639,7 @@ let currentSort = 'popular';
 let searchQuery = '';
 
 let cart = [];
-try { const c = JSON.parse(localStorage.getItem(CART_KEY) || '[]'); if (Array.isArray(c)) cart = c.filter((i) => i && i.id && i.title); } catch (e) {}
+try { const c = JSON.parse(localStorage.getItem(CART_KEY) || '[]'); if (Array.isArray(c)) cart = c.filter((i) => i && i.id && i.title && (i.offer === 'single' || i.offer === 'pass')); } catch (e) {}
 const saveCart = () => { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {} };
 
 const robuxOf = (eur) => Math.round(eur * DATA.robuxRate / 5) * 5;
@@ -3591,7 +3683,7 @@ function sortList(list) {
 }
 
 function productCard(a, i) {
-  const inCart = cart.some((it) => it.productId === a.id);
+  const access = accessFor(a);
   const badge = a.badge ? `<span class="product-badge ${a.badgeType === 'hot' ? 'hot' : a.badgeType === 'new' ? 'new' : ''}">${esc(a.badge)}</span>` : '';
   const old = a.oldPrice ? `<span class="product-price-old">${fmt(priceOf(a.oldPrice))} ${CURRENCY_LABEL[currentCurrency]}</span>` : '';
   return `
@@ -3611,11 +3703,9 @@ function productCard(a, i) {
         ${old}
       </div>
       <div class="product-actions">
-        ${subscription.active
+        ${access && access.level === 'latest'
           ? `<button class="btn btn-primary btn-sm btn-view" data-id="${esc(a.id)}">${ic('download', 16)} Télécharger</button>`
-          : `<button class="btn btn-primary btn-sm btn-cart-toggle ${inCart ? 'in-cart' : ''}" data-id="${esc(a.id)}" aria-pressed="${inCart}">
-          ${inCart ? ic('check', 16) + ' Dans le panier' : ic('plus', 16) + ' Ajouter'}
-        </button>`}
+          : `<button class="btn btn-primary btn-sm btn-view" data-id="${esc(a.id)}">${ic('cart', 16)} Acheter</button>`}
         <button class="btn btn-ghost btn-sm btn-view" data-id="${esc(a.id)}">Détails</button>
       </div>
     </div>
@@ -3657,68 +3747,172 @@ searchClear.addEventListener('click', () => {
 });
 
 let currentProductId = null;
-let currentLicense = 'personal';
-let currentPay = 'once';
-let subscription = { active: false };
-const SUB = DATA.subscription || { label: 'Abonnement', monthlyPrice: 8 };
+let currentPay = 'single';
+let me = null; // droits renvoyés par le serveur : { subscription, purchases }
+const SUB = DATA.subscription || { label: 'Abonnement total', monthlyPrice: 15 };
+const PASS_MULT = DATA.passMultiplier || 1.6;
+const passPriceOf = (a) => (a.passPrice != null ? +a.passPrice : Math.round(a.price * PASS_MULT));
+const eurLabel = (n) => fmt(n) + ' €';
+const subActive = () => !!(me && me.subscription && me.subscription.active);
+
+// Même règle que le serveur : 'latest' = accès à la dernière version, 'old' = seulement une ancienne version achetée
+function accessFor(a) {
+  if (!me) return null;
+  if (subActive()) return { level: 'latest', via: 'subscription' };
+  const mine = (me.purchases || []).filter((p) => p.assetId === a.id);
+  if (mine.some((p) => p.offer === 'pass')) return { level: 'latest', via: 'pass' };
+  const versions = mine.filter((p) => p.offer === 'single').map((p) => p.version);
+  if (versions.includes(a.version)) return { level: 'latest', via: 'single' };
+  if (versions.length) return { level: 'old', via: 'single', version: versions[versions.length - 1] };
+  return null;
+}
+
+function offerNote(a) {
+  if (currentPay === 'single') return { warn: true, html: `<b>Achat simple :</b> tu reçois la version ${esc(a.version || 'actuelle')} uniquement. Les futures mises à jour <b>ne sont pas incluses</b> : pour les avoir, il faudra racheter l'asset (ou prendre le Pass).` };
+  if (currentPay === 'pass') return { html: `<b>Pass asset :</b> ${esc(a.title)} + toutes ses futures mises à jour, à vie. Tu paies une seule fois.` };
+  return { html: `<b>${esc(SUB.label)} :</b> tous les assets du shop (modèles, scripts, UI…) et toutes leurs mises à jour, tant que tu es abonné. ${eurLabel(SUB.monthlyPrice)} par mois, connexion Discord obligatoire, désabonnement en 1 clic.` };
+}
 
 function updatePayUI(a) {
-  $('#pay-once-price').textContent = priceLabel(a.price);
-  $('#pay-sub-price').textContent = priceLabel(SUB.monthlyPrice) + ' / mois';
+  $('#pay-single-price').textContent = eurLabel(a.price);
+  $('#pay-pass-price').textContent = eurLabel(passPriceOf(a));
+  $('#pay-sub-price').textContent = eurLabel(SUB.monthlyPrice) + ' / mois';
   $$('#pay-grid .license-option').forEach((b) => b.setAttribute('aria-checked', b.dataset.pay === currentPay));
-  $('#sub-banner').hidden = !subscription.active;
-  $('#pay-block').hidden = subscription.active;
-}
+  const note = offerNote(a), noteEl = $('#offer-note');
+  noteEl.innerHTML = note.html;
+  noteEl.classList.toggle('warn', !!note.warn);
 
-function toggleSubscription(a) {
-  if (!currentUser) { needLogin("L'abonnement nécessite d'être connecté avec Discord."); return; }
-  const existing = cart.find((it) => it.type === 'subscription');
-  if (existing) {
-    cart = cart.filter((it) => it !== existing);
-    toast('Abonnement retiré du panier.', { duration: 2500 });
-  } else {
-    cart.push({
-      id: 'subscription', productId: 'subscription', type: 'subscription', qty: 1,
-      title: SUB.label + ' (mensuel)',
-      priceEur: SUB.monthlyPrice, priceRobux: robuxOf(SUB.monthlyPrice)
-    });
-    toast('Abonnement ajouté au panier.', { type: 'success', action: openCart, label: 'Voir le panier', duration: 4000 });
+  const access = accessFor(a);
+  $('#own-banner').hidden = !access;
+  $('#pay-block').hidden = !!access && access.level === 'latest';
+  if (access) {
+    const dl = $('#own-download');
+    if (access.level === 'latest') {
+      $('#own-title').textContent = access.via === 'subscription' ? 'Inclus dans ton abonnement' : access.via === 'pass' ? 'Tu as le Pass de cet asset' : 'Tu possèdes cet asset';
+      $('#own-text').textContent = access.via === 'single' ? `Version ${a.version} — les futures mises à jour ne sont pas incluses.` : 'Téléchargement gratuit, mises à jour incluses.';
+      dl.hidden = true;
+    } else {
+      $('#own-title').textContent = `Tu possèdes la version ${access.version}`;
+      $('#own-text').textContent = `La version ${a.version} est sortie : rachète l'asset ou prends le Pass pour l'avoir.`;
+      dl.hidden = false;
+      dl.innerHTML = ic('download', 16) + ' v' + esc(access.version);
+    }
   }
-  renderCart(); renderProducts();
-  if (a) updateModalAddState(a);
+  updateModalButtons(a);
 }
 
-async function downloadAsset(a) {
-  if (!currentUser) { needLogin('Connecte-toi avec Discord pour télécharger.'); return; }
-  const btn = $('#product-add'); btn.disabled = true;
+function updateModalButtons(a) {
+  const pay = $('#product-pay'), add = $('#product-add');
+  const access = accessFor(a);
+  if (access && access.level === 'latest') {
+    pay.innerHTML = ic('download', 18) + 'Télécharger';
+    add.hidden = true;
+    return;
+  }
+  if (currentPay === 'sub') {
+    pay.innerHTML = ic('discord', 18) + `S'abonner — ${eurLabel(SUB.monthlyPrice)} / mois`;
+    add.hidden = true;
+    return;
+  }
+  pay.innerHTML = ic('cart', 18) + `Payer par carte — ${eurLabel(currentPay === 'pass' ? passPriceOf(a) : a.price)}`;
+  add.hidden = false;
+  const inCart = cart.some((it) => it.productId === a.id && it.offer === currentPay);
+  add.innerHTML = inCart ? ic('check', 18) + 'Dans ta commande Discord' : ic('discord', 18) + 'Commander via Discord';
+}
+
+async function apiJson(res) {
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401) { sessionExpired(); throw Object.assign(new Error('session'), { silent: true }); }
+  return data;
+}
+
+async function startCheckout(a, offer, btn) {
+  if (!currentUser) { needLogin(offer === 'subscription' ? "L'abonnement nécessite d'être connecté avec Discord." : 'Connecte-toi avec Discord pour acheter.'); return; }
+  const old = btn.innerHTML;
+  btn.disabled = true; btn.textContent = 'Redirection vers le paiement…';
   try {
-    const res = await fetch(`${apiBase()}/api/download/${encodeURIComponent(a.id)}?discordId=${encodeURIComponent(currentUser.id)}`);
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !/^https:\/\//i.test(data.url || '')) { toast(data.error || 'Lien de téléchargement indisponible.', { type: 'error' }); return; }
-    window.open(data.url, '_blank', 'noopener');
-    toast('Téléchargement lancé.', { type: 'success', duration: 2500 });
+    const res = await authFetch(`${apiBase()}/api/checkout`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ offer, assetId: a ? a.id : undefined })
+    });
+    const data = await apiJson(res);
+    if (!res.ok || !/^https:\/\//i.test(data.url || '')) { toast(data.error || `Paiement indisponible (${res.status}).`, { type: 'error', duration: 6000 }); return; }
+    window.location.href = data.url;
   } catch (e) {
-    toast('Impossible de contacter le serveur.', { type: 'error' });
-  } finally { btn.disabled = false; }
+    if (!e.silent) toast('Impossible de contacter le serveur.', { type: 'error' });
+  } finally { btn.disabled = false; btn.innerHTML = old; }
 }
 
-async function checkSubscription() {
-  subscription = { active: false };
+async function downloadAsset(a, btn) {
+  if (!currentUser) { needLogin('Connecte-toi avec Discord pour télécharger.'); return; }
+  const win = window.open('about:blank', '_blank'); // ouvert tout de suite pour ne pas être bloqué
+  if (btn) btn.disabled = true;
+  try {
+    const res = await authFetch(`${apiBase()}/api/download/${encodeURIComponent(a.id)}`);
+    const data = await apiJson(res);
+    if (!res.ok || !/^https:\/\//i.test(data.url || '')) { if (win) win.close(); toast(data.error || 'Lien de téléchargement indisponible.', { type: 'error' }); return; }
+    if (win) { win.opener = null; win.location.href = data.url; } else window.location.href = data.url;
+    toast(data.outdated ? `Téléchargement de ta version (${data.version}).` : 'Téléchargement lancé.', { type: 'success', duration: 2500 });
+  } catch (e) {
+    if (win) win.close();
+    if (!e.silent) toast('Impossible de contacter le serveur.', { type: 'error' });
+  } finally { if (btn) btn.disabled = false; }
+}
+
+async function openPortal() {
+  if (!currentUser) { needLogin('Connecte-toi avec Discord pour gérer ton abonnement.'); return; }
+  try {
+    const res = await authFetch(`${apiBase()}/api/subscription/portal`);
+    const data = await apiJson(res);
+    if (!res.ok || !/^https:\/\//i.test(data.url || '')) { toast(data.error || 'Page de gestion indisponible.', { type: 'error' }); return; }
+    window.location.href = data.url;
+  } catch (e) { if (!e.silent) toast('Impossible de contacter le serveur.', { type: 'error' }); }
+}
+
+function renderSubBand() {
+  const active = subActive(), btn = $('#sub-band-btn');
+  $('#sub-band-title').textContent = active ? 'Tu es abonné' : `${SUB.label} — ${eurLabel(SUB.monthlyPrice)} / mois`;
+  $('#sub-band-text').textContent = active
+    ? 'Tous les assets et leurs mises à jour sont en téléchargement gratuit pour toi.'
+    : 'Tous les assets (modèles, scripts, UI…) et toutes leurs mises à jour. Désabonnement en 1 clic.';
+  btn.className = active ? 'btn btn-ghost btn-sm' : 'btn btn-primary btn-sm';
+  btn.innerHTML = active ? 'Gérer mon abonnement' : ic('discord', 16) + "S'abonner";
+  btn.onclick = () => (active ? openPortal() : startCheckout(null, 'subscription', btn));
+}
+
+async function refreshMe() {
+  me = null;
   if (currentUser) {
     try {
-      const res = await fetch(`${apiBase()}/api/subscription/${encodeURIComponent(currentUser.id)}`);
-      if (res.ok) { const d = await res.json(); subscription = { active: !!d.active, expiresAt: d.expiresAt }; }
+      const res = await authFetch(`${apiBase()}/api/me`);
+      if (res.status === 401) { sessionExpired(); return; }
+      if (res.ok) me = await res.json();
     } catch (e) {}
   }
   updateNavDiscord();
+  renderSubBand();
   renderProducts();
   if (currentProductId) openProduct(currentProductId, true);
 }
 
-function openProduct(id, keepLicense) {
+async function waitForAccess() {
+  toast('Paiement reçu ! Ton accès se débloque dans quelques secondes…', { type: 'success', duration: 6000 });
+  const before = JSON.stringify(me);
+  for (let i = 0; i < 12; i++) {
+    await new Promise((r) => setTimeout(r, 2500));
+    await refreshMe();
+    if (JSON.stringify(me) !== before) {
+      toast("C'est bon, ton accès est débloqué ! Le lien t'a aussi été envoyé en MP sur Discord.", { type: 'success', duration: 7000 });
+      return;
+    }
+  }
+  toast("Ton accès n'est pas encore apparu. Recharge la page dans une minute, ou contacte Exiozz sur Discord.", { duration: 9000 });
+}
+
+function openProduct(id, keepState) {
   const a = ASSETS.find((x) => x.id === id); if (!a) return;
   currentProductId = id;
-  if (!keepLicense) currentLicense = 'personal';
+  if (!keepState) currentPay = 'single';
 
   const img = $('#product-img');
   if (safeImg(a.image)) { img.src = a.image; img.alt = a.title; img.parentElement.style.display = ''; }
@@ -3734,67 +3928,47 @@ function openProduct(id, keepLicense) {
   $('#product-updated').textContent = a.updated || '—';
   $('#product-includes').innerHTML = (a.includes || []).map((f) => `<li>${ic('check', 16)}<span>${esc(f)}</span></li>`).join('') || '<li>Documentation incluse</li>';
 
-  if (!keepLicense) currentPay = 'once';
   updatePayUI(a);
 
   const q = encodeURIComponent(`Question — ${a.title}`);
   $('#product-quote').href = `mailto:${DATA.contactEmail}?subject=${q}`;
 
-  $$('.license-option', $('#pay-grid')).forEach((btn) => {
-    btn.onclick = () => { currentPay = btn.dataset.pay; updatePayUI(a); updateModalAddState(a); };
+  $$('#pay-grid .license-option').forEach((btn) => {
+    btn.onclick = () => { currentPay = btn.dataset.pay; updatePayUI(a); };
   });
-  $('#product-add').onclick = () => {
-    if (subscription.active) return downloadAsset(a);
-    if (currentPay === 'sub') return toggleSubscription(a);
-    addToCart(a.id, currentLicense, true);
+  $('#product-pay').onclick = (e) => {
+    const access = accessFor(a);
+    if (access && access.level === 'latest') return downloadAsset(a, e.currentTarget);
+    startCheckout(a, currentPay === 'sub' ? 'subscription' : currentPay, e.currentTarget);
   };
+  $('#product-add').onclick = () => addToCart(a.id, currentPay, true);
+  $('#own-download').onclick = (e) => downloadAsset(a, e.currentTarget);
 
   const modalEl = $('.modal', $('#product-modal'));
-  if (modalEl) modalEl.scrollTop = 0;
+  if (modalEl && !keepState) modalEl.scrollTop = 0;
   if (!$('#product-modal').classList.contains('active')) openOv($('#product-modal'), '#product-close');
-  updateModalAddState(a);
-}
-
-function updateModalAddState(a) {
-  const btn = $('#product-add');
-  if (!btn || !a) return;
-  if (subscription.active) { btn.innerHTML = ic('download', 18) + 'Télécharger gratuitement'; return; }
-  if (currentPay === 'sub') {
-    const has = cart.some((it) => it.type === 'subscription');
-    btn.innerHTML = has ? ic('check', 18) + 'Abonnement dans le panier' : ic('discord', 18) + "S'abonner — " + priceLabel(SUB.monthlyPrice) + ' / mois';
-    return;
-  }
-  const inCart = cart.some((it) => it.productId === a.id && it.license === currentLicense);
-  btn.innerHTML = inCart
-    ? ic('check', 18) + 'Dans le panier'
-    : ic('cart', 18) + 'Ajouter au panier';
 }
 $('#product-close').addEventListener('click', () => { closeOv($('#product-modal')); currentProductId = null; });
 
-function addToCart(productId, license, fromModal) {
-  if (!currentUser) { needLogin('Connecte-toi avec Discord pour ajouter des assets au panier.'); return; }
-  const a = ASSETS.find((x) => x.id === productId); if (!a) return;
-  const existing = cart.find((it) => it.productId === productId && it.license === license);
+// Panier = commande manuelle via Discord (achat simple ou Pass)
+function addToCart(productId, offer, fromModal) {
+  if (!currentUser) { needLogin('Connecte-toi avec Discord pour commander.'); return; }
+  const a = ASSETS.find((x) => x.id === productId); if (!a || (offer !== 'single' && offer !== 'pass')) return;
+  const existing = cart.find((it) => it.productId === productId && it.offer === offer);
+  cart = cart.filter((it) => it.productId !== productId);
   if (existing) {
-    cart = cart.filter((it) => it !== existing);
-    toast(`« ${a.title} » retiré du panier.`, { duration: 2500 });
+    toast(`« ${a.title} » retiré de ta commande.`, { duration: 2500 });
   } else {
-    const priceEur = Math.round(a.price * (license === 'commercial' ? COMMERCIAL_MULT : 1));
+    const priceEur = offer === 'pass' ? passPriceOf(a) : a.price;
     cart.push({
-      id: productId + '::' + license,
-      productId,
-      title: a.title,
-      license,
-      priceEur,
-      priceRobux: Math.round(priceEur * DATA.robuxRate / 5) * 5,
-      qty: 1,
-      type: 'asset'
+      id: productId + '::' + offer, productId, offer, version: a.version, title: a.title,
+      priceEur, priceRobux: robuxOf(priceEur), qty: 1, type: 'asset'
     });
-    toast(`« ${a.title} » ajouté au panier.`, { type: 'success', action: openCart, label: 'Voir le panier', duration: 4000 });
+    toast(`« ${a.title} » ajouté à ta commande Discord.`, { type: 'success', action: openCart, label: 'Voir', duration: 4000 });
   }
   renderProducts();
   renderCart();
-  if (fromModal) updateModalAddState(a);
+  if (fromModal) updateModalButtons(a);
   updateCartBar();
 }
 
@@ -3817,7 +3991,9 @@ function renderCart() {
     box.innerHTML = cart.map((item, idx) => {
       const price = (currentCurrency === 'robux' ? (item.priceRobux || Math.round((item.priceEur || 0) * DATA.robuxRate / 5) * 5) : (item.priceEur || 0)) * (item.qty || 1);
       total += price;
-      const lic = item.type === 'subscription' ? '<span class="lic">Mensuel · liens de téléchargement gratuits</span>' : '';
+      const lic = item.offer === 'pass'
+        ? '<span class="lic">Pass — mises à jour incluses</span>'
+        : `<span class="lic">Achat simple — v${esc(item.version || '')} uniquement, sans mises à jour</span>`;
       return `<div class="cart-item">
         <span class="title">${esc(item.title)}${lic}</span>
         <span class="price">${fmt(price)} ${cur}</span>
@@ -3865,16 +4041,17 @@ $('#cart-order').addEventListener('click', async () => {
   const items = cart.map((item) => {
     const price = (currentCurrency === 'robux' ? (item.priceRobux || Math.round((item.priceEur || 0) * DATA.robuxRate / 5) * 5) : (item.priceEur || 0)) * (item.qty || 1);
     total += price;
-    const licLabel = item.license === 'commercial' ? ' (commerciale)' : '';
-    return { title: item.title + licLabel, price, type: item.type || 'asset', productId: item.productId };
+    const label = item.offer === 'pass' ? ' (Pass mises à jour)' : ` (achat simple v${item.version || ''})`;
+    return { title: item.title + label, price, type: 'asset', productId: item.productId, offer: item.offer, version: item.version };
   });
   const original = orderBtn.textContent;
   orderBtn.textContent = 'Envoi en cours…'; orderBtn.disabled = true;
   try {
-    const res = await fetch(`${apiBase()}/api/order`, {
+    const res = await authFetch(`${apiBase()}/api/order`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ customerName: currentUser.name, discordId: currentUser.id, items, total, currency: CURRENCY_LABEL[currentCurrency], source: 'shop' })
+      body: JSON.stringify({ items, total, currency: CURRENCY_LABEL[currentCurrency], source: 'shop' })
     });
+    if (res.status === 401) { sessionExpired(); return; }
     const data = await res.json().catch(() => ({}));
     if (!res.ok) { toast(`Commande non envoyée (${res.status}) : ${data.error || 'raison inconnue'}.`, { type: 'error', duration: 6000 }); return; }
     toast('Commande envoyée ! Exiozz te recontacte sur Discord pour le paiement et les fichiers.', { type: 'success', duration: 6000 });
@@ -3898,33 +4075,38 @@ function updateCartBar() {
 
 /* ---------- AUTH ---------- */
 const SESSION_KEY = 'exiozz_discord_session';
-const params = new URLSearchParams(window.location.search);
+// Au retour de Discord ou du paiement, les infos arrivent dans le # de l'URL.
+const hashParams = new URLSearchParams(window.location.hash.slice(1));
+const paidReturn = hashParams.get('paid') === '1';
 let currentUser = null;
-if (params.get('discord_id')) {
-  currentUser = { id: params.get('discord_id'), name: params.get('discord_user'), avatar: params.get('discord_avatar'), discordHandle: params.get('discord_user') };
+if (hashParams.get('token')) {
+  currentUser = { id: hashParams.get('discord_id'), name: hashParams.get('discord_user'), avatar: hashParams.get('discord_avatar'), token: hashParams.get('token') };
   try { localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser)); } catch (e) {}
-  window.history.replaceState({}, '', window.location.pathname);
-} else { try { const saved = localStorage.getItem(SESSION_KEY); if (saved) currentUser = JSON.parse(saved); } catch (e) {} }
+} else {
+  try { const saved = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); if (saved && saved.token) currentUser = saved; } catch (e) {}
+}
+if (hashParams.get('login_error')) setTimeout(() => toast('Connexion Discord impossible, réessaie.', { type: 'error' }), 400);
+if (hashParams.get('token') || paidReturn || hashParams.get('login_error')) history.replaceState({}, '', location.pathname + location.search);
+
 const apiBase = () => DATA.discord.backendAuthUrl.replace('/auth/discord', '');
+const authFetch = (url, opts = {}) => fetch(url, {
+  ...opts,
+  headers: { ...(opts.headers || {}), ...(currentUser && currentUser.token ? { Authorization: 'Bearer ' + currentUser.token } : {}) }
+});
 const isAdmin = () => currentUser && currentUser.id === DATA.adminDiscordId;
 function startLogin() {
-  if (!DATA.discord.clientId || DATA.discord.clientId === 'TON_CLIENT_ID') {
-    const name = prompt('Entrez votre pseudo Discord (pour tester) :', 'zo7q');
-    if (name && name.trim()) {
-      currentUser = { id: 'test_' + Date.now(), name: name.trim(), avatar: '', discordHandle: name.trim() };
-      try { localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser)); } catch (e) {}
-      updateNavDiscord(); renderCart(); checkSubscription();
-    }
-    return;
-  }
   const redirect = encodeURIComponent(DATA.discord.backendAuthUrl);
-  window.location.href = `https://discord.com/oauth2/authorize?client_id=${DATA.discord.clientId}&redirect_uri=${redirect}&response_type=code&scope=identify`;
+  window.location.href = `https://discord.com/oauth2/authorize?client_id=${DATA.discord.clientId}&redirect_uri=${redirect}&response_type=code&scope=identify&state=shop`;
 }
 function needLogin(msg) { toast(msg, { action: startLogin, label: 'Se connecter', duration: 6000 }); }
 function logout() {
-  currentUser = null;
+  currentUser = null; me = null;
   try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
-  updateNavDiscord(); renderCart(); checkSubscription();
+  updateNavDiscord(); renderCart(); renderSubBand(); renderProducts();
+}
+function sessionExpired() {
+  logout();
+  toast('Ta session a expiré : reconnecte-toi avec Discord.', { action: startLogin, label: 'Se connecter', duration: 6000 });
 }
 const navDiscordBtn = $('#nav-discord-btn'), navDiscordLabel = $('#nav-discord-label'), navDropdown = $('#nav-discord-dropdown');
 function closeDropdown() { navDropdown.classList.remove('active'); navDiscordBtn.setAttribute('aria-expanded', 'false'); }
@@ -3933,17 +4115,19 @@ function updateNavDiscord() {
   if (currentUser) {
     navDiscordLabel.textContent = currentUser.name;
     const avatar = safeImg(currentUser.avatar) || 'https://cdn.discordapp.com/embed/avatars/0.png';
-    headerEl.innerHTML = `<img src="${esc(avatar)}" alt=""><div><div class="dh-name">${esc(currentUser.name)}</div>${isAdmin() ? '<span class="dh-badge">Admin</span>' : ''}${subscription.active ? ' <span class="dh-badge">Abonné</span>' : ''}</div>`;
+    headerEl.innerHTML = `<img src="${esc(avatar)}" alt=""><div><div class="dh-name">${esc(currentUser.name)}</div>${isAdmin() ? '<span class="dh-badge">Admin</span>' : ''}${subActive() ? ' <span class="dh-badge">Abonné</span>' : ''}</div>`;
   } else {
     navDiscordLabel.textContent = 'Se connecter'; headerEl.innerHTML = '';
   }
   closeDropdown();
   $$('.only-logged, #nav-my-cart-link, #nav-my-orders-link').forEach((el) => { el.hidden = !currentUser; });
+  $('#nav-sub-link').hidden = !(currentUser && me && me.subscription);
   headerEl.style.display = currentUser ? '' : 'none';
   updateCartBar();
 }
 updateNavDiscord();
-checkSubscription();
+renderSubBand();
+refreshMe().then(() => { if (paidReturn && currentUser) waitForAccess(); });
 navDiscordBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   if (!currentUser) { startLogin(); return; }
@@ -3952,6 +4136,7 @@ navDiscordBtn.addEventListener('click', (e) => {
   if (open) setSettings(false);
 });
 $('#nav-my-cart-link').addEventListener('click', (e) => { e.preventDefault(); closeDropdown(); openCart(); });
+$('#nav-sub-link').addEventListener('click', (e) => { e.preventDefault(); closeDropdown(); openPortal(); });
 $('#nav-discord-logout').addEventListener('click', (e) => { e.preventDefault(); logout(); });
 document.addEventListener('click', () => { closeDropdown(); setSettings(false); setMobileMenu(false); });
 
@@ -3966,11 +4151,11 @@ function orderCardHtml(order, admin) {
   return `<div class="order-card"><div class="order-head"><div><b>${admin ? esc(order.customerName || 'Client') : 'Commande'}</b><div class="order-id">#${esc(order.id)} · ${formatOrderDate(order.timestamp)}</div>${admin ? `<div class="order-id">Discord : ${esc(order.discordId || 'inconnu')}</div>` : ''}</div><span class="order-status ${orderStatusClass(order.status)}">${esc(order.status || 'En attente de contact')}</span></div><div class="order-items">${items || '<div class="order-item-row"><span>Aucun article</span></div>'}</div><div class="order-footer"><span>Total</span><span>${fmt(order.total || 0)} ${esc(order.currency || '')}</span></div>${adminActions}</div>`;
 }
 async function fetchMyOrders() {
-  const res = await fetch(`${apiBase()}/api/orders/${encodeURIComponent(currentUser.id)}`);
+  const res = await authFetch(`${apiBase()}/api/orders/${encodeURIComponent(currentUser.id)}`);
   if (!res.ok) throw new Error('Impossible de charger tes commandes.'); return res.json();
 }
 async function fetchAdminOrders() {
-  const res = await fetch(`${apiBase()}/api/admin/orders?requesterId=${encodeURIComponent(currentUser.id)}`);
+  const res = await authFetch(`${apiBase()}/api/admin/orders?requesterId=${encodeURIComponent(currentUser.id)}`);
   if (!res.ok) throw new Error('Impossible de charger les commandes admin.'); return res.json();
 }
 async function renderOrders() {
@@ -3997,7 +4182,7 @@ function bindOrderAdminActions() {
   $$('.admin-order-status', ordersList).forEach((sel) => sel.addEventListener('change', async () => {
     sel.disabled = true;
     try {
-      const res = await fetch(`${apiBase()}/api/orders/${encodeURIComponent(sel.dataset.orderId)}`, {
+      const res = await authFetch(`${apiBase()}/api/orders/${encodeURIComponent(sel.dataset.orderId)}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requesterId: currentUser.id, status: sel.value })
       });
       const data = await res.json().catch(() => ({}));
@@ -4009,7 +4194,7 @@ function bindOrderAdminActions() {
     if (!(await askConfirm('Supprimer cette commande ?', 'Cette action est irréversible.', 'Supprimer'))) return;
     btn.disabled = true;
     try {
-      const res = await fetch(`${apiBase()}/api/orders/${encodeURIComponent(btn.dataset.orderId)}`, {
+      const res = await authFetch(`${apiBase()}/api/orders/${encodeURIComponent(btn.dataset.orderId)}`, {
         method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requesterId: currentUser.id })
       });
       const data = await res.json().catch(() => ({}));
@@ -4044,6 +4229,7 @@ function cmdkCommands() {
   if (currentUser) {
     list.push({ g: 'Actions', label: 'Ouvrir mon panier', icon: 'cart', k: 'commander achat', run: openCart });
     list.push({ g: 'Actions', label: 'Mes commandes', icon: 'box', k: 'suivi historique', run: openOrders });
+    if (me && me.subscription) list.push({ g: 'Actions', label: 'Gérer mon abonnement', icon: 'star', k: 'abonnement desabonner resilier', run: openPortal });
   } else {
     list.push({ g: 'Actions', label: 'Se connecter avec Discord', icon: 'discord', k: 'login compte connexion', run: startLogin });
   }

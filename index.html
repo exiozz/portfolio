@@ -2197,7 +2197,7 @@ $('#cart-order').addEventListener('click', async () => {
   const original = orderBtn.textContent;
   orderBtn.textContent = 'Envoi en cours…'; orderBtn.disabled = true;
   try {
-    const res = await fetch(`${apiBase()}/api/order`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customerName: currentUser.name, discordId: currentUser.id, items, total, currency: CURRENCY_LABEL[currentCurrency] }) });
+    const res = await authFetch(`${apiBase()}/api/order`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customerName: currentUser.name, discordId: currentUser.id, items, total, currency: CURRENCY_LABEL[currentCurrency] }) });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) { toast(`Commande non envoyée (${res.status}) : ${data.error || 'raison inconnue'}.`, { type: 'error', duration: 6000 }); return; }
     toast('Commande envoyée ! Exiozz te recontacte directement sur Discord.', { type: 'success', duration: 6000 });
@@ -2219,23 +2219,26 @@ function updateCartBar() {
 
 /* ---------- AUTH DISCORD ---------- */
 const SESSION_KEY = 'exiozz_discord_session';
-const params = new URLSearchParams(window.location.search);
+// Au retour de Discord, les infos de connexion arrivent dans le # de l'URL.
+const hashParams = new URLSearchParams(window.location.hash.slice(1));
 let currentUser = null;
-if (params.get('discord_id')) {
-  currentUser = { id: params.get('discord_id'), name: params.get('discord_user'), avatar: params.get('discord_avatar'), discordHandle: params.get('discord_user') };
+if (hashParams.get('token')) {
+  currentUser = { id: hashParams.get('discord_id'), name: hashParams.get('discord_user'), avatar: hashParams.get('discord_avatar'), token: hashParams.get('token') };
   try { localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser)); } catch (e) {}
-  window.history.replaceState({}, '', window.location.pathname);
-} else { try { const saved = localStorage.getItem(SESSION_KEY); if (saved) currentUser = JSON.parse(saved); } catch (e) {} }
+} else {
+  try { const saved = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); if (saved && saved.token) currentUser = saved; } catch (e) {}
+}
+if (hashParams.get('login_error')) setTimeout(() => toast('Connexion Discord impossible, réessaie.', { type: 'error' }), 400);
+if (hashParams.get('token') || hashParams.get('login_error')) history.replaceState({}, '', location.pathname + location.search);
 const apiBase = () => DATA.discord.backendAuthUrl.replace('/auth/discord', '');
+const authFetch = (url, opts = {}) => fetch(url, {
+  ...opts,
+  headers: { ...(opts.headers || {}), ...(currentUser && currentUser.token ? { Authorization: 'Bearer ' + currentUser.token } : {}) }
+});
 const isAdmin = () => currentUser && currentUser.id === DATA.adminDiscordId;
 function startLogin() {
-  if (!DATA.discord.clientId || DATA.discord.clientId === 'TON_CLIENT_ID') {
-    const name = prompt('Entrez votre pseudo Discord (pour tester) :', 'zo7q');
-    if (name && name.trim()) { currentUser = { id: 'test_' + Date.now(), name: name.trim(), avatar: '', discordHandle: name.trim() }; try { localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser)); } catch (e) {} updateNavDiscord(); renderConnectionState(); renderReviews(); }
-    return;
-  }
   const redirect = encodeURIComponent(DATA.discord.backendAuthUrl);
-  window.location.href = `https://discord.com/oauth2/authorize?client_id=${DATA.discord.clientId}&redirect_uri=${redirect}&response_type=code&scope=identify`;
+  window.location.href = `https://discord.com/oauth2/authorize?client_id=${DATA.discord.clientId}&redirect_uri=${redirect}&response_type=code&scope=identify&state=index`;
 }
 function needLogin(msg) { toast(msg, { action: startLogin, label: 'Se connecter', duration: 6000 }); }
 function logout() { currentUser = null; try { localStorage.removeItem(SESSION_KEY); } catch (e) {} updateNavDiscord(); renderConnectionState(); renderReviews(); }
@@ -2308,7 +2311,7 @@ const carouselEl = $('#reviews-carousel');
 ['mouseleave', 'focusout'].forEach((ev) => carouselEl.addEventListener(ev, resetCarouselTimer));
 window.addEventListener('resize', updateCarousel);
 window.addEventListener('orientationchange', () => setTimeout(updateCarousel, 200));
-async function fetchReviews() { try { const res = await fetch(`${apiBase()}/api/reviews`); return res.ok ? await res.json() : []; } catch (e) { return []; } }
+async function fetchReviews() { try { const res = await authFetch(`${apiBase()}/api/reviews`); return res.ok ? await res.json() : []; } catch (e) { return []; } }
 async function renderReviews() {
   const grid = $('#reviews-grid'), dots = $('#reviews-dots');
   grid.innerHTML = '<div class="skel-row" aria-label="Chargement des avis"><div class="skel-card"></div><div class="skel-card"></div><div class="skel-card"></div></div>';
@@ -2331,7 +2334,7 @@ async function renderReviews() {
   $$('.review-delete', grid).forEach((btn) => btn.addEventListener('click', async () => {
     if (!(await askConfirm('Supprimer cet avis ?', 'Cette action est définitive.', 'Supprimer'))) return;
     try {
-      const res = await fetch(`${apiBase()}/api/reviews/${encodeURIComponent(btn.dataset.discordId)}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requesterId: currentUser.id }) });
+      const res = await authFetch(`${apiBase()}/api/reviews/${encodeURIComponent(btn.dataset.discordId)}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requesterId: currentUser.id }) });
       if (!res.ok) { const d = await res.json().catch(() => ({})); toast('Suppression impossible : ' + (d.error || res.status), { type: 'error' }); return; }
       toast('Avis supprimé.', { type: 'success', duration: 2500 }); renderReviews();
     } catch (e) { toast('Impossible de contacter le serveur.', { type: 'error' }); }
@@ -2346,7 +2349,7 @@ $('#submit-review').addEventListener('click', async () => {
   if (!text) { st.textContent = 'Écris ton avis avant de publier.'; return; }
   st.textContent = 'Publication en cours…';
   try {
-    const res = await fetch(`${apiBase()}/api/reviews`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ discordId: currentUser.id, name: currentUser.name, avatar: currentUser.avatar || '', rating: selectedRating, text }) });
+    const res = await authFetch(`${apiBase()}/api/reviews`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ discordId: currentUser.id, name: currentUser.name, avatar: currentUser.avatar || '', rating: selectedRating, text }) });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) { st.textContent = `Erreur (${res.status}) : ${data.error || 'inconnue'}`; return; }
     $('#review-text').value = ''; selectedRating = 0;
@@ -2492,8 +2495,8 @@ function orderCardHtml(order, admin) {
   const adminActions = admin ? `<div class="admin-order-actions"><select class="admin-order-status" data-order-id="${esc(order.id)}" aria-label="Statut">${ORDER_STATUS_OPTIONS.map((s) => `<option value="${esc(s)}" ${s === order.status ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select><button class="admin-delete-order" data-order-id="${esc(order.id)}" aria-label="Supprimer">${ic('trash', 16)}</button></div>` : '';
   return `<div class="order-card"><div class="order-head"><div><b>${admin ? esc(order.customerName || 'Client') : 'Commande'}</b><div class="order-id">#${esc(order.id)} · ${formatOrderDate(order.timestamp)}</div>${admin ? `<div class="order-id">Discord : ${esc(order.discordId || 'inconnu')}</div>` : ''}</div><span class="order-status ${orderStatusClass(order.status)}">${esc(order.status || 'En attente de contact')}</span></div><div class="order-items">${items || '<div class="order-item-row"><span>Aucun article</span></div>'}</div><div class="order-footer"><span>Total</span><span>${fmt(order.total || 0)} ${esc(order.currency || '')}</span></div>${adminActions}</div>`;
 }
-async function fetchMyOrders() { const res = await fetch(`${apiBase()}/api/orders/${encodeURIComponent(currentUser.id)}`); if (!res.ok) throw new Error('Impossible de charger tes commandes.'); return res.json(); }
-async function fetchAdminOrders() { const res = await fetch(`${apiBase()}/api/admin/orders?requesterId=${encodeURIComponent(currentUser.id)}`); if (!res.ok) throw new Error('Impossible de charger les commandes admin.'); return res.json(); }
+async function fetchMyOrders() { const res = await authFetch(`${apiBase()}/api/orders/${encodeURIComponent(currentUser.id)}`); if (!res.ok) throw new Error('Impossible de charger tes commandes.'); return res.json(); }
+async function fetchAdminOrders() { const res = await authFetch(`${apiBase()}/api/admin/orders?requesterId=${encodeURIComponent(currentUser.id)}`); if (!res.ok) throw new Error('Impossible de charger les commandes admin.'); return res.json(); }
 async function renderOrders() {
   if (!currentUser) { ordersList.innerHTML = '<div class="cart-empty">Connecte-toi avec Discord pour voir tes commandes.</div>'; return; }
   ordersList.innerHTML = '<div class="cart-empty">Chargement des commandes…</div>';
@@ -2510,12 +2513,12 @@ function bindOrderAdminActions() {
   if (!isAdmin()) return;
   $$('.admin-order-status', ordersList).forEach((sel) => sel.addEventListener('change', async () => {
     sel.disabled = true;
-    try { const res = await fetch(`${apiBase()}/api/orders/${encodeURIComponent(sel.dataset.orderId)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requesterId: currentUser.id, status: sel.value }) }); const data = await res.json().catch(() => ({})); if (!res.ok) toast(data.error || `Erreur ${res.status}`, { type: 'error' }); await renderOrders(); } catch (e) { toast('Impossible de contacter le serveur.', { type: 'error' }); sel.disabled = false; }
+    try { const res = await authFetch(`${apiBase()}/api/orders/${encodeURIComponent(sel.dataset.orderId)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requesterId: currentUser.id, status: sel.value }) }); const data = await res.json().catch(() => ({})); if (!res.ok) toast(data.error || `Erreur ${res.status}`, { type: 'error' }); await renderOrders(); } catch (e) { toast('Impossible de contacter le serveur.', { type: 'error' }); sel.disabled = false; }
   }));
   $$('.admin-delete-order', ordersList).forEach((btn) => btn.addEventListener('click', async () => {
     if (!(await askConfirm('Supprimer cette commande ?', 'Cette action est irréversible.', 'Supprimer'))) return;
     btn.disabled = true;
-    try { const res = await fetch(`${apiBase()}/api/orders/${encodeURIComponent(btn.dataset.orderId)}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requesterId: currentUser.id }) }); const data = await res.json().catch(() => ({})); if (!res.ok) { toast(data.error || `Erreur ${res.status}`, { type: 'error' }); btn.disabled = false; return; } await renderOrders(); } catch (e) { toast('Impossible de contacter le serveur.', { type: 'error' }); btn.disabled = false; }
+    try { const res = await authFetch(`${apiBase()}/api/orders/${encodeURIComponent(btn.dataset.orderId)}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requesterId: currentUser.id }) }); const data = await res.json().catch(() => ({})); if (!res.ok) { toast(data.error || `Erreur ${res.status}`, { type: 'error' }); btn.disabled = false; return; } await renderOrders(); } catch (e) { toast('Impossible de contacter le serveur.', { type: 'error' }); btn.disabled = false; }
   }));
 }
 $('#nav-my-orders-link').addEventListener('click', (e) => { e.preventDefault(); closeDropdown(); openOrders(); });

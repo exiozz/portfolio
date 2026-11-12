@@ -2758,8 +2758,7 @@
   ],
   "faq": [
     { "q": "Comment reçois-je mon asset après l'achat ?", "a": "Après validation du paiement, tu reçois un lien de téléchargement direct sur Discord, avec les fichiers sources et la documentation." },
-    { "q": "Quelle est la différence entre licence personnelle et commerciale ?", "a": "La licence personnelle te permet d'utiliser l'asset dans un projet non monétisé. La licence commerciale autorise l'usage dans un projet monétisé (Roblox, client, vente...)." },
-    { "q": "Puis-je modifier les assets ?", "a": "Oui, tu peux les modifier librement selon ta licence. Tu ne peux simplement pas les revendre tels quels ou les redistribuer." },
+    { "q": "Puis-je modifier les assets ?", "a": "Oui, tu peux les modifier librement. Tu ne peux simplement pas les revendre tels quels ou les redistribuer." },
     { "q": "Y a-t-il un support après l'achat ?", "a": "Oui, un support de 14 jours est inclus pour toute question technique ou problème d'installation." },
     { "q": "Les mises à jour sont-elles gratuites ?", "a": "Oui, toutes les mises à jour futures d'un asset que tu as acheté te sont envoyées gratuitement." },
     { "q": "Puis-je payer en Robux ?", "a": "Oui, la plupart des assets peuvent être réglés en euros ou en Robux — bascule la devise en haut du catalogue." }
@@ -3143,17 +3142,6 @@
         <h2 id="product-title"></h2>
         <div class="tag-row" id="product-tags"></div>
         <p class="modal-desc" id="product-desc"></p>
-        <div id="license-block">
-          <div class="license-label" id="license-label">Choisis ta licence</div>
-          <div class="license-grid" id="license-grid" role="radiogroup" aria-labelledby="license-label">
-            <button type="button" class="license-option" data-license="personal" role="radio" aria-checked="true">
-              <b>Personnelle</b><small>Projet non monétisé</small><span class="lic-price" data-lic="personal"></span>
-            </button>
-            <button type="button" class="license-option" data-license="commercial" role="radio" aria-checked="false">
-              <b>Commerciale</b><small>Projet monétisé / client</small><span class="lic-price" data-lic="commercial"></span>
-            </button>
-          </div>
-        </div>
         <div id="pay-block">
           <div class="license-label" id="pay-label">Mode de paiement</div>
           <div class="license-grid" id="pay-grid" role="radiogroup" aria-labelledby="pay-label">
@@ -3675,13 +3663,11 @@ let subscription = { active: false };
 const SUB = DATA.subscription || { label: 'Abonnement', monthlyPrice: 8 };
 
 function updatePayUI(a) {
-  const mult = currentLicense === 'commercial' ? COMMERCIAL_MULT : 1;
-  $('#pay-once-price').textContent = priceLabel(a.price * mult);
+  $('#pay-once-price').textContent = priceLabel(a.price);
   $('#pay-sub-price').textContent = priceLabel(SUB.monthlyPrice) + ' / mois';
   $$('#pay-grid .license-option').forEach((b) => b.setAttribute('aria-checked', b.dataset.pay === currentPay));
   $('#sub-banner').hidden = !subscription.active;
   $('#pay-block').hidden = subscription.active;
-  $('#license-block').hidden = subscription.active || currentPay === 'sub';
 }
 
 function toggleSubscription(a) {
@@ -3749,20 +3735,11 @@ function openProduct(id, keepLicense) {
   $('#product-includes').innerHTML = (a.includes || []).map((f) => `<li>${ic('check', 16)}<span>${esc(f)}</span></li>`).join('') || '<li>Documentation incluse</li>';
 
   if (!keepLicense) currentPay = 'once';
-  updateLicenseUI(a);
   updatePayUI(a);
 
   const q = encodeURIComponent(`Question — ${a.title}`);
   $('#product-quote').href = `mailto:${DATA.contactEmail}?subject=${q}`;
 
-  $$('.license-option', $('#license-grid')).forEach((btn) => {
-    btn.onclick = () => {
-      currentLicense = btn.dataset.license;
-      updateLicenseUI(a);
-      updatePayUI(a);
-      updateModalAddState(a);
-    };
-  });
   $$('.license-option', $('#pay-grid')).forEach((btn) => {
     btn.onclick = () => { currentPay = btn.dataset.pay; updatePayUI(a); updateModalAddState(a); };
   });
@@ -3776,15 +3753,6 @@ function openProduct(id, keepLicense) {
   if (modalEl) modalEl.scrollTop = 0;
   if (!$('#product-modal').classList.contains('active')) openOv($('#product-modal'), '#product-close');
   updateModalAddState(a);
-}
-
-function updateLicenseUI(a) {
-  $$('.license-option', $('#license-grid')).forEach((btn) => {
-    const lic = btn.dataset.license;
-    btn.setAttribute('aria-checked', lic === currentLicense);
-    const mult = lic === 'commercial' ? COMMERCIAL_MULT : 1;
-    $('.lic-price', btn).textContent = priceLabel(a.price * mult);
-  });
 }
 
 function updateModalAddState(a) {
@@ -3849,9 +3817,7 @@ function renderCart() {
     box.innerHTML = cart.map((item, idx) => {
       const price = (currentCurrency === 'robux' ? (item.priceRobux || Math.round((item.priceEur || 0) * DATA.robuxRate / 5) * 5) : (item.priceEur || 0)) * (item.qty || 1);
       total += price;
-      const lic = item.type === 'subscription'
-        ? '<span class="lic">Mensuel · liens de téléchargement gratuits</span>'
-        : item.license ? `<span class="lic">${item.license === 'commercial' ? 'Licence commerciale' : 'Licence personnelle'}</span>` : '';
+      const lic = item.type === 'subscription' ? '<span class="lic">Mensuel · liens de téléchargement gratuits</span>' : '';
       return `<div class="cart-item">
         <span class="title">${esc(item.title)}${lic}</span>
         <span class="price">${fmt(price)} ${cur}</span>
@@ -4066,7 +4032,7 @@ function cmdkCommands() {
   const list = [
     { g: 'Aller à', label: 'Accueil', icon: 'home', k: 'haut top debut', run: () => window.scrollTo({ top: 0, behavior: smooth() }) },
     { g: 'Aller à', label: 'Catalogue complet', icon: 'blocks', k: 'shop produits assets', run: goTo('#catalog') },
-    { g: 'Aller à', label: 'Questions fréquentes', icon: 'help', k: 'faq aide licence paiement', run: goTo('#faq') },
+    { g: 'Aller à', label: 'Questions fréquentes', icon: 'help', k: 'faq aide paiement abonnement', run: goTo('#faq') },
     { g: 'Aller à', label: 'Contact', icon: 'mail', k: 'ecrire projet devis', run: goTo('#contact') },
     { g: 'Aller à', label: 'Retour au portfolio', icon: 'user', k: 'accueil services projets', run: () => { window.location.href = 'index.html'; } }
   ];

@@ -4537,7 +4537,7 @@ function bindOrderAdminActions() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) toast(data.error || `Erreur ${res.status}`, { type: 'error' });
-      else if (sel.value === 'Payée') toast('Commande payée : si elle contient un abonnement, il est activé pour 30 jours.', { type: 'success', duration: 4000 });
+      else if (sel.value === 'Payée') toast('Commande passée en « Payée ».', { type: 'success', duration: 3000 });
       await renderOrders();
     } catch (e) { toast('Impossible de contacter le serveur.', { type: 'error' }); sel.disabled = false; }
   }));

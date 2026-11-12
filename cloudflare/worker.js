@@ -4,6 +4,8 @@
  *  - Connexion Discord (OAuth2) avec un jeton de session signé
  *  - Commandes (tout passe par Exiozz) + panneau admin
  *  - Fichiers envoyés par l'admin sous une commande, supprimés au bout de 24 h
+ *  - Bibliothèque des assets : les fichiers de chaque asset, rangés une fois,
+ *    envoyés au client en un clic depuis une commande
  *  - Avis clients
  *  - Récupération automatique des avis et commandes de l'ancien serveur
  *
@@ -17,7 +19,8 @@
 const SESSION_DAYS = 30;
 const FILE_HOURS = 24;                 // durée de vie d'un fichier livré
 const MAX_FILE_BYTES = 95 * 1048576;   // limite d'envoi de Cloudflare (gratuit) : 100 Mo par requête
-const PART_BYTES = 24 * 1048576;       // KV accepte 25 Mo max par valeur : les gros fichiers sont découpés
+const PART_BYTES = 24 * 1048576;
+const STORAGE_LIMIT = 900 * 1048576;   // l'offre gratuite KV donne 1 Go : on garde une marge       // KV accepte 25 Mo max par valeur : les gros fichiers sont découpés
 const ORDER_STATUSES = ['En attente de contact', 'Confirmée', 'En construction', 'En pause', 'Payée', 'Annulée'];
 
 /* ------------------------------------------------------------------ outils */
@@ -115,13 +118,18 @@ async function notifyAdmin(env, content) {
 
 /* ------------------------------------------------- fichiers livrés (KV) */
 const liveFiles = (order) => (order.files || []).filter((f) => f.expiresAt > Date.now());
-const publicOrder = (o) => ({ ...o, files: liveFiles(o).map((f) => ({ id: f.id, name: f.name, size: f.size, expiresAt: f.expiresAt })) });
+const publicOrder = (o) => ({ ...o, files: liveFiles(o).map((f) => ({ id: f.id, name: f.name, size: f.size, kind: f.url ? 'link' : 'file', expiresAt: f.expiresAt })) });
 const partKey = (id, i) => `file:${id}:${i}`;
+const libKey = (id, i) => `lib:${id}:${i}`;
+// Un fichier de commande peut pointer vers un fichier de la bibliothèque (champ lib)
+const fileKey = (f, i) => (f.lib ? libKey(f.lib, i) : partKey(f.id, i));
 
 // Enregistre le corps de la requête dans KV, découpé en morceaux de 24 Mo, sans tout charger en mémoire.
-async function saveFile(env, id, body) {
+// permanent = true pour la bibliothèque (pas de suppression automatique)
+async function saveFile(env, id, body, permanent) {
   if (!env.FILES) throw new HttpError(500, 'Stockage KV non lié (variable FILES).');
-  const ttl = (FILE_HOURS + 1) * 3600; // KV supprime tout seul les morceaux après ce délai
+  const keyOf = permanent ? libKey : partKey;
+  const opts = permanent ? {} : { expirationTtl: (FILE_HOURS + 1) * 3600 }; // KV supprime tout seul après ce délai
   const reader = body.getReader();
   let leftover = null, finished = false, total = 0, parts = 0;
   while (!finished) {
@@ -149,14 +157,29 @@ async function saveFile(env, id, body) {
         if (partSize >= PART_BYTES) controller.close();
       }
     });
-    await env.FILES.put(partKey(id, parts), stream, { expirationTtl: ttl });
-    if (partSize === 0 && parts > 0) { await env.FILES.delete(partKey(id, parts)); break; }
+    await env.FILES.put(keyOf(id, parts), stream, opts);
+    if (partSize === 0 && parts > 0) { await env.FILES.delete(keyOf(id, parts)); break; }
     parts++;
     if (partSize < PART_BYTES) finished = true;
   }
   return { size: total, parts };
 }
+// Espace occupé dans KV : bibliothèque + fichiers de commandes encore valables (les liens ne comptent pas)
+async function storageUsed(env) {
+  let used = 0;
+  for (const files of Object.values(await getVal(env, 'library', {}))) for (const f of files) if (!f.url) used += f.size || 0;
+  for (const o of await getVal(env, 'orders', [])) for (const f of liveFiles(o)) if (!f.lib && !f.url) used += f.size || 0;
+  return used;
+}
+const mo = (b) => Math.round(b / 1048576);
+async function checkSpace(env, request) {
+  const len = +request.headers.get('Content-Length') || 0;
+  const used = await storageUsed(env);
+  if (used + len > STORAGE_LIMIT) throw new HttpError(507, `Stockage presque plein (${mo(used)} Mo sur ${mo(STORAGE_LIMIT)} Mo). Pour ce fichier, utilise un lien Google Drive ou MEGA, ou supprime des fichiers de la bibliothèque.`);
+}
+
 async function removeFile(env, file) {
+  if (file.lib) return; // copie d'un fichier de la bibliothèque : la bibliothèque reste intacte
   for (let i = 0; i < (file.parts || 1); i++) await env.FILES.delete(partKey(file.id, i)).catch(() => {});
 }
 
@@ -309,6 +332,7 @@ async function route(request, env, ctx) {
     if (!order) throw new HttpError(404, 'Commande introuvable.');
     if (+request.headers.get('Content-Length') > MAX_FILE_BYTES) throw new HttpError(413, 'Fichier trop gros (95 Mo maximum).');
     if (!request.body) throw new HttpError(400, 'Fichier vide.');
+    await checkSpace(env, request);
     const name = clampStr(String(url.searchParams.get('name') || 'fichier').replace(/[\\/:*?"<>|\r\n]+/g, '_').trim(), 150) || 'fichier';
     const id = newId();
     const { size, parts } = await saveFile(env, id, request.body);
@@ -322,6 +346,25 @@ async function route(request, env, ctx) {
     if (!ok) { await removeFile(env, file); throw new HttpError(404, 'Commande supprimée entre-temps.'); }
     ctx.waitUntil(discordDM(env, order.discordId, `📦 Tes fichiers sont prêts : **${name}**\nTélécharge-les sur ${FRONT}/shop.html → menu Discord → « Mes commandes ».\n⏳ Ils seront supprimés dans ${FILE_HOURS} h.`));
     return json({ ok: true, file: { id, name, size, expiresAt: file.expiresAt } });
+  }
+
+  if ((m = /^\/api\/orders\/([^/]+)\/links$/.exec(path)) && method === 'POST') {
+    const user = await auth(env, request); adminOnly(user);
+    const orderId = decodeURIComponent(m[1]);
+    const b = await readJson(request);
+    const link = clampStr(String(b.url || '').trim(), 2000);
+    if (!isHttps(link)) throw new HttpError(400, 'Le lien doit commencer par https://');
+    const name = clampStr(String(b.name || '').trim(), 150) || 'Lien de téléchargement';
+    const file = { id: newId(), name, url: link, uploadedAt: Date.now(), expiresAt: Date.now() + FILE_HOURS * 3600e3 };
+    let order = null;
+    await updateVal(env, 'orders', [], (orders) => {
+      order = orders.find((x) => x.id === orderId) || null;
+      if (order) order.files = liveFiles(order).concat(file);
+      return orders;
+    });
+    if (!order) throw new HttpError(404, 'Commande introuvable.');
+    ctx.waitUntil(discordDM(env, order.discordId, `📦 Tes fichiers sont prêts : **${name}**\nRécupère-les sur ${FRONT}/shop.html → menu Discord → « Mes commandes ».\n⏳ Disponibles pendant ${FILE_HOURS} h.`));
+    return json({ ok: true });
   }
 
   if ((m = /^\/api\/orders\/([^/]+)\/files\/([^/]+)$/.exec(path)) && method === 'DELETE') {
@@ -343,6 +386,8 @@ async function route(request, env, ctx) {
     const order = orders.find((o) => liveFiles(o).some((f) => f.id === m[1]));
     if (!order) throw new HttpError(404, 'Fichier introuvable ou expiré.');
     if (order.discordId !== user.id && !user.isAdmin) throw new HttpError(403, 'Accès refusé.');
+    const linked = liveFiles(order).find((f) => f.id === m[1]);
+    if (linked.url) return json({ url: linked.url, external: true });
     const exp = Date.now() + 10 * 60e3;
     return json({ url: `${url.origin}/api/files/${encodeURIComponent(m[1])}/download?exp=${exp}&sig=${await fileSig(env, m[1], exp)}` });
   }
@@ -356,13 +401,14 @@ async function route(request, env, ctx) {
     const order = orders.find((o) => liveFiles(o).some((f) => f.id === fileId));
     if (!order) return new Response('Fichier expiré ou supprimé.', { status: 404 });
     const file = liveFiles(order).find((f) => f.id === fileId);
-    const first = await env.FILES.get(partKey(fileId, 0), 'stream');
+    if (file.url) return Response.redirect(file.url, 302);
+    const first = await env.FILES.get(fileKey(file, 0), 'stream');
     if (!first) return new Response('Fichier expiré ou supprimé.', { status: 404 });
     const { readable, writable } = new TransformStream();
     ctx.waitUntil((async () => {
       await first.pipeTo(writable, { preventClose: true });
       for (let i = 1; i < (file.parts || 1); i++) {
-        const s = await env.FILES.get(partKey(fileId, i), 'stream');
+        const s = await env.FILES.get(fileKey(file, i), 'stream');
         if (!s) break;
         await s.pipeTo(writable, { preventClose: true });
       }
@@ -375,6 +421,77 @@ async function route(request, env, ctx) {
         ...(file.size ? { 'Content-Length': String(file.size) } : {})
       }
     });
+  }
+
+  /* --- Bibliothèque des assets (admin) --- */
+  if (path === '/api/admin/library' && method === 'GET') {
+    const user = await auth(env, request); adminOnly(user);
+    return json({ assets: await getVal(env, 'library', {}), used: await storageUsed(env), limit: STORAGE_LIMIT });
+  }
+
+  if ((m = /^\/api\/admin\/library\/([^/]+)\/files$/.exec(path)) && method === 'POST') {
+    const user = await auth(env, request); adminOnly(user);
+    const assetId = clampStr(decodeURIComponent(m[1]), 100);
+    if (+request.headers.get('Content-Length') > MAX_FILE_BYTES) throw new HttpError(413, 'Fichier trop gros (95 Mo maximum).');
+    if (!request.body) throw new HttpError(400, 'Fichier vide.');
+    await checkSpace(env, request);
+    const name = clampStr(String(url.searchParams.get('name') || 'fichier').replace(/[\\/:*?"<>|\r\n]+/g, '_').trim(), 150) || 'fichier';
+    const id = newId();
+    const { size, parts } = await saveFile(env, id, request.body, true);
+    const file = { id, name, size, parts, uploadedAt: Date.now() };
+    await updateVal(env, 'library', {}, (lib) => { lib[assetId] = (lib[assetId] || []).concat(file); return lib; });
+    return json({ ok: true, file });
+  }
+
+  // Ajoute un lien (Google Drive, MEGA…) pour les fichiers trop gros
+  if ((m = /^\/api\/admin\/library\/([^/]+)\/links$/.exec(path)) && method === 'POST') {
+    const user = await auth(env, request); adminOnly(user);
+    const assetId = clampStr(decodeURIComponent(m[1]), 100);
+    const b = await readJson(request);
+    const link = clampStr(String(b.url || '').trim(), 2000);
+    if (!isHttps(link)) throw new HttpError(400, 'Le lien doit commencer par https://');
+    const name = clampStr(String(b.name || '').trim(), 150) || 'Lien de téléchargement';
+    const file = { id: newId(), name, url: link, uploadedAt: Date.now() };
+    await updateVal(env, 'library', {}, (lib) => { lib[assetId] = (lib[assetId] || []).concat(file); return lib; });
+    return json({ ok: true, file });
+  }
+
+  if ((m = /^\/api\/admin\/library\/([^/]+)\/files\/([^/]+)$/.exec(path)) && method === 'DELETE') {
+    const user = await auth(env, request); adminOnly(user);
+    const assetId = decodeURIComponent(m[1]);
+    let file = null;
+    await updateVal(env, 'library', {}, (lib) => {
+      file = (lib[assetId] || []).find((f) => f.id === m[2]) || null;
+      lib[assetId] = (lib[assetId] || []).filter((f) => f.id !== m[2]);
+      if (!lib[assetId].length) delete lib[assetId];
+      return lib;
+    });
+    if (file && !file.url) for (let i = 0; i < (file.parts || 1); i++) await env.FILES.delete(libKey(file.id, i)).catch(() => {});
+    return json({ ok: true });
+  }
+
+  // Envoie au client tous les fichiers de la bibliothèque des assets choisis (visibles 24 h dans « Mes commandes »)
+  if ((m = /^\/api\/orders\/([^/]+)\/send-assets$/.exec(path)) && method === 'POST') {
+    const user = await auth(env, request); adminOnly(user);
+    const orderId = decodeURIComponent(m[1]);
+    const { assetIds } = await readJson(request);
+    const lib = await getVal(env, 'library', {});
+    const chosen = (Array.isArray(assetIds) ? assetIds : []).flatMap((a) => lib[a] || []);
+    if (!chosen.length) throw new HttpError(404, 'Aucun fichier dans la bibliothèque pour cet asset.');
+    const expiresAt = Date.now() + FILE_HOURS * 3600e3;
+    const added = chosen.map((f) => ({ id: newId(), lib: f.id, name: f.name, size: f.size, parts: f.parts, ...(f.url ? { url: f.url } : {}), uploadedAt: Date.now(), expiresAt }));
+    let order = null;
+    await updateVal(env, 'orders', [], (orders) => {
+      order = orders.find((x) => x.id === orderId) || null;
+      if (order) {
+        // un renvoi remplace l'ancien envoi des mêmes fichiers (le délai de 24 h repart de zéro)
+        order.files = liveFiles(order).filter((f) => !(f.lib && chosen.some((c) => c.id === f.lib))).concat(added);
+      }
+      return orders;
+    });
+    if (!order) throw new HttpError(404, 'Commande introuvable.');
+    ctx.waitUntil(discordDM(env, order.discordId, `📦 Tes fichiers sont prêts : ${added.map((f) => `**${f.name}**`).join(', ')}\nTélécharge-les sur ${FRONT}/shop.html → menu Discord → « Mes commandes ».\n⏳ Ils seront disponibles pendant ${FILE_HOURS} h.`));
+    return json({ ok: true, count: added.length });
   }
 
   /* --- Avis --- */

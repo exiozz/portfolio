@@ -4,7 +4,7 @@ Le serveur tient dans **un seul fichier** : `worker.js`. Il gère :
 
 - la **connexion Discord**, avec un jeton signé : personne ne peut se faire passer pour quelqu'un d'autre ;
 - les **commandes** : tout passe par toi, tu valides dans le panneau admin (shop → menu Discord → « Mes commandes ») ;
-- les **fichiers livrés** : depuis l'admin, tu les ajoutes sous la commande d'un client. Il les télécharge depuis son compte et **ils sont supprimés au bout de 24 h** (95 Mo maximum par fichier) ;
+- les **liens de téléchargement** : dans « Mes commandes » (admin), la **bibliothèque des assets** garde le lien de chaque asset (rangé une seule fois). Sur une commande, **« Envoyer les fichiers de l'asset »** donne ce lien au client en un clic, et **« Ajouter un lien »** permet d'en envoyer un à la main. Le client voit ses liens dans « Mes commandes » pendant **24 h** ; il est le seul (avec toi) à pouvoir les ouvrir ;
 - les **avis** de la page d'accueil.
 
 **Tes avis et tes commandes ne sont pas perdus** : à la première visite, le serveur les copie automatiquement depuis l'ancien serveur Replit, tant que celui-ci est encore en ligne.

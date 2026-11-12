@@ -2354,6 +2354,56 @@
       color: var(--muted);
     }
 
+    .lib-hint {
+      margin: -4px 0 12px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .lib-asset {
+      margin-bottom: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      background: var(--surface-2);
+    }
+
+    .lib-asset summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .lib-asset summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .lib-asset summary small {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .lib-asset[open] summary {
+      border-bottom: 1px dashed var(--line-2);
+    }
+
+    .lib-body {
+      display: grid;
+      gap: 8px;
+      padding: 12px 16px 16px;
+    }
+
+    .send-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
     .sub-notice {
       display: flex;
       align-items: center;
@@ -4441,12 +4491,20 @@ function timeLeft(ts) {
 function orderFilesHtml(order, admin) {
   const files = Array.isArray(order.files) ? order.files : [];
   const rows = files.map((f) => `<div class="order-file">
-      <span class="of-info">${ic('folder', 18)}<span><b>${esc(f.name)}</b><small>${[fmtSize(f.size), timeLeft(f.expiresAt)].filter(Boolean).join(' · ')}</small></span></span>
-      <span class="of-actions"><button class="btn btn-primary btn-sm file-dl" data-file-id="${esc(f.id)}">${ic('download', 16)}Télécharger</button>${admin ? `<button class="admin-delete-file" data-order-id="${esc(order.id)}" data-file-id="${esc(f.id)}" aria-label="Supprimer ${esc(f.name)}">${ic('trash', 16)}</button>` : ''}</span>
+      <span class="of-info">${ic(f.kind === 'link' ? 'globe' : 'folder', 18)}<span><b>${esc(f.name)}</b><small>${[f.kind === 'link' ? 'lien' : fmtSize(f.size), timeLeft(f.expiresAt)].filter(Boolean).join(' · ')}</small></span></span>
+      <span class="of-actions"><button class="btn btn-primary btn-sm file-dl" data-file-id="${esc(f.id)}" data-kind="${f.kind === 'link' ? 'link' : 'file'}">${ic(f.kind === 'link' ? 'arrow-up-right' : 'download', 16)}${f.kind === 'link' ? 'Ouvrir le lien' : 'Télécharger'}</button>${admin ? `<button class="admin-delete-file" data-order-id="${esc(order.id)}" data-file-id="${esc(f.id)}" aria-label="Supprimer ${esc(f.name)}">${ic('trash', 16)}</button>` : ''}</span>
     </div>`).join('');
-  const upload = admin ? `<label class="btn btn-ghost btn-sm of-upload">${ic('plus', 16)}Ajouter des fichiers<input type="file" multiple hidden data-order-id="${esc(order.id)}"></label><span class="of-progress" data-progress="${esc(order.id)}"></span>` : '';
+  let send = '';
+  if (admin) {
+    const assets = assetsOfOrder(order);
+    const ready = assets.filter((a) => (adminLibrary[a.id] || []).length);
+    const missing = assets.filter((a) => !(adminLibrary[a.id] || []).length);
+    if (ready.length) send += `<button class="btn btn-primary btn-sm send-assets" data-order-id="${esc(order.id)}" data-assets="${esc(ready.map((a) => a.id).join(','))}">${ic('box', 16)}Envoyer les fichiers de l'asset (${esc(ready.map((a) => a.title).join(', '))})</button>`;
+    if (missing.length) send += `<span class="of-progress">Rien dans la bibliothèque pour : ${esc(missing.map((a) => a.title).join(', '))}</span>`;
+  }
+  const upload = admin ? `<button class="btn btn-ghost btn-sm order-add-link" data-order-id="${esc(order.id)}">${ic('globe', 16)}Ajouter un lien</button>` : '';
   if (!rows && !upload) return '';
-  return `<div class="order-files"><div class="of-title">${rows ? 'Tes fichiers — disponibles 24 h après l\'envoi' : 'Fichiers'}</div>${rows}${upload ? `<div class="of-upload-row">${upload}</div>` : ''}</div>`;
+  return `<div class="order-files"><div class="of-title">${rows ? 'Tes fichiers — disponibles 24 h après l\'envoi' : 'Fichiers'}</div>${rows}${send ? `<div class="send-row">${send}</div>` : ''}${upload ? `<div class="of-upload-row">${upload}</div>` : ''}</div>`;
 }
 function orderCardHtml(order, admin) {
   const items = Array.isArray(order.items) ? order.items.map((it) => `<div class="order-item-row"><span>${esc(it.title || 'Article')}</span><span>${fmt(it.price || 0)} ${esc(order.currency || '')}</span></div>`).join('') : '';
@@ -4456,6 +4514,61 @@ function orderCardHtml(order, admin) {
 async function fetchMyOrders() {
   const res = await authFetch(`${apiBase()}/api/orders/${encodeURIComponent(currentUser.id)}`);
   if (!res.ok) throw new Error('Impossible de charger tes commandes.'); return res.json();
+}
+// Bibliothèque des assets (admin) : fichiers rangés une fois, envoyés en un clic
+let adminLibrary = {}, adminStorage = null;
+const LIB_ASSETS = DATA.assets.filter((a) => a.enabled !== false);
+// Assets d'une commande : par identifiant, ou par titre pour les anciennes commandes
+function assetsOfOrder(order) {
+  const found = new Map();
+  (order.items || []).forEach((it) => {
+    const a = LIB_ASSETS.find((x) => x.id === it.productId) || LIB_ASSETS.find((x) => String(it.title || '').startsWith(x.title));
+    if (a) found.set(a.id, a);
+  });
+  return [...found.values()];
+}
+function libraryHtml() {
+  return `<div class="orders-title">Bibliothèque des assets</div>
+  <p class="lib-hint">Range ici le lien de téléchargement de chaque asset <b>une seule fois</b>. Ensuite, dans une commande, un clic sur « Envoyer les fichiers de l'asset » suffit : le client voit le lien dans « Mes commandes » pendant 24 h.</p>
+  ${LIB_ASSETS.map((a) => {
+    const files = adminLibrary[a.id] || [];
+    const rows = files.map((f) => `<div class="order-file">
+        <span class="of-info">${ic(f.url ? 'globe' : 'folder', 18)}<span><b>${esc(f.name)}</b><small>${f.url ? esc(f.url.replace(/^https:\/\//, '').slice(0, 60)) : fmtSize(f.size)}</small></span></span>
+        <span class="of-actions"><button class="admin-delete-file lib-delete" data-asset="${esc(a.id)}" data-file-id="${esc(f.id)}" aria-label="Supprimer ${esc(f.name)}">${ic('trash', 16)}</button></span>
+      </div>`).join('');
+    return `<details class="lib-asset"${files.length ? '' : ' open'}>
+      <summary><b>${esc(a.title)}</b><small>${files.length ? `${files.length} élément${files.length > 1 ? 's' : ''}` : 'vide'}</small></summary>
+      <div class="lib-body">${rows}
+        <div class="of-upload-row">
+          <button class="btn btn-ghost btn-sm lib-add-link" data-asset="${esc(a.id)}">${ic('globe', 16)}Ajouter un lien</button>
+          <span class="of-progress" data-progress="lib-${esc(a.id)}"></span>
+        </div>
+      </div>
+    </details>`;
+  }).join('')}`;
+}
+// Envoi de fichiers avec barre de progression
+async function uploadFiles(list, urlFor, prog, onDone) {
+  for (let i = 0; i < list.length; i++) {
+    const f = list[i];
+    try {
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', urlFor(f));
+        xhr.setRequestHeader('Authorization', 'Bearer ' + currentUser.token);
+        xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+        xhr.upload.onprogress = (e) => { if (e.lengthComputable && prog) prog.textContent = `Envoi de ${f.name}${list.length > 1 ? ` (${i + 1}/${list.length})` : ''} : ${Math.round(e.loaded / e.total * 100)} %`; };
+        xhr.onload = () => {
+          let data = {}; try { data = JSON.parse(xhr.responseText); } catch (e) {}
+          xhr.status >= 200 && xhr.status < 300 ? resolve(data) : reject(new Error(data.error || `Erreur ${xhr.status}`));
+        };
+        xhr.onerror = () => reject(new Error('connexion interrompue'));
+        if (f.size > 95 * 1048576) { reject(new Error('plus de 95 Mo : mets-le sur Google Drive ou MEGA et ajoute le lien')); return; }
+        xhr.send(f);
+      });
+      toast(onDone(f), { type: 'success', duration: 3500 });
+    } catch (e) { toast(`« ${f.name} » non envoyé : ${e.message}`, { type: 'error', duration: 7000 }); }
+  }
 }
 async function fetchAdminOrders() {
   const res = await authFetch(`${apiBase()}/api/admin/orders`);
@@ -4469,10 +4582,12 @@ async function renderOrders() {
     let html = '<div class="orders-title">Mes commandes</div>';
     html += mine.length ? mine.map((o) => orderCardHtml(o, false)).join('') : '<div class="cart-empty">Tu n\'as pas encore passé de commande.</div>';
     if (isAdmin()) {
-      const all = await fetchAdminOrders();
+      const [all, lib] = await Promise.all([fetchAdminOrders(), authFetch(`${apiBase()}/api/admin/library`).then((r) => (r.ok ? r.json() : {})).catch(() => ({}))]);
+      adminLibrary = (lib && lib.assets) || {}; adminStorage = lib && lib.limit ? lib : null;
       html += '<div class="orders-title">Administration — toutes les commandes</div>';
       html += all.length ? all.map((o) => orderCardHtml(o, true)).join('') : '<div class="cart-empty">Aucune commande.</div>';
     }
+    if (isAdmin()) html += libraryHtml();
     ordersList.innerHTML = html; bindOrderFiles(); bindOrderAdminActions();
   } catch (e) { ordersList.innerHTML = `<div class="cart-empty">${esc(e.message)}</div>`; }
 }
@@ -4483,41 +4598,86 @@ function openOrders() {
 function bindOrderFiles() {
   $$('.file-dl', ordersList).forEach((btn) => btn.addEventListener('click', async () => {
     btn.disabled = true;
+    const win = btn.dataset.kind === 'link' ? window.open('about:blank', '_blank') : null; // ouvert tout de suite pour ne pas être bloqué
     try {
       const res = await authFetch(`${apiBase()}/api/files/${encodeURIComponent(btn.dataset.fileId)}/link`);
       if (res.status === 401) { sessionExpired(); return; }
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || !/^https?:\/\//i.test(data.url || '')) { toast(data.error || 'Fichier indisponible.', { type: 'error' }); return; }
-      window.location.href = data.url; // téléchargement direct, la page reste ouverte
-    } catch (e) { toast('Impossible de contacter le serveur.', { type: 'error' }); }
+      if (!res.ok || !/^https?:\/\//i.test(data.url || '')) { if (win) win.close(); toast(data.error || 'Fichier indisponible.', { type: 'error' }); return; }
+      if (data.external) { if (win) { win.opener = null; win.location.href = data.url; } else window.open(data.url, '_blank', 'noopener'); }
+      else { if (win) win.close(); window.location.href = data.url; } // téléchargement direct, la page reste ouverte
+    } catch (e) { if (win) win.close(); toast('Impossible de contacter le serveur.', { type: 'error' }); }
     finally { btn.disabled = false; }
   }));
   if (!isAdmin()) return;
-  $$('.of-upload input', ordersList).forEach((input) => input.addEventListener('change', async () => {
-    const list = Array.from(input.files || []), orderId = input.dataset.orderId;
-    const prog = $(`[data-progress="${CSS.escape(orderId)}"]`, ordersList);
-    for (let i = 0; i < list.length; i++) {
-      const f = list[i];
-      try {
-        await new Promise((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
-          xhr.open('POST', `${apiBase()}/api/orders/${encodeURIComponent(orderId)}/files?name=${encodeURIComponent(f.name)}`);
-          xhr.setRequestHeader('Authorization', 'Bearer ' + currentUser.token);
-          xhr.setRequestHeader('Content-Type', 'application/octet-stream');
-          xhr.upload.onprogress = (e) => { if (e.lengthComputable && prog) prog.textContent = `Envoi de ${f.name}${list.length > 1 ? ` (${i + 1}/${list.length})` : ''} : ${Math.round(e.loaded / e.total * 100)} %`; };
-          xhr.onload = () => {
-            let data = {}; try { data = JSON.parse(xhr.responseText); } catch (e) {}
-            xhr.status >= 200 && xhr.status < 300 ? resolve(data) : reject(new Error(data.error || `Erreur ${xhr.status}`));
-          };
-          xhr.onerror = () => reject(new Error('connexion interrompue'));
-          xhr.send(f);
-        });
-        toast(`« ${f.name} » envoyé : le client est prévenu sur Discord.`, { type: 'success', duration: 3500 });
-      } catch (e) { toast(`« ${f.name} » non envoyé : ${e.message}`, { type: 'error', duration: 6000 }); }
-    }
+  $$('.of-upload input[data-order-id]', ordersList).forEach((input) => input.addEventListener('change', async () => {
+    const orderId = input.dataset.orderId;
+    await uploadFiles(Array.from(input.files || []), (f) => `${apiBase()}/api/orders/${encodeURIComponent(orderId)}/files?name=${encodeURIComponent(f.name)}`,
+      $(`[data-progress="${CSS.escape(orderId)}"]`, ordersList), (f) => `« ${f.name} » envoyé : le client est prévenu sur Discord.`);
     await renderOrders();
   }));
-  $$('.admin-delete-file', ordersList).forEach((btn) => btn.addEventListener('click', async () => {
+  // Bibliothèque : ajouter des fichiers
+  $$('.of-upload input[data-lib-asset]', ordersList).forEach((input) => input.addEventListener('change', async () => {
+    const assetId = input.dataset.libAsset;
+    await uploadFiles(Array.from(input.files || []), (f) => `${apiBase()}/api/admin/library/${encodeURIComponent(assetId)}/files?name=${encodeURIComponent(f.name)}`,
+      $(`[data-progress="lib-${CSS.escape(assetId)}"]`, ordersList), (f) => `« ${f.name} » rangé dans la bibliothèque.`);
+    await renderOrders();
+  }));
+  // Ajouter un lien : dans la bibliothèque (.lib-add-link) ou directement sur une commande (.order-add-link)
+  $$('.order-add-link', ordersList).forEach((btn) => btn.addEventListener('click', async () => {
+    const link = (prompt('Colle le lien de téléchargement :') || '').trim();
+    if (!link) return;
+    if (!/^https:\/\//i.test(link)) { toast('Le lien doit commencer par https://', { type: 'error' }); return; }
+    const name = (prompt('Nom affiché au client :', 'Fichiers de ta commande') || '').trim();
+    try {
+      const res = await authFetch(`${apiBase()}/api/orders/${encodeURIComponent(btn.dataset.orderId)}/links`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: link, name })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { toast(data.error || `Erreur ${res.status}`, { type: 'error' }); return; }
+      toast('Lien envoyé : le client le voit dans « Mes commandes ».', { type: 'success', duration: 3500 });
+      await renderOrders();
+    } catch (e) { toast('Impossible de contacter le serveur.', { type: 'error' }); }
+  }));
+  $$('.lib-add-link', ordersList).forEach((btn) => btn.addEventListener('click', async () => {
+    const link = (prompt('Colle le lien de téléchargement :') || '').trim();
+    if (!link) return;
+    if (!/^https:\/\//i.test(link)) { toast('Le lien doit commencer par https://', { type: 'error' }); return; }
+    const name = (prompt('Nom affiché au client (ex : Forest Pack — fichiers complets) :', 'Fichiers complets') || '').trim();
+    try {
+      const res = await authFetch(`${apiBase()}/api/admin/library/${encodeURIComponent(btn.dataset.asset)}/links`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: link, name })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { toast(data.error || `Erreur ${res.status}`, { type: 'error' }); return; }
+      toast('Lien rangé dans la bibliothèque.', { type: 'success', duration: 3000 });
+      await renderOrders();
+    } catch (e) { toast('Impossible de contacter le serveur.', { type: 'error' }); }
+  }));
+  // Bibliothèque : supprimer
+  $$('.lib-delete', ordersList).forEach((btn) => btn.addEventListener('click', async () => {
+    if (!(await askConfirm('Retirer de la bibliothèque ?', 'Ce lien ne pourra plus être envoyé (les clients qui l\'ont déjà reçu le voient encore 24 h).', 'Retirer'))) return;
+    btn.disabled = true;
+    try {
+      const res = await authFetch(`${apiBase()}/api/admin/library/${encodeURIComponent(btn.dataset.asset)}/files/${encodeURIComponent(btn.dataset.fileId)}`, { method: 'DELETE' });
+      if (!res.ok) { const d = await res.json().catch(() => ({})); toast(d.error || `Erreur ${res.status}`, { type: 'error' }); btn.disabled = false; return; }
+      await renderOrders();
+    } catch (e) { toast('Impossible de contacter le serveur.', { type: 'error' }); btn.disabled = false; }
+  }));
+  // Commande : envoyer les fichiers de l'asset en un clic
+  $$('.send-assets', ordersList).forEach((btn) => btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    try {
+      const res = await authFetch(`${apiBase()}/api/orders/${encodeURIComponent(btn.dataset.orderId)}/send-assets`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ assetIds: btn.dataset.assets.split(',') })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { toast(data.error || `Erreur ${res.status}`, { type: 'error' }); btn.disabled = false; return; }
+      toast(`${data.count} fichier${data.count > 1 ? 's' : ''} envoyé${data.count > 1 ? 's' : ''} : le client est prévenu sur Discord.`, { type: 'success', duration: 4000 });
+      await renderOrders();
+    } catch (e) { toast('Impossible de contacter le serveur.', { type: 'error' }); btn.disabled = false; }
+  }));
+  $$('.admin-delete-file:not(.lib-delete)', ordersList).forEach((btn) => btn.addEventListener('click', async () => {
     if (!(await askConfirm('Supprimer ce fichier ?', 'Le client ne pourra plus le télécharger.', 'Supprimer'))) return;
     btn.disabled = true;
     try {

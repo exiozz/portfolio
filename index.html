@@ -445,8 +445,8 @@ textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4
 .review-stars svg { fill: currentColor; stroke: none; }
 .review-card > p { font-size: 15.5px; line-height: 1.65; overflow-wrap: anywhere; }
 .review-head { margin-top: auto; display: flex; align-items: center; gap: 12px; }
-.review-avatar { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: var(--accent-soft); color: var(--accent-text); font-size: 13px; font-weight: 700; }
-.review-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.review-avatar { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: var(--accent-soft); color: var(--accent-text); font-size: 13px; font-weight: 700; }
+.review-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .review-name { font-weight: 600; font-size: 15px; }
 .review-delete { position: absolute; top: 14px; right: 14px; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; border: 0; background: transparent; color: var(--faint); cursor: pointer; transition: background-color .2s, color .2s; }
 .review-delete:hover { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); }
@@ -1656,6 +1656,13 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const safeImg = (u) => (/^https:\/\//i.test(u || '') ? u : '');
+// Avatar Discord : lien complet, ou simple code d'avatar à transformer en lien
+const avatarUrl = (id, av) => {
+  if (/^https:\/\//i.test(av || '') && !/\/null\.(png|gif|webp)/i.test(av)) return av;
+  if (/^(a_)?[0-9a-f]{32}$/i.test(av || '') && /^\d+$/.test(id || '')) return `https://cdn.discordapp.com/avatars/${id}/${av}.png?size=128`;
+  return '';
+};
+const AVATAR_FALLBACK = "this.onerror=null;this.src='https://cdn.discordapp.com/embed/avatars/0.png'";
 const fmt = (n) => Number(n).toLocaleString('fr-FR');
 const root = document.documentElement;
 const reduced = () => root.dataset.motion === 'reduced' || matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2256,8 +2263,8 @@ function updateNavDiscord() {
   const headerEl = $('#dropdown-header');
   if (currentUser) {
     navDiscordLabel.textContent = currentUser.name;
-    const avatar = safeImg(currentUser.avatar) || 'https://cdn.discordapp.com/embed/avatars/0.png';
-    headerEl.innerHTML = `<img src="${esc(avatar)}" alt=""><div><div class="dh-name">${esc(currentUser.name)}</div>${isAdmin() ? '<span class="dh-badge">Admin</span>' : ''}</div>`;
+    const avatar = avatarUrl(currentUser.id, currentUser.avatar) || 'https://cdn.discordapp.com/embed/avatars/0.png';
+    headerEl.innerHTML = `<img src="${esc(avatar)}" alt="" onerror="${AVATAR_FALLBACK}"><div><div class="dh-name">${esc(currentUser.name)}</div>${isAdmin() ? '<span class="dh-badge">Admin</span>' : ''}</div>`;
   } else { navDiscordLabel.textContent = 'Se connecter'; headerEl.innerHTML = ''; }
   closeDropdown();
   $$('.only-logged, #nav-my-cart-link, #nav-my-orders-link').forEach((el) => { el.hidden = !currentUser; });
@@ -2335,9 +2342,9 @@ async function renderReviews() {
   renderReviewsSummary(reviews);
   grid.innerHTML = reviews.map((r) => {
     const canDelete = (currentUser && r.discordId === currentUser.id) || isAdmin();
-    const av = safeImg(r.avatar), name = String(r.name || '?');
+    const av = avatarUrl(r.discordId, r.avatar), name = String(r.name || '?');
     const rating = Math.max(0, Math.min(5, Math.round(+r.rating || 0)));
-    return `<article class="review-card"><div class="review-stars" aria-label="${rating} sur 5">${Array.from({ length: 5 }, (_, i) => `<span class="${i < rating ? '' : 'off'}">${starSvg(15)}</span>`).join('')}</div><p>${esc(r.text)}</p><div class="review-head"><div class="review-avatar">${av ? `<img src="${esc(av)}" alt="">` : esc(name.slice(0, 2).toUpperCase())}</div><div class="review-name">${esc(name)}</div></div>${canDelete ? `<button class="review-delete" data-discord-id="${esc(r.discordId)}" aria-label="Supprimer cet avis">${ic('trash', 16)}</button>` : ''}</article>`;
+    return `<article class="review-card"><div class="review-stars" aria-label="${rating} sur 5">${Array.from({ length: 5 }, (_, i) => `<span class="${i < rating ? '' : 'off'}">${starSvg(15)}</span>`).join('')}</div><p>${esc(r.text)}</p><div class="review-head"><div class="review-avatar">${av ? `<img src="${esc(av)}" alt="" data-initials="${esc(name.slice(0, 2).toUpperCase())}" onerror="this.parentElement.textContent=this.dataset.initials">` : esc(name.slice(0, 2).toUpperCase())}</div><div class="review-name">${esc(name)}</div></div>${canDelete ? `<button class="review-delete" data-discord-id="${esc(r.discordId)}" aria-label="Supprimer cet avis">${ic('trash', 16)}</button>` : ''}</article>`;
   }).join('');
   $$('.review-delete', grid).forEach((btn) => btn.addEventListener('click', async () => {
     if (!(await askConfirm('Supprimer cet avis ?', 'Cette action est définitive.', 'Supprimer'))) return;

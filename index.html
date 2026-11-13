@@ -1053,7 +1053,8 @@ body.has-promo .nav { top: calc(var(--promo-h) + 12px); }
 .promo-bar-chip { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; background: var(--accent-ink); color: var(--accent); font-weight: 800; font-size: 13px; }
 .promo-bar-cta { display: inline-flex; align-items: center; padding: 3px 11px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--accent-ink) 55%, transparent); font-size: 12.5px; transition: background-color .2s, color .2s; }
 .promo-bar-short { display: none; }
-@media (max-width: 640px) { .promo-bar { font-size: 13px; gap: 8px; } .promo-bar-long, .promo-bar-cta { display: none; } .promo-bar-short { display: inline; } }
+@media (max-width: 1100px) { .promo-bar-cta { display: none; } }
+@media (max-width: 960px) { .promo-bar { font-size: 13px; gap: 8px; } .promo-bar-long { display: none; } .promo-bar-short { display: inline; } }
 @keyframes promo-slide { to { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) { .promo-bar { animation: none; } }
 .promo-badge { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-size: 13px; font-weight: 800; letter-spacing: -.005em; align-self: flex-start; box-shadow: 0 8px 24px -8px color-mix(in srgb, var(--accent) 70%, transparent); }
@@ -1193,10 +1194,10 @@ body.has-promo .nav { top: calc(var(--promo-h) + 12px); }
 
 <a class="skip" href="#main">Aller au contenu</a>
 <div id="scroll-progress" aria-hidden="true"></div>
-<a class="promo-bar" data-promo href="shop.html" aria-label="Promo de la Toussaint : −10 % sur tout le shop et les commandes sur devis jusqu'au 20 novembre">
+<a class="promo-bar" data-promo href="shop.html" aria-label="Réduc grâce à la Toussaint : −10 % sur tout le shop et les commandes sur devis jusqu'au 20 novembre">
   <span class="promo-bar-chip">−10 %</span>
-  <span class="promo-bar-long">Promo de la Toussaint : −10 % sur tout le shop et sur toutes les commandes sur devis, jusqu'au 20 novembre</span>
-  <span class="promo-bar-short">Toussaint · shop et devis jusqu'au 20/11</span>
+  <span class="promo-bar-long">Réduc grâce à la Toussaint : −10 % sur tout le shop et sur toutes les commandes sur devis, jusqu'au 20 novembre</span>
+  <span class="promo-bar-short">Réduc Toussaint jusqu'au 20/11</span>
   <span class="promo-bar-cta">Voir le shop →</span>
 </a>
 
@@ -1363,10 +1364,10 @@ body.has-promo .nav { top: calc(var(--promo-h) + 12px); }
   <div class="wrap">
     <div class="shop-promo reveal">
       <div>
-        <span class="promo-badge" data-promo style="margin-bottom:14px">Toussaint : −10 % jusqu'au 20 nov.</span>
+        <span class="promo-badge" data-promo style="margin-bottom:14px">Réduc Toussaint : −10 % jusqu'au 20 nov.</span>
         <h2>Le shop d'assets est ouvert</h2>
         <p>Modèles 3D, scripts complets, UI kits, GFX packs, templates et sound packs — prêts à importer dans ton projet. Licence personnelle ou commerciale, payable en euros ou en Robux.</p>
-        <div class="promo-note" data-promo><span class="promo-badge">−10 %</span>Promo de la Toussaint : sur tout le shop et sur toutes les commandes sur devis, jusqu'au 20 novembre.</div>
+        <div class="promo-note" data-promo><span class="promo-badge">−10 %</span>Réduc grâce à la Toussaint : sur tout le shop et sur toutes les commandes sur devis, jusqu'au 20 novembre.</div>
         <div class="shop-promo-actions">
           <a href="shop.html" class="btn btn-primary no-hover"><span data-icon="cart" data-size="18"></span>Découvrir le shop</a>
           <a href="shop.html#faq" class="btn btn-ghost">Voir la FAQ</a>
@@ -1426,7 +1427,7 @@ body.has-promo .nav { top: calc(var(--promo-h) + 12px); }
     <div class="sec-head reveal">
       <h2 class="sec-title">Tout ce que je peux faire, sur devis</h2>
       <p class="sec-desc">Prix de départ à titre indicatif, en euros ou en Robux. Le montant final dépend de l'ampleur et de la complexité de ta demande.</p>
-      <div class="promo-note" data-promo><span class="promo-badge">−10 %</span>Promo de la Toussaint : sur toutes les commandes sur devis, jusqu'au 20 novembre.</div>
+      <div class="promo-note" data-promo><span class="promo-badge">−10 %</span>Réduc grâce à la Toussaint : sur toutes les commandes sur devis, jusqu'au 20 novembre.</div>
     </div>
     <div class="pricing-bar reveal">
       <div class="seg" id="pricing-toggle" role="group" aria-label="Devise">

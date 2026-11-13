@@ -3132,7 +3132,8 @@ body.has-promo .nav { top: calc(var(--promo-h) + 12px); }
 .promo-bar-chip { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; background: var(--accent-ink); color: var(--accent); font-weight: 800; font-size: 13px; }
 .promo-bar-cta { display: inline-flex; align-items: center; padding: 3px 11px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--accent-ink) 55%, transparent); font-size: 12.5px; transition: background-color .2s, color .2s; }
 .promo-bar-short { display: none; }
-@media (max-width: 640px) { .promo-bar { font-size: 13px; gap: 8px; } .promo-bar-long, .promo-bar-cta { display: none; } .promo-bar-short { display: inline; } }
+@media (max-width: 1100px) { .promo-bar-cta { display: none; } }
+@media (max-width: 960px) { .promo-bar { font-size: 13px; gap: 8px; } .promo-bar-long { display: none; } .promo-bar-short { display: inline; } }
 @keyframes promo-slide { to { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) { .promo-bar { animation: none; } }
 .promo-badge { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-size: 13px; font-weight: 800; letter-spacing: -.005em; align-self: flex-start; box-shadow: 0 8px 24px -8px color-mix(in srgb, var(--accent) 70%, transparent); }
@@ -3456,10 +3457,10 @@ body.has-promo .nav { top: calc(var(--promo-h) + 12px); }
 
   <a class="skip" href="#main">Aller au contenu</a>
   <div id="scroll-progress" aria-hidden="true"></div>
-<a class="promo-bar" data-promo href="#contact" aria-label="Promo de la Toussaint : −10 % sur tout le shop et les commandes sur devis jusqu'au 20 novembre">
+<a class="promo-bar" data-promo href="#contact" aria-label="Réduc grâce à la Toussaint : −10 % sur tout le shop et les commandes sur devis jusqu'au 20 novembre">
   <span class="promo-bar-chip">−10 %</span>
-  <span class="promo-bar-long">Promo de la Toussaint : −10 % sur tout le shop et sur toutes les commandes sur devis, jusqu'au 20 novembre</span>
-  <span class="promo-bar-short">Toussaint · shop et devis jusqu'au 20/11</span>
+  <span class="promo-bar-long">Réduc grâce à la Toussaint : −10 % sur tout le shop et sur toutes les commandes sur devis, jusqu'au 20 novembre</span>
+  <span class="promo-bar-short">Réduc Toussaint jusqu'au 20/11</span>
   <span class="promo-bar-cta">Demander un devis →</span>
 </a>
 
@@ -3561,7 +3562,7 @@ body.has-promo .nav { top: calc(var(--promo-h) + 12px); }
       <div class="hero-glow" id="hero-glow"></div>
       <canvas id="particles" aria-hidden="true"></canvas>
       <div class="wrap">
-        <div class="status-pill promo-pill" data-promo-fallback="Nouveaux assets ajoutés régulièrement"><span class="dot"></span>Promo de la Toussaint : −10 % sur tout le shop et les devis, jusqu'au 20 novembre</div>
+        <div class="status-pill promo-pill" data-promo-fallback="Nouveaux assets ajoutés régulièrement"><span class="dot"></span>Réduc grâce à la Toussaint : −10 % sur tout le shop et les devis, jusqu'au 20 novembre</div>
         <h1>Shop d'assets</h1>
         <p class="hero-sub" id="shop-tagline"></p>
         <div class="shop-search">
@@ -3613,7 +3614,7 @@ body.has-promo .nav { top: calc(var(--promo-h) + 12px); }
           <h2>Besoin d'un asset sur mesure ?</h2>
           <p>Un modèle, un système, une UI ou un pack qui n'existe pas encore ? Décris-moi ton besoin et je te fais un
             devis clair, sans engagement.</p>
-          <div class="promo-note" data-promo style="background:color-mix(in srgb, var(--accent-ink) 14%, transparent);border-color:color-mix(in srgb, var(--accent-ink) 40%, transparent);color:var(--accent-ink);margin:0 0 22px;max-width:560px"><span class="promo-badge" style="background:var(--accent-ink);color:var(--accent)">−10 %</span>Promo de la Toussaint : sur les commandes sur mesure, jusqu'au 20 novembre.</div>
+          <div class="promo-note" data-promo style="background:color-mix(in srgb, var(--accent-ink) 14%, transparent);border-color:color-mix(in srgb, var(--accent-ink) 40%, transparent);color:var(--accent-ink);margin:0 0 22px;max-width:560px"><span class="promo-badge" style="background:var(--accent-ink);color:var(--accent)">−10 %</span>Réduc grâce à la Toussaint : sur les commandes sur mesure, jusqu'au 20 novembre.</div>
           <div class="cta-actions">
             <a id="cta-mail" href="#"
               class="btn btn-inverse no-hover"><span data-icon="mail" data-size="18"></span>Envoyer un email</a>

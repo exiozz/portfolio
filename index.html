@@ -1043,9 +1043,28 @@ body.has-cart-bar .toasts { bottom: calc(92px + env(safe-area-inset-bottom, 0px)
   .chat-panel { width: 440px; }
 }
 
+/* ===== Promo −10 % ===== */
+:root { --promo-h: 40px; }
+body.has-promo { padding-top: var(--promo-h); }
+body.has-promo .nav { top: calc(var(--promo-h) + 12px); }
+@media (max-width: 640px) { :root { --promo-h: 36px; } body.has-promo .nav { top: calc(var(--promo-h) + 8px); } }
+.promo-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 120; height: var(--promo-h); display: flex; align-items: center; justify-content: center; gap: 12px; padding: 0 16px; background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 70%, #a855f7), var(--accent)); background-size: 200% 100%; animation: promo-slide 8s linear infinite; color: var(--accent-ink); font-size: 14px; font-weight: 600; letter-spacing: -.005em; text-decoration: none; white-space: nowrap; overflow: hidden; }
+.promo-bar:hover .promo-bar-cta { background: var(--accent-ink); color: var(--accent); }
+.promo-bar-chip { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; background: var(--accent-ink); color: var(--accent); font-weight: 800; font-size: 13px; }
+.promo-bar-cta { display: inline-flex; align-items: center; padding: 3px 11px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--accent-ink) 55%, transparent); font-size: 12.5px; transition: background-color .2s, color .2s; }
+.promo-bar-short { display: none; }
+@media (max-width: 1100px) { .promo-bar-cta { display: none; } }
+@media (max-width: 960px) { .promo-bar { font-size: 13px; gap: 8px; } .promo-bar-long { display: none; } .promo-bar-short { display: inline; } }
+@keyframes promo-slide { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .promo-bar { animation: none; } }
+.promo-badge { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-size: 13px; font-weight: 800; letter-spacing: -.005em; align-self: flex-start; box-shadow: 0 8px 24px -8px color-mix(in srgb, var(--accent) 70%, transparent); }
+.promo-note { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 12px 16px; border-radius: var(--r, 16px); background: var(--accent-soft, color-mix(in srgb, var(--accent) 11%, transparent)); border: 1px solid var(--accent-line, color-mix(in srgb, var(--accent) 36%, transparent)); color: var(--ink); font-size: 15px; font-weight: 600; line-height: 1.4; }
+.promo-note .promo-badge { flex-shrink: 0; align-self: center; }
+.status-pill.promo-pill { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
+.status-pill.promo-pill .dot { background: var(--accent-ink); }
 </style>
 </head>
-<body>
+<body class="has-promo">
 
 <script id="site-data" type="application/json">
 {
@@ -1175,6 +1194,13 @@ body.has-cart-bar .toasts { bottom: calc(92px + env(safe-area-inset-bottom, 0px)
 
 <a class="skip" href="#main">Aller au contenu</a>
 <div id="scroll-progress" aria-hidden="true"></div>
+<a class="promo-bar" data-promo href="shop.html" aria-label="Réduc grâce à la Toussaint : −10 % sur tout le shop et les commandes sur devis jusqu'au 20 novembre">
+  <span class="promo-bar-chip">−10 %</span>
+  <span class="promo-bar-long">Réduc grâce à la Toussaint : −10 % sur tout le shop et sur toutes les commandes sur devis, jusqu'au 20 novembre</span>
+  <span class="promo-bar-short">Réduc Toussaint jusqu'au 20/11</span>
+  <span class="promo-bar-cta">Voir le shop →</span>
+</a>
+
 
 <header class="nav" id="nav">
   <div class="nav-inner">
@@ -1338,9 +1364,10 @@ body.has-cart-bar .toasts { bottom: calc(92px + env(safe-area-inset-bottom, 0px)
   <div class="wrap">
     <div class="shop-promo reveal">
       <div>
-        <span class="news-badge" style="margin-bottom:14px">Promo −10 %</span>
+        <span class="promo-badge" data-promo style="margin-bottom:14px">Réduc Toussaint : −10 % jusqu'au 20 nov.</span>
         <h2>Le shop d'assets est ouvert</h2>
-        <p>Modèles 3D, scripts complets, UI kits, GFX packs, templates et sound packs — prêts à importer dans ton projet. Licence personnelle ou commerciale, payable en euros ou en Robux.<br><strong>En ce moment : −10 % sur tout le shop et sur toutes les commandes sur devis.</strong></p>
+        <p>Modèles 3D, scripts complets, UI kits, GFX packs, templates et sound packs — prêts à importer dans ton projet. Licence personnelle ou commerciale, payable en euros ou en Robux.</p>
+        <div class="promo-note" data-promo><span class="promo-badge">−10 %</span>Réduc grâce à la Toussaint : sur tout le shop et sur toutes les commandes sur devis, jusqu'au 20 novembre.</div>
         <div class="shop-promo-actions">
           <a href="shop.html" class="btn btn-primary no-hover"><span data-icon="cart" data-size="18"></span>Découvrir le shop</a>
           <a href="shop.html#faq" class="btn btn-ghost">Voir la FAQ</a>
@@ -1398,9 +1425,9 @@ body.has-cart-bar .toasts { bottom: calc(92px + env(safe-area-inset-bottom, 0px)
 <section class="sec" id="services">
   <div class="wrap">
     <div class="sec-head reveal">
-      <span class="news-badge" style="margin-bottom:14px">Promo −10 %</span>
       <h2 class="sec-title">Tout ce que je peux faire, sur devis</h2>
-      <p class="sec-desc">Prix de départ à titre indicatif, en euros ou en Robux. Le montant final dépend de l'ampleur et de la complexité de ta demande. <strong>En ce moment, −10 % sur toutes les commandes.</strong></p>
+      <p class="sec-desc">Prix de départ à titre indicatif, en euros ou en Robux. Le montant final dépend de l'ampleur et de la complexité de ta demande.</p>
+      <div class="promo-note" data-promo><span class="promo-badge">−10 %</span>Réduc grâce à la Toussaint : sur toutes les commandes sur devis, jusqu'au 20 novembre.</div>
     </div>
     <div class="pricing-bar reveal">
       <div class="seg" id="pricing-toggle" role="group" aria-label="Devise">
@@ -2971,6 +2998,17 @@ document.addEventListener('keydown', (e) => {
 applyPrefs();
 renderCart();
 hydrateIcons();
+})();
+</script>
+<script>
+/* Fin de la promo Toussaint : tout disparaît automatiquement après le 20 novembre 2026 (heure de Paris) */
+(function () {
+  if (Date.now() < Date.parse('2026-11-21T00:00:00+01:00')) return;
+  document.body.classList.remove('has-promo');
+  document.querySelectorAll('[data-promo]').forEach(function (el) { el.remove(); });
+  document.querySelectorAll('[data-promo-fallback]').forEach(function (el) {
+    el.classList.remove('promo-pill'); el.innerHTML = '<span class="dot"></span>' + el.dataset.promoFallback;
+  });
 })();
 </script>
 </body>

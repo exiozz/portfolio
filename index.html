@@ -391,16 +391,26 @@ kbd { font: 500 12px/1 var(--font-code); padding: 4px 7px; border-radius: 6px; b
 .project-body { padding: 24px 26px 28px; display: flex; flex-direction: column; flex: 1; }
 .project-body h3 { font-size: 21px; letter-spacing: -.035em; }
 .project-body > p { margin-top: 10px; color: var(--muted); font-size: 15.5px; }
-.photos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-.photo-card { position: relative; aspect-ratio: 4 / 3; padding: 0; overflow: hidden; cursor: zoom-in; background: var(--bg-2); border: 1px solid var(--line); border-radius: calc(var(--r) + 2px); transition: border-color .25s, box-shadow .25s; }
-.photo-card:hover { border-color: var(--line-2); box-shadow: var(--shadow-md); }
+.photos-grid { display: grid; gap: 44px; --row-h: clamp(100px, 22vw, 170px); }
+.photo-pack-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.photo-pack-head h3 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; font-size: 21px; letter-spacing: -.03em; }
+.photo-pack-head h3 small { white-space: nowrap; font-size: 12.5px; font-weight: 500; letter-spacing: 0; color: var(--faint); }
+.photo-pack-head p { margin-top: 4px; font-size: 14px; color: var(--muted); }
+.photo-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.photo-row::after { content: ''; flex-grow: 999; }
+.photo-card { position: relative; flex: var(--ar) 1 calc(var(--ar) * var(--row-h)); aspect-ratio: var(--ar); padding: 0; overflow: hidden; cursor: zoom-in; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r); transition: border-color .25s, box-shadow .25s; }
+.photo-card:hover, .photo-card:focus-visible { border-color: var(--line-2); box-shadow: var(--shadow-md); }
 .photo-card img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .8s var(--ease); }
 .photo-card:hover img { transform: scale(1.04); }
-.photo-card figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 28px 16px 12px; font-size: 14px; font-weight: 600; text-align: left; color: #fff; background: linear-gradient(transparent, rgba(0, 0, 0, .65)); }
+.photo-card span { position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 12px 10px; font-size: 13px; font-weight: 600; text-align: left; color: #fff; background: linear-gradient(transparent, rgba(0, 0, 0, .7)); opacity: 0; transform: translateY(6px); transition: opacity .25s, transform .25s var(--ease); }
+.photo-card:hover span, .photo-card:focus-visible span { opacity: 1; transform: none; }
+.photo-nav { position: absolute; top: 50%; z-index: 3; transform: translateY(-50%); background: color-mix(in srgb, var(--surface) 82%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border-color: var(--line); color: var(--ink); }
+.photo-nav.prev { left: 14px; } .photo-nav.next { right: 14px; }
 .photo-modal { width: min(100%, 1100px); }
 .photo-modal .modal-media { aspect-ratio: auto; border-bottom: 0; }
 .photo-modal .modal-media img { height: auto; max-height: calc(100dvh - 120px); object-fit: contain; }
-.photo-modal figcaption { padding: 14px 20px; font-weight: 600; border-top: 1px solid var(--line); }
+.photo-modal figcaption { display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; font-weight: 600; border-top: 1px solid var(--line); }
+.photo-modal figcaption small { font-weight: 500; color: var(--muted); white-space: nowrap; }
 .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .tag { padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line-2); font-size: 12.5px; font-weight: 500; color: var(--muted); }
 .project-cta { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; min-height: 300px; padding: 32px; text-align: center; border: 1.5px dashed var(--line-2); border-radius: calc(var(--r) + 2px); color: var(--muted); transition: border-color .25s, background-color .25s, color .25s; }
@@ -1171,14 +1181,39 @@ body.has-promo .nav { top: calc(var(--promo-h) + 12px); }
     "enabled": true
   }],
   "photos": [
-    { "src": "assets/lava-mounts-pack/hero.jpg", "title": "Lava Mounts Pack", "enabled": true },
-    { "src": "assets/forest-pack/hero.jpg", "title": "Forest Pack", "enabled": true },
-    { "src": "assets/lava-mounts-pack/renders/dragon-side.webp", "title": "Dragon de lave", "enabled": true },
-    { "src": "assets/lava-mounts-pack/renders/horse-side.webp", "title": "Cheval de lave", "enabled": true },
-    { "src": "assets/lava-mounts-pack/renders/portal.webp", "title": "Portail", "enabled": true },
-    { "src": "assets/forest-pack/renders/tree-autumn-01.webp", "title": "Arbre d'automne", "enabled": true },
-    { "src": "assets/forest-pack/planche.jpg", "title": "Forest Pack — planche", "enabled": true },
-    { "src": "assets/lava-mounts-pack/planche.jpg", "title": "Lava Mounts Pack — planche", "enabled": true }
+    { "pack": "Lava Mounts Pack", "product": "lava-mounts-pack", "desc": "Dragon et cheval de lave riggés, cloche d'invocation et portail de feu.", "enabled": true, "items": [
+      { "src": "assets/lava-mounts-pack/renders/dragon-front.webp", "title": "Dragon de lave", "w": 1000, "h": 620 },
+      { "src": "assets/lava-mounts-pack/renders/dragon-side.webp", "title": "Dragon de lave — profil", "w": 1000, "h": 620 },
+      { "src": "assets/lava-mounts-pack/renders/dragon-head.webp", "title": "Dragon de lave — tête", "w": 1000, "h": 620 },
+      { "src": "assets/lava-mounts-pack/renders/horse-front.webp", "title": "Cheval de lave", "w": 1000, "h": 700 },
+      { "src": "assets/lava-mounts-pack/renders/horse-side.webp", "title": "Cheval de lave — profil", "w": 1000, "h": 700 },
+      { "src": "assets/lava-mounts-pack/renders/portal.webp", "title": "Portail de feu", "w": 1000, "h": 760 },
+      { "src": "assets/lava-mounts-pack/renders/bell.webp", "title": "Cloche d'invocation", "w": 700, "h": 800 }
+    ] },
+    { "pack": "Stylized Forest Pack", "product": "stylized-forest-pack", "desc": "18 assets nature stylisés : arbres, buissons, rochers, champignons, fleurs…", "enabled": true, "items": [
+      { "src": "assets/forest-pack/hero.jpg", "title": "Forest Pack — la scène complète", "w": 1600, "h": 900 },
+      { "src": "assets/forest-pack/renders/tree-oak-01.webp", "title": "Chêne", "w": 600, "h": 600 },
+      { "src": "assets/forest-pack/renders/tree-oak-02.webp", "title": "Chêne — variante", "w": 600, "h": 600 },
+      { "src": "assets/forest-pack/renders/tree-autumn-01.webp", "title": "Arbre d'automne", "w": 600, "h": 600 },
+      { "src": "assets/forest-pack/renders/tree-birch-01.webp", "title": "Bouleau", "w": 600, "h": 600 },
+      { "src": "assets/forest-pack/renders/tree-pine-01.webp", "title": "Pin", "w": 600, "h": 600 },
+      { "src": "assets/forest-pack/renders/tree-pine-02.webp", "title": "Pin — variante", "w": 600, "h": 600 },
+      { "src": "assets/forest-pack/renders/bush-01.webp", "title": "Buisson", "w": 600, "h": 600 },
+      { "src": "assets/forest-pack/renders/bush-berry-01.webp", "title": "Buisson à baies", "w": 600, "h": 600 },
+      { "src": "assets/forest-pack/renders/stump-01.webp", "title": "Souche", "w": 600, "h": 600 },
+      { "src": "assets/forest-pack/renders/log-01.webp", "title": "Tronc", "w": 600, "h": 600 },
+      { "src": "assets/forest-pack/renders/rock-large-01.webp", "title": "Gros rocher", "w": 600, "h": 600 },
+      { "src": "assets/forest-pack/renders/rock-medium-01.webp", "title": "Rocher moyen", "w": 600, "h": 600 },
+      { "src": "assets/forest-pack/renders/rock-small-01.webp", "title": "Petit rocher", "w": 600, "h": 600 },
+      { "src": "assets/forest-pack/renders/mushroom-red-01.webp", "title": "Champignon rouge", "w": 600, "h": 600 },
+      { "src": "assets/forest-pack/renders/mushroom-brown-cluster-01.webp", "title": "Champignons bruns", "w": 600, "h": 600 },
+      { "src": "assets/forest-pack/renders/flowers-01.webp", "title": "Fleurs", "w": 600, "h": 600 },
+      { "src": "assets/forest-pack/renders/grass-01.webp", "title": "Herbe", "w": 600, "h": 600 },
+      { "src": "assets/forest-pack/renders/fern-01.webp", "title": "Fougère", "w": 600, "h": 600 }
+    ] },
+    { "pack": "HUD & Quêtes Pack", "product": "hud-quest-pack", "desc": "Boussole, minimap fonctionnelle, suivi de quêtes, notifications et barres de vie.", "enabled": true, "items": [
+      { "src": "assets/hud-quest-pack/hero.webp", "title": "HUD & Quêtes — en jeu", "w": 1522, "h": 827 }
+    ] }
   ],
   "faq": [
     { "q": "Comment se passe le paiement ?", "a": "Un acompte est demandé avant le début du projet, le solde à la livraison. Détails précisés dans le devis." },
@@ -1623,8 +1658,10 @@ body.has-promo .nav { top: calc(var(--promo-h) + 12px); }
 <div class="overlay" id="photo-modal" aria-hidden="true">
   <figure class="modal photo-modal" role="dialog" aria-modal="true" aria-label="Photo agrandie">
     <button class="icon-btn modal-close" id="photo-close" aria-label="Fermer"><span data-icon="x"></span></button>
+    <button class="icon-btn photo-nav prev" id="photo-prev" aria-label="Photo précédente"><span data-icon="chevron-left"></span></button>
+    <button class="icon-btn photo-nav next" id="photo-next" aria-label="Photo suivante"><span data-icon="chevron-right"></span></button>
     <div class="modal-media"><img id="photo-img" src="" alt=""></div>
-    <figcaption id="photo-caption"></figcaption>
+    <figcaption><span id="photo-caption"></span><small id="photo-meta"></small></figcaption>
   </figure>
 </div>
 
@@ -2569,20 +2606,32 @@ projectsGrid.addEventListener('click', (e) => { const c = e.target.closest('.pro
 projectsGrid.addEventListener('keydown', (e) => { if (e.key !== 'Enter' && e.key !== ' ') return; const c = e.target.closest('.project-card'); if (c) { e.preventDefault(); openModal(+c.dataset.index); } });
 
 /* ---------- PHOTOS ---------- */
-const activePhotos = (DATA.photos || []).filter((p) => p.enabled !== false);
+const photoPacks = (DATA.photos || []).filter((p) => p.enabled !== false && (p.items || []).length);
+const allPhotos = photoPacks.flatMap((pack) => pack.items.map((it) => ({ ...it, pack: pack.pack })));
 const photosGrid = $('#photos-grid'), photoModal = $('#photo-modal');
-photosGrid.innerHTML = activePhotos.length
-  ? activePhotos.map((p, i) => `<figure><button type="button" class="photo-card" data-index="${i}" aria-label="Agrandir la photo ${esc(p.title || '')}"><img src="${esc(p.src)}" alt="${esc(p.title || '')}" loading="lazy">${p.title ? `<figcaption>${esc(p.title)}</figcaption>` : ''}</button></figure>`).join('')
-  : '<div class="empty-note" style="grid-column:1/-1">Aucune photo pour le moment.</div>';
+let photoIndex = 0, photoCursor = 0;
+photosGrid.innerHTML = photoPacks.length
+  ? photoPacks.map((pack) => `<section class="photo-pack"><div class="photo-pack-head"><div><h3>${esc(pack.pack)}<small>${pack.items.length} rendu${pack.items.length > 1 ? 's' : ''}</small></h3>${pack.desc ? `<p>${esc(pack.desc)}</p>` : ''}</div>${pack.product ? `<a class="btn btn-ghost btn-sm" href="shop.html?produit=${encodeURIComponent(pack.product)}">Voir dans le shop ${ic('arrow-right', 15)}</a>` : ''}</div><div class="photo-row">${pack.items.map((it) => `<button type="button" class="photo-card" data-index="${photoCursor++}" style="--ar:${(it.w && it.h) ? (it.w / it.h).toFixed(3) : 1.333}" aria-label="Agrandir : ${esc(it.title || pack.pack)}"><img src="${esc(it.src)}" alt="${esc(it.title || '')}" loading="lazy" decoding="async"${it.w ? ` width="${it.w}" height="${it.h}"` : ''}>${it.title ? `<span>${esc(it.title)}</span>` : ''}</button>`).join('')}</div></section>`).join('')
+  : '<div class="empty-note">Aucune photo pour le moment.</div>';
+function showPhoto(i) {
+  photoIndex = (i + allPhotos.length) % allPhotos.length;
+  const p = allPhotos[photoIndex];
+  const img = $('#photo-img'); img.src = p.src; img.alt = p.title || '';
+  $('#photo-caption').textContent = p.title || p.pack;
+  $('#photo-meta').textContent = `${p.pack} · ${photoIndex + 1} / ${allPhotos.length}`;
+}
 photosGrid.addEventListener('click', (e) => {
   const c = e.target.closest('.photo-card'); if (!c) return;
-  const p = activePhotos[+c.dataset.index];
-  const img = $('#photo-img'); img.src = p.src; img.alt = p.title || '';
-  $('#photo-caption').textContent = p.title || '';
-  $('#photo-caption').hidden = !p.title;
+  showPhoto(+c.dataset.index);
   openOv(photoModal, '#photo-close');
 });
 $('#photo-close').addEventListener('click', () => closeOv(photoModal));
+$('#photo-prev').addEventListener('click', () => showPhoto(photoIndex - 1));
+$('#photo-next').addEventListener('click', () => showPhoto(photoIndex + 1));
+document.addEventListener('keydown', (e) => {
+  if (!photoModal.classList.contains('active') || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+  e.preventDefault(); showPhoto(photoIndex + (e.key === 'ArrowRight' ? 1 : -1));
+});
 $('#projects-toggle').addEventListener('click', (e) => {
   const btn = e.target.closest('button'); if (!btn) return;
   const photos = btn.dataset.view === 'photos';

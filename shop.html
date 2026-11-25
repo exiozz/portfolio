@@ -4999,6 +4999,8 @@ renderTabs();
 renderProducts();
 renderCart();
 hydrateIcons();
+const linkedProduct = new URLSearchParams(location.search).get('produit');
+if (linkedProduct && ASSETS.some((a) => a.id === linkedProduct)) setTimeout(() => openProduct(linkedProduct), 300);
 
 })();
   </script>

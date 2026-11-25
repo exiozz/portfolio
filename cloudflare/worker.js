@@ -535,7 +535,9 @@ async function route(request, env, ctx) {
     if (!(rating >= 1 && rating <= 5)) throw new HttpError(400, 'Note invalide.');
     if (!text) throw new HttpError(400, 'Avis vide.');
     await ensureImported(env);
-    const review = { discordId: user.id, name: user.name, avatar: user.avatar || '', rating, text, timestamp: Date.now() };
+    // Pays facultatif (code ISO à 2 lettres), affiché sur le globe des avis
+    const country = /^[A-Z]{2}$/.test(String(b.country || '').toUpperCase()) ? String(b.country).toUpperCase() : undefined;
+    const review = { discordId: user.id, name: user.name, avatar: user.avatar || '', rating, text, country, timestamp: Date.now() };
     await updateVal(env, 'reviews', [], (reviews) => [review, ...reviews.filter((r) => r.discordId !== user.id)]);
     return json({ ok: true });
   }

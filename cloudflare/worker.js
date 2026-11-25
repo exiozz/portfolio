@@ -298,6 +298,34 @@ async function route(request, env, ctx) {
     return json((await getVal(env, 'orders', [])).map(publicOrder));
   }
 
+  // Commande créée par l'admin pour un client (ex. demande reçue en MP Discord)
+  if (path === '/api/admin/orders' && method === 'POST') {
+    const user = await auth(env, request); adminOnly(user);
+    const b = await readJson(request);
+    const discordId = String(b.discordId || '').trim();
+    const customerName = clampStr(b.customerName, 80).trim();
+    if (!/^\d{17,20}$/.test(discordId)) throw new HttpError(400, 'ID Discord invalide (17 à 20 chiffres).');
+    if (!customerName) throw new HttpError(400, 'Nom du client manquant.');
+    const items = (Array.isArray(b.items) ? b.items : []).slice(0, 30).map((it) => ({
+      title: clampStr(it.title, 200).trim(),
+      price: Math.max(0, +it.price || 0),
+      productId: it.productId ? clampStr(it.productId, 100) : undefined,
+      type: it.productId ? 'asset' : 'custom'
+    })).filter((it) => it.title);
+    if (!items.length) throw new HttpError(400, 'Ajoute au moins un article.');
+    const status = ORDER_STATUSES.includes(b.status) ? b.status : 'Confirmée';
+    const order = {
+      id: newId(), customerName, discordId, items,
+      total: items.reduce((s, it) => s + it.price, 0),
+      currency: b.currency === 'R$' ? 'R$' : '€', source: 'admin',
+      note: clampStr(b.note, 1000).trim() || undefined,
+      status, timestamp: Date.now(), files: []
+    };
+    await updateVal(env, 'orders', [], (orders) => { orders.unshift(order); return orders; });
+    if (b.notify) ctx.waitUntil(discordDM(env, discordId, `🧾 Exiozz a créé ta commande : ${items.map((it) => `**${it.title}**`).join(', ')} — ${order.total} ${order.currency}\nSuis-la sur ${FRONT}/shop.html → menu Discord → « Mes commandes ».`));
+    return json({ ok: true, id: order.id });
+  }
+
   if ((m = /^\/api\/orders\/([^/]+)$/.exec(path)) && method === 'PATCH') {
     const user = await auth(env, request); adminOnly(user);
     const { status } = await readJson(request);

@@ -2504,6 +2504,21 @@
       background: color-mix(in srgb, var(--danger) 12%, transparent);
     }
 
+    .new-order { margin-bottom: 14px; }
+    .new-order summary b { display: inline-flex; align-items: center; gap: 8px; }
+    .new-order form { display: grid; gap: 14px; }
+    .no-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .no-field { display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
+    .no-field small { font-weight: 400; color: var(--faint); }
+    .no-input { width: 100%; height: 40px; padding: 0 12px; border-radius: var(--r-btn); border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); font: 500 14.5px var(--font-body); }
+    textarea.no-input { height: auto; min-height: 70px; padding: 10px 12px; resize: vertical; }
+    .no-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+    .no-lines { display: grid; gap: 8px; }
+    .no-line { display: grid; grid-template-columns: 1fr 110px 40px; gap: 8px; }
+    .no-check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink); cursor: pointer; }
+    .order-note { margin: -4px 0 14px; padding: 10px 12px; border-radius: 10px; background: var(--bg-2); font-size: 14px; line-height: 1.5; color: var(--muted); white-space: pre-line; }
+    @media (max-width: 560px) { .no-grid { grid-template-columns: 1fr; } .no-line { grid-template-columns: 1fr 90px 40px; } }
+
     .orders-title {
       margin: 28px 0 14px;
       font-family: var(--font-display);
@@ -4666,7 +4681,7 @@ function orderFilesHtml(order, admin) {
 function orderCardHtml(order, admin) {
   const items = Array.isArray(order.items) ? order.items.map((it) => `<div class="order-item-row"><span>${esc(it.title || 'Article')}</span><span>${fmt(it.price || 0)} ${esc(order.currency || '')}</span></div>`).join('') : '';
   const adminActions = admin ? `<div class="admin-order-actions"><select class="admin-order-status" data-order-id="${esc(order.id)}" aria-label="Statut">${ORDER_STATUS_OPTIONS.map((s) => `<option value="${esc(s)}" ${s === order.status ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select><button class="admin-delete-order" data-order-id="${esc(order.id)}" aria-label="Supprimer">${ic('trash', 16)}</button></div>` : '';
-  return `<div class="order-card"><div class="order-head"><div><b>${admin ? esc(order.customerName || 'Client') : 'Commande'}</b><div class="order-id">#${esc(order.id)} · ${formatOrderDate(order.timestamp)}</div>${admin ? `<div class="order-id">Discord : ${esc(order.discordId || 'inconnu')}</div>` : ''}${admin && order.subscription ? `<div class="order-id">Abonnement : ${order.subscription.active ? 'actif jusqu\'au' : 'terminé le'} ${frDateLong(order.subscription.until)}</div>` : ''}</div><span class="order-status ${orderStatusClass(order.status)}">${esc(order.status || 'En attente de contact')}</span></div><div class="order-items">${items || '<div class="order-item-row"><span>Aucun article</span></div>'}</div><div class="order-footer"><span>Total</span><span>${fmt(order.total || 0)} ${esc(order.currency || '')}</span></div>${orderFilesHtml(order, admin)}${adminActions}</div>`;
+  return `<div class="order-card"><div class="order-head"><div><b>${admin ? esc(order.customerName || 'Client') : 'Commande'}</b><div class="order-id">#${esc(order.id)} · ${formatOrderDate(order.timestamp)}</div>${admin ? `<div class="order-id">Discord : ${esc(order.discordId || 'inconnu')}</div>` : ''}${admin && order.subscription ? `<div class="order-id">Abonnement : ${order.subscription.active ? 'actif jusqu\'au' : 'terminé le'} ${frDateLong(order.subscription.until)}</div>` : ''}</div><span class="order-status ${orderStatusClass(order.status)}">${esc(order.status || 'En attente de contact')}</span></div>${order.note ? `<div class="order-note">${esc(order.note)}</div>` : ''}<div class="order-items">${items || '<div class="order-item-row"><span>Aucun article</span></div>'}</div><div class="order-footer"><span>Total</span><span>${fmt(order.total || 0)} ${esc(order.currency || '')}</span></div>${orderFilesHtml(order, admin)}${adminActions}</div>`;
 }
 async function fetchMyOrders() {
   const res = await authFetch(`${apiBase()}/api/orders/${encodeURIComponent(currentUser.id)}`);
@@ -4703,6 +4718,73 @@ function libraryHtml() {
       </div>
     </details>`;
   }).join('')}`;
+}
+// Commande créée à la main par l'admin (ex. demande reçue en MP Discord)
+const newOrderLine = (title = '', price = '', productId = '') => `<div class="no-line"${productId ? ` data-product-id="${esc(productId)}"` : ''}><input class="no-input no-title" maxlength="200" placeholder="Ce que le client commande" aria-label="Article" value="${esc(title)}"><input class="no-input no-price" type="number" min="0" step="0.01" placeholder="Prix" aria-label="Prix" value="${esc(price)}"><button type="button" class="admin-delete-order no-remove" aria-label="Retirer la ligne">${ic('trash', 16)}</button></div>`;
+function newOrderHtml() {
+  return `<details class="lib-asset new-order"><summary><b>${ic('cart', 16)}Créer une commande pour un client</b><small>ex. demande reçue en MP</small></summary>
+    <div class="lib-body"><form id="new-order-form" novalidate>
+      <div class="no-grid">
+        <label class="no-field">Pseudo du client<input class="no-input" name="customerName" maxlength="80" autocomplete="off"></label>
+        <label class="no-field">ID Discord du client <small>clic droit sur son profil → Copier l'identifiant</small><input class="no-input" name="discordId" inputmode="numeric" maxlength="20" autocomplete="off" placeholder="17 à 20 chiffres"></label>
+      </div>
+      <div class="no-field">Articles
+        <div class="no-lines" id="no-lines">${newOrderLine()}</div>
+        <div class="of-upload-row">
+          <button type="button" class="btn btn-ghost btn-sm" id="no-add-line">${ic('plus', 16)}Ligne libre</button>
+          <select class="no-input" id="no-add-asset" style="width:auto" aria-label="Ajouter un asset du shop"><option value="">+ Asset du shop…</option>${LIB_ASSETS.map((a) => `<option value="${esc(a.id)}">${esc(a.title)}</option>`).join('')}</select>
+        </div>
+      </div>
+      <div class="no-grid">
+        <label class="no-field">Devise<select class="no-input" name="currency"><option value="€">€ (euros)</option><option value="R$">R$ (Robux)</option></select></label>
+        <label class="no-field">Statut<select class="no-input" name="status">${ORDER_STATUS_OPTIONS.map((st) => `<option${st === 'Confirmée' ? ' selected' : ''}>${esc(st)}</option>`).join('')}</select></label>
+      </div>
+      <label class="no-field">Note visible par le client <small>(optionnel)</small><textarea class="no-input" name="note" maxlength="1000" placeholder="Détails convenus, délai, acompte…"></textarea></label>
+      <label class="no-check"><input type="checkbox" name="notify" checked>Prévenir le client en MP Discord</label>
+      <div class="order-footer"><span>Total</span><span id="no-total">0 €</span></div>
+      <div><button type="submit" class="btn btn-primary btn-sm">${ic('check', 16)}Créer la commande</button></div>
+    </form></div>
+  </details>`;
+}
+function bindNewOrderForm() {
+  const form = $('#new-order-form', ordersList); if (!form) return;
+  const lines = $('#no-lines', form);
+  const total = () => {
+    const sum = $$('.no-price', lines).reduce((t, i) => t + (+i.value || 0), 0);
+    $('#no-total', form).textContent = `${fmt(sum)} ${form.currency.value}`;
+  };
+  const priceOf = (a) => (form.currency.value === 'R$' ? robuxPriceOf(a) : a.price);
+  $('#no-add-line', form).addEventListener('click', () => { lines.insertAdjacentHTML('beforeend', newOrderLine()); $('.no-line:last-child .no-title', lines).focus(); });
+  $('#no-add-asset', form).addEventListener('change', (e) => {
+    const a = LIB_ASSETS.find((x) => x.id === e.target.value); e.target.value = ''; if (!a) return;
+    const empty = $$('.no-line', lines).find((l) => !$('.no-title', l).value.trim() && !$('.no-price', l).value);
+    if (empty) empty.remove();
+    lines.insertAdjacentHTML('beforeend', newOrderLine(a.title, priceOf(a), a.id)); total();
+  });
+  lines.addEventListener('click', (e) => { const b = e.target.closest('.no-remove'); if (!b) return; b.closest('.no-line').remove(); if (!$('.no-line', lines)) lines.insertAdjacentHTML('beforeend', newOrderLine()); total(); });
+  lines.addEventListener('input', total);
+  form.currency.addEventListener('change', () => {
+    $$('.no-line[data-product-id]', lines).forEach((l) => { const a = LIB_ASSETS.find((x) => x.id === l.dataset.productId); if (a) $('.no-price', l).value = priceOf(a); });
+    total();
+  });
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const items = $$('.no-line', lines).map((l) => ({ title: $('.no-title', l).value.trim(), price: +$('.no-price', l).value || 0, productId: l.dataset.productId || undefined })).filter((it) => it.title);
+    const discordId = form.discordId.value.trim(), customerName = form.customerName.value.trim();
+    if (!customerName) { toast('Indique le pseudo du client.', { type: 'error' }); form.customerName.focus(); return; }
+    if (!/^\d{17,20}$/.test(discordId)) { toast('ID Discord invalide : 17 à 20 chiffres.', { type: 'error' }); form.discordId.focus(); return; }
+    if (!items.length) { toast('Ajoute au moins un article.', { type: 'error' }); return; }
+    const btn = $('button[type="submit"]', form); btn.disabled = true;
+    try {
+      const res = await authFetch(`${apiBase()}/api/admin/orders`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customerName, discordId, items, currency: form.currency.value, status: form.status.value, note: form.note.value, notify: form.notify.checked }) });
+      if (res.status === 401) { sessionExpired(); return; }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { toast(data.error || `Erreur ${res.status}`, { type: 'error' }); return; }
+      toast(`Commande créée pour ${customerName}.`, { type: 'success' });
+      await renderOrders();
+    } catch (err) { toast('Impossible de contacter le serveur.', { type: 'error' }); }
+    finally { btn.disabled = false; }
+  });
 }
 // Envoi de fichiers avec barre de progression
 async function uploadFiles(list, urlFor, prog, onDone) {
@@ -4742,10 +4824,11 @@ async function renderOrders() {
       const [all, lib] = await Promise.all([fetchAdminOrders(), authFetch(`${apiBase()}/api/admin/library`).then((r) => (r.ok ? r.json() : {})).catch(() => ({}))]);
       adminLibrary = (lib && lib.assets) || {}; adminStorage = lib && lib.limit ? lib : null;
       html += '<div class="orders-title">Administration — toutes les commandes</div>';
+      html += newOrderHtml();
       html += all.length ? all.map((o) => orderCardHtml(o, true)).join('') : '<div class="cart-empty">Aucune commande.</div>';
     }
     if (isAdmin()) html += libraryHtml();
-    ordersList.innerHTML = html; bindOrderFiles(); bindOrderAdminActions();
+    ordersList.innerHTML = html; bindOrderFiles(); bindOrderAdminActions(); bindNewOrderForm();
   } catch (e) { ordersList.innerHTML = `<div class="cart-empty">${esc(e.message)}</div>`; }
 }
 function openOrders() {

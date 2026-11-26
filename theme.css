@@ -1254,3 +1254,24 @@ html[data-theme="light"] .btn-w::after, html[data-theme="light"] .nav-shop::afte
 .gb-foot .btn { white-space: nowrap; }
 .gb-swipe { display: none; }
 @media (max-width: 960px) { .gb-swipe { display: flex; align-items: center; gap: 6px; margin: -6px 0 10px; font: 400 11px/1 var(--mono); color: var(--ink-4); } }
+
+/* Admin : codes promo */
+.a-promo-form { max-width: none; padding: 16px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); }
+.a-grid2 { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 12px; }
+.a-grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.a-inline { display: flex; gap: 6px; align-items: center; }
+.a-inline input { flex: 1; min-width: 0; height: 42px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--card-2); color: var(--ink); font: 500 14px/1 var(--mono); letter-spacing: 0; text-transform: uppercase; }
+.a-inline input[type="number"] { text-transform: none; font-family: var(--body); }
+.a-inline .btn { height: 42px; }
+.a-unit { font: 600 15px/1 var(--display); color: var(--ink-2); letter-spacing: 0; }
+.a-lbl > input[type="date"], .a-lbl > input[type="number"] { height: 42px; padding: 0 10px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--card-2); color: var(--ink); font: 400 13px/1 var(--body); letter-spacing: 0; }
+.a-check { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-2); cursor: pointer; }
+.a-check input { width: 16px; height: 16px; accent-color: var(--accent); }
+.a-sub { display: flex; align-items: center; gap: 8px; margin: 22px 0 10px; font: 700 15px/1 var(--display); }
+.a-sub span { font: 400 11px/1 var(--mono); color: var(--ink-4); }
+.a-promo { grid-template-columns: auto minmax(0, 1fr) auto auto; }
+.a-promo .a-acts { display: flex; gap: 2px; }
+.a-local { margin-top: 16px; font-size: 13px; color: var(--ink-3); }
+.a-local summary { cursor: pointer; margin-bottom: 10px; font: 400 12px/1.4 var(--mono); }
+@media (max-width: 640px) { .a-grid2, .a-grid3 { grid-template-columns: minmax(0, 1fr); } .a-promo { grid-template-columns: auto minmax(0, 1fr); } }
+.a-inline input::placeholder { text-transform: none; }

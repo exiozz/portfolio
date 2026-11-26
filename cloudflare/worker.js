@@ -9,6 +9,7 @@
  *  - Avis clients, notes des assets, liste d'envies, disponibilités
  *  - Activité récente anonyme, avatar Roblox pour le badge de l'accueil
  *  - Communauté : mur d'idées, réactions, compteur en direct, livre d'or
+ *  - Codes promo créés depuis l'espace admin
  *  - Récupération automatique des avis et commandes de l'ancien serveur
  *
  * À coller tel quel dans l'éditeur Cloudflare (Workers → ton worker → Edit code).
@@ -285,6 +286,11 @@ async function route(request, env, ctx) {
       note: clampStr(b.note, 1000).trim() || undefined, // message du client (demande de devis)
       status: 'En attente de contact', timestamp: Date.now(), files: []
     };
+    const promoCode = clampStr(b.promo, 40).trim().toUpperCase();
+    if (promoCode) {
+      order.promo = promoCode;
+      ctx.waitUntil(updateVal(env, 'promos', [], (list) => { const pr = list.find((x) => x.code === promoCode); if (pr) pr.uses = (pr.uses || 0) + 1; return list; }).catch(() => {}));
+    }
     await updateVal(env, 'orders', [], (orders) => { orders.unshift(order); return orders; });
     ctx.waitUntil(notifyAdmin(env, `🛒 Nouvelle commande de **${order.customerName}** (<@${order.discordId}>) — ${order.total} ${order.currency}\n` + items.map((it) => `• ${it.title} — ${it.price}`).join('\n') + (order.note ? `\n> ${order.note.slice(0, 500)}` : '')));
     return json({ ok: true, id: order.id });
@@ -862,6 +868,62 @@ async function route(request, env, ctx) {
       found = true; return false;
     }));
     if (!found) throw new HttpError(404, 'Message introuvable.');
+    return json({ ok: true });
+  }
+
+  /* ============================== Codes promo (créés depuis l'espace admin) ============================== */
+  const todayStr = () => new Date().toISOString().slice(0, 10);
+  const promoState = (pr) => (pr.from && todayStr() < pr.from ? 'scheduled' : pr.until && todayStr() > pr.until ? 'expired' : pr.maxUses && (pr.uses || 0) >= pr.maxUses ? 'used up' : 'active');
+  const publicPromo = (pr) => ({ code: pr.code, pct: pr.pct, label: pr.label, from: pr.from || null, until: pr.until || null });
+  // Vérifier un code tapé par un visiteur (messages en anglais : ils s'affichent tels quels sur le site)
+  if (path === '/api/promos/check' && method === 'POST') {
+    const b = await readJson(request);
+    const code = clampStr(b.code, 40).trim().toUpperCase().replace(/\s+/g, '');
+    const pr = (await getVal(env, 'promos', [])).find((x) => x.code === code);
+    if (!pr) throw new HttpError(404, "This code doesn't exist");
+    const st = promoState(pr);
+    if (st === 'scheduled') throw new HttpError(400, "This code isn't active yet");
+    if (st === 'expired') throw new HttpError(400, 'This code has expired');
+    if (st === 'used up') throw new HttpError(400, 'This code has been used up');
+    return json({ ok: true, ...publicPromo(pr) });
+  }
+  // Code mis en avant dans la barre du haut du site
+  if (path === '/api/promos/banner' && method === 'GET') {
+    const pr = (await getVal(env, 'promos', [])).find((x) => x.banner && promoState(x) === 'active');
+    return json(pr ? publicPromo(pr) : null);
+  }
+  if (path === '/api/admin/promos' && method === 'GET') {
+    const user = await auth(env, request); adminOnly(user);
+    return json((await getVal(env, 'promos', [])).map((pr) => ({ ...pr, state: promoState(pr) })));
+  }
+  if (path === '/api/admin/promos' && method === 'POST') {
+    const user = await auth(env, request); adminOnly(user);
+    const b = await readJson(request);
+    const code = clampStr(b.code, 24).trim().toUpperCase().replace(/\s+/g, '');
+    if (!/^[A-Z0-9_-]{3,24}$/.test(code)) throw new HttpError(400, 'Code invalide : 3 à 24 lettres, chiffres, - ou _.');
+    const pct = Math.round(+b.pct);
+    if (!(pct >= 1 && pct <= 90)) throw new HttpError(400, 'Remise entre 1 et 90 %.');
+    const date = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? String(v) : null);
+    const from = date(b.from), until = date(b.until);
+    if (from && until && until < from) throw new HttpError(400, 'La date de fin est avant la date de début.');
+    const maxUses = b.maxUses ? Math.max(1, Math.min(100000, Math.round(+b.maxUses) || 0)) : null;
+    const label = clampStr(b.label, 80).trim() || `${pct}% off`;
+    let saved = null;
+    await updateVal(env, 'promos', [], (list) => {
+      const old = list.find((x) => x.code === code);
+      if (old && !b.update) throw new HttpError(409, 'Ce code existe déjà.');
+      if (b.banner) list.forEach((x) => { x.banner = false; });
+      saved = { code, pct, label, from, until, maxUses, uses: old ? old.uses || 0 : 0, banner: !!b.banner, createdAt: old ? old.createdAt : Date.now() };
+      return old ? list.map((x) => (x.code === code ? saved : x)) : [saved, ...list].slice(0, 200);
+    });
+    return json({ ok: true, promo: { ...saved, state: promoState(saved) } });
+  }
+  if ((m = /^\/api\/admin\/promos\/([^/]+)$/.exec(path)) && method === 'DELETE') {
+    const user = await auth(env, request); adminOnly(user);
+    const code = decodeURIComponent(m[1]).toUpperCase();
+    let found = false;
+    await updateVal(env, 'promos', [], (list) => list.filter((x) => { if (x.code === code) { found = true; return false; } return true; }));
+    if (!found) throw new HttpError(404, 'Code introuvable.');
     return json({ ok: true });
   }
 

@@ -197,5 +197,34 @@
     }
   };
 
-  window.Exiozz = { PRODUCTS, CATEGORIES, PROMO, BUNDLE, Promo, Cart, money, inCur, priceHTML, mountBar, mountPromoForm };
+  /* ---------- Catalogue géré depuis l'espace admin ----------
+     Les assets écrits ci-dessus restent la base ; le serveur ajoute les nouveaux et les modifications
+     (prix, textes, images, asset masqué). Une copie est gardée dans le navigateur pour un affichage immédiat. */
+  const CAT_LABEL = Object.fromEntries(CATEGORIES.map(([id, label]) => [id, label]));
+  const BUILTIN = PRODUCTS.map(p => ({ ...p }));
+  const ALL = BUILTIN.map(p => ({ ...p, builtin: true }));
+  const applyCatalog = (list, quiet) => {
+    const byId = new Map(BUILTIN.map(p => [p.id, { ...p, builtin: true }]));
+    (Array.isArray(list) ? list : []).forEach(c => {
+      if (!c || !c.id) return;
+      const base = byId.get(c.id), isBuiltin = BUILTIN.some(b => b.id === c.id);
+      byId.set(c.id, { ...(base || {}), ...c, catLabel: CAT_LABEL[c.cat] || c.cat, builtin: isBuiltin, edited: isBuiltin, added: c.added || (base && base.added) || Date.now() });
+    });
+    ALL.length = 0; ALL.push(...byId.values());
+    PRODUCTS.length = 0; PRODUCTS.push(...ALL.filter(p => !p.hidden));
+    if (!quiet) { emit("catalogchange"); emit("cartchange"); }
+  };
+  const CAT_KEY = "exiozz-catalog";
+  applyCatalog(store.get(CAT_KEY, []), true);
+  const Catalog = {
+    all: () => ALL.slice(),
+    builtin: id => BUILTIN.find(p => p.id === id),
+    labels: CAT_LABEL,
+    async reload() {
+      try { const r = await fetch(API + "/api/products", { cache: "no-store" }); if (!r.ok) return; const list = await r.json(); store.set(CAT_KEY, list); applyCatalog(list); } catch (e) {}
+    }
+  };
+  Catalog.reload();
+
+  window.Exiozz = { PRODUCTS, CATEGORIES, PROMO, BUNDLE, Promo, Cart, Catalog, API, money, inCur, priceHTML, mountBar, mountPromoForm };
 })();

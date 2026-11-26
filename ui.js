@@ -409,7 +409,7 @@
     const body = adminD.querySelector(".drawer-body");
     adminD.querySelector(".drawer-foot").innerHTML = `<a class="btn btn-o wide" href="admin.html"><i data-lucide="folder-cog"></i>Full admin panel · files, asset library, new order</a>`;
     if (!isAdmin()) { body.innerHTML = `<div class="d-empty"><i data-lucide="lock"></i><b>Admin only</b><span>Sign in with the admin Discord account</span></div>`; icons(); return; }
-    const tabs = [["orders", "Orders"], ["avail", "Availability"], ["shots", "Showcase"], ["promo", "Promo codes"], ["community", "Community"]];
+    const tabs = [["orders", "Orders"], ["shop", "Shop"], ["promo", "Promo codes"], ["avail", "Availability"], ["shots", "Showcase"], ["community", "Community"]];
     const head = `<div class="a-tabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${k === adminTab}" data-atab="${k}">${l}</button>`).join("")}</div>`;
     if (adminTab === "orders") {
       body.innerHTML = head + `<div id="a-orders"></div>`; const box = $("#a-orders");
@@ -451,6 +451,8 @@
           : `<div class="d-empty"><i data-lucide="image"></i><b>No screenshot yet</b><span>Buyers can add one with their rating in the shop</span></div>`;
         icons();
       } catch (e) { errorBox(box, e.message); }
+    } else if (adminTab === "shop") {
+      body.innerHTML = head + `<div id="a-shop"></div>`; renderShopAdmin($("#a-shop"));
     } else if (adminTab === "promo") {
       body.innerHTML = head + `<div id="a-promo"></div>`; renderPromoAdmin($("#a-promo"));
     } else {
@@ -460,6 +462,123 @@
       fetch(API + "/api/reviews").then(r => r.json()).then(l => { const el = $("#a-rev"); if (el) el.textContent = l.length; }).catch(() => {});
     }
   }
+  /* Shop : ajouter, modifier, masquer ou supprimer des assets (gardés sur le serveur) */
+  const SHOP_CATS = X.CATEGORIES.filter(c => c[0] !== "all");
+  const BADGES = ["New", "Best-seller", "Popular", "Sale", "Limited"];
+  let shopEdit = null; // null = liste ; objet = formulaire (nouvel asset ou modification)
+  const shrinkImg = file => new Promise((res, rej) => {
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) return rej(new Error("Use PNG, JPG or WebP images"));
+    if (file.size > 20 * 1048576) return rej(new Error("Image too big (20 MB max)"));
+    const img = new Image(), u = URL.createObjectURL(file);
+    img.onload = () => {
+      const k = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u);
+      let out = c.toDataURL("image/webp", .84); if (!out.startsWith("data:image/webp")) out = c.toDataURL("image/jpeg", .86);
+      res(out);
+    };
+    img.onerror = () => { URL.revokeObjectURL(u); rej(new Error("Couldn't read this image")); };
+    img.src = u;
+  });
+  // f.elements.namedItem : « name » et « hidden » sont aussi des propriétés du formulaire lui-même
+  const fld = (f, n) => f.elements.namedItem(n);
+  const prodFromForm = f => ({
+    ...shopEdit, name: fld(f, "name").value.trim(), cat: fld(f, "cat").value, eur: +fld(f, "eur").value, rbx: fld(f, "rbx").value ? +fld(f, "rbx").value : 0,
+    badge: fld(f, "badge").value, desc: fld(f, "desc").value.trim(), tags: fld(f, "tags").value, hidden: fld(f, "hidden").checked
+  });
+  function renderShopAdmin(box) {
+    box = box || $("#a-shop"); if (!box) return;
+    if (!shopEdit) {
+      const list = X.Catalog.all().sort((a, b) => (a.hidden - b.hidden) || (a.rank - b.rank));
+      box.innerHTML = `<div class="a-shop-top"><p class="d-note" style="margin:0">Add new assets or edit the existing ones. Changes show in the shop right away, for everyone.</p><button class="btn btn-w" data-shop-new><i data-lucide="plus"></i>New asset</button></div>
+        <div class="a-prods">${list.map(p => `<div class="a-prod${p.hidden ? " is-hidden" : ""}">
+          <img src="${esc(p.cover)}" alt="" loading="lazy">
+          <div class="a-prod-info"><b>${esc(p.name)}</b><span>${esc(p.catLabel || p.cat)} · ${X.money(p.eur)} · R$ ${p.rbx || Math.round(p.eur * 80)}</span>
+            <div class="a-prod-tags">${p.hidden ? '<span class="st off">Hidden</span>' : '<span class="st ok">Visible</span>'}${p.builtin ? `<span class="st">${p.edited ? "Built-in · edited" : "Built-in"}</span>` : '<span class="st run">Added by you</span>'}</div></div>
+          <div class="a-prod-acts">
+            <button class="btn btn-o" data-shop-edit="${esc(p.id)}"><i data-lucide="pencil"></i>Edit</button>
+            <button class="c-rm" data-shop-hide="${esc(p.id)}" aria-label="${p.hidden ? "Show" : "Hide"} ${esc(p.name)}" title="${p.hidden ? "Show in the shop" : "Hide from the shop"}"><i data-lucide="${p.hidden ? "eye" : "eye-off"}"></i></button>
+            ${!p.builtin ? `<button class="c-rm" data-shop-del="${esc(p.id)}" aria-label="Delete ${esc(p.name)}" title="Delete"><i data-lucide="trash-2"></i></button>` : p.edited ? `<button class="c-rm" data-shop-reset="${esc(p.id)}" aria-label="Undo my changes on ${esc(p.name)}" title="Undo my changes"><i data-lucide="rotate-ccw"></i></button>` : ""}
+          </div></div>`).join("")}</div>`;
+      icons(); return;
+    }
+    const p = shopEdit, isNew = !p.id;
+    box.innerHTML = `<form class="a-form a-prod-form" id="shop-form" novalidate>
+        <button type="button" class="a-back" data-shop-back><i data-lucide="arrow-left"></i>All assets</button>
+        <b class="a-form-t">${isNew ? "New asset" : "Edit · " + esc(p.name)}</b>
+        <label class="a-lbl">Name <input name="name" maxlength="80" required value="${esc(p.name || "")}" placeholder="e.g. Medieval Castle Pack"></label>
+        <div class="a-grid3">
+          <label class="a-lbl">Category <select name="cat" class="a-select">${SHOP_CATS.map(([id, l]) => `<option value="${id}"${id === (p.cat || "models") ? " selected" : ""}>${l}</option>`).join("")}</select></label>
+          <label class="a-lbl">Price (€) <input name="eur" type="number" min="0.5" step="0.5" required value="${p.eur || ""}" placeholder="e.g. 8"></label>
+          <label class="a-lbl">Price (R$) <input name="rbx" type="number" min="1" step="10" value="${p.rbx || ""}" placeholder="€ × 80"></label>
+        </div>
+        <div class="a-grid2">
+          <label class="a-lbl">Badge <select name="badge" class="a-select">${[...new Set([...BADGES, p.badge || "New"])].map(b => `<option${b === (p.badge || "New") ? " selected" : ""}>${esc(b)}</option>`).join("")}</select></label>
+          <label class="a-lbl">Tags <input name="tags" maxlength="140" value="${esc(Array.isArray(p.tags) ? p.tags.join(", ") : p.tags || "")}" placeholder="e.g. Low Poly, FBX, Rigged"></label>
+        </div>
+        <label class="a-lbl">Description <textarea name="desc" maxlength="400" rows="3" placeholder="What's inside, what it's for…">${esc(p.desc || "")}</textarea></label>
+        <div class="a-lbl">Images <span class="a-hint">The ★ one is the cover. PNG, JPG or WebP, resized automatically.</span></div>
+        <div class="a-imgs" id="a-imgs">${(p.gallery || []).map(([src, cap], i) => `<div class="a-img${src === p.cover ? " cover" : ""}">
+            <img src="${esc(src)}" alt=""><input data-cap="${i}" value="${esc(cap || "")}" placeholder="Caption" maxlength="80">
+            <div class="a-img-acts"><button type="button" data-img-cover="${i}" aria-label="Use as cover" title="Use as cover">★</button><button type="button" data-img-left="${i}" aria-label="Move left"${i ? "" : " disabled"}>←</button><button type="button" data-img-del="${i}" aria-label="Remove image">×</button></div></div>`).join("")}
+          <label class="a-img add"><input type="file" accept="image/png,image/jpeg,image/webp" multiple id="a-img-in" class="sr"><i data-lucide="image-plus"></i><span>Add images</span></label>
+        </div>
+        <label class="a-check"><input type="checkbox" name="hidden"${p.hidden ? " checked" : ""}><span>Hidden (not shown in the shop)</span></label>
+        <button class="btn btn-w wide"><i data-lucide="save"></i>${isNew ? "Add to the shop" : "Save changes"}</button>
+      </form>`;
+    icons();
+  }
+  const syncCaptions = () => $$("#a-imgs [data-cap]").forEach(i => { shopEdit.gallery[+i.dataset.cap][1] = i.value; });
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const saveProd = async (p, msg) => {
+    const body = { id: p.id, name: p.name, cat: p.cat, eur: p.eur, rbx: p.rbx, badge: p.badge, desc: p.desc, tags: Array.isArray(p.tags) ? p.tags : String(p.tags || "").split(","), cover: p.cover, gallery: p.gallery, hidden: !!p.hidden, rank: p.rank, builtin: !!p.builtin, isNew: !p.id };
+    const r = await api("/api/admin/products", { method: "POST", body: JSON.stringify(body) });
+    await X.Catalog.reload(); toast(msg); return r;
+  };
+  document.addEventListener("click", async e => {
+    if (!e.target.closest("#a-shop")) return;
+    if (e.target.closest("[data-shop-new]")) { shopEdit = { gallery: [], cat: "models", badge: "New" }; renderShopAdmin(); return; }
+    if (e.target.closest("[data-shop-back]")) { shopEdit = null; renderShopAdmin(); return; }
+    const ed = e.target.closest("[data-shop-edit]");
+    if (ed) { const p = X.Catalog.all().find(x => x.id === ed.dataset.shopEdit); shopEdit = JSON.parse(JSON.stringify({ ...p, gallery: p.gallery && p.gallery.length ? p.gallery : [[p.cover, p.name]] })); renderShopAdmin(); return; }
+    const hd = e.target.closest("[data-shop-hide]");
+    if (hd) { const p = X.Catalog.all().find(x => x.id === hd.dataset.shopHide); hd.disabled = true; try { await saveProd({ ...p, hidden: !p.hidden }, p.hidden ? `${p.name} is visible again` : `${p.name} is hidden`); } catch (err) { toast(err.message); } renderShopAdmin(); return; }
+    const dl = e.target.closest("[data-shop-del], [data-shop-reset]");
+    if (dl) {
+      const id = dl.dataset.shopDel || dl.dataset.shopReset, p = X.Catalog.all().find(x => x.id === id);
+      if (!confirm(dl.dataset.shopDel ? `Delete ${p.name} from the shop? Its uploaded images are deleted too.` : `Undo your changes on ${p.name}? It goes back to its original version.`)) return;
+      try { await api(`/api/admin/products/${encodeURIComponent(id)}`, { method: "DELETE" }); await X.Catalog.reload(); toast(dl.dataset.shopDel ? "Asset deleted" : "Back to the original version"); } catch (err) { toast(err.message); }
+      renderShopAdmin(); return;
+    }
+    const cv = e.target.closest("[data-img-cover]"); if (cv) { syncCaptions(); shopEdit.cover = shopEdit.gallery[+cv.dataset.imgCover][0]; renderShopAdmin(); return; }
+    const lf = e.target.closest("[data-img-left]"); if (lf) { syncCaptions(); const i = +lf.dataset.imgLeft, g = shopEdit.gallery; [g[i - 1], g[i]] = [g[i], g[i - 1]]; renderShopAdmin(); return; }
+    const rm = e.target.closest("[data-img-del]"); if (rm) { syncCaptions(); const [src] = shopEdit.gallery.splice(+rm.dataset.imgDel, 1); if (shopEdit.cover === src) shopEdit.cover = (shopEdit.gallery[0] || [])[0]; renderShopAdmin(); }
+  });
+  document.addEventListener("change", async e => {
+    if (e.target.id !== "a-img-in") return;
+    const f = $("#shop-form"); Object.assign(shopEdit, prodFromForm(f)); syncCaptions();
+    const files = [...e.target.files]; if (!files.length) return;
+    const add = $(".a-img.add"); add.classList.add("busy"); add.querySelector("span").textContent = `Uploading ${files.length}…`;
+    for (const file of files) {
+      try { const data = await shrinkImg(file); const r = await api("/api/admin/images", { method: "POST", body: JSON.stringify({ image: data }) }); shopEdit.gallery.push([r.url, file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ")]); if (!shopEdit.cover) shopEdit.cover = r.url; }
+      catch (err) { toast(err.message); }
+    }
+    renderShopAdmin();
+  });
+  document.addEventListener("submit", async e => {
+    if (e.target.id !== "shop-form") return;
+    e.preventDefault();
+    const f = e.target; syncCaptions(); Object.assign(shopEdit, prodFromForm(f));
+    if (!shopEdit.name) { toast("Give it a name"); fld(f, "name").focus(); return; }
+    if (!(shopEdit.eur > 0)) { toast("Set a price in euros"); fld(f, "eur").focus(); return; }
+    if (!shopEdit.gallery.length) { toast("Add at least one image"); return; }
+    if (!shopEdit.cover) shopEdit.cover = shopEdit.gallery[0][0];
+    const btn = f.querySelector(".btn-w"); btn.disabled = true;
+    try { const isNew = !shopEdit.id; await saveProd(shopEdit, isNew ? `${shopEdit.name} added to the shop` : "Changes saved"); shopEdit = null; renderShopAdmin(); }
+    catch (err) { toast(err.message); btn.disabled = false; }
+  });
+  document.addEventListener("catalogchange", () => { if (adminTab === "shop" && !shopEdit && openD === adminD) renderShopAdmin(); });
+
   /* Codes promo : création depuis l'espace admin (gardés sur le serveur) */
   const STATE_EN = { active: ["Active", "ok"], scheduled: ["Scheduled", "run"], expired: ["Expired", "off"], "used up": ["Used up", "off"] };
   const genCode = () => "EXIOZZ-" + Array.from(crypto.getRandomValues(new Uint8Array(4)), b => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[b % 32]).join("");

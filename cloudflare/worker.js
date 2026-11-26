@@ -9,7 +9,7 @@
  *  - Avis clients, notes des assets, liste d'envies, disponibilités
  *  - Activité récente anonyme, avatar Roblox pour le badge de l'accueil
  *  - Communauté : mur d'idées, réactions, compteur en direct, livre d'or
- *  - Codes promo créés depuis l'espace admin
+ *  - Codes promo et catalogue du shop gérés depuis l'espace admin
  *  - Récupération automatique des avis et commandes de l'ancien serveur
  *
  * À coller tel quel dans l'éditeur Cloudflare (Workers → ton worker → Edit code).
@@ -924,6 +924,71 @@ async function route(request, env, ctx) {
     let found = false;
     await updateVal(env, 'promos', [], (list) => list.filter((x) => { if (x.code === code) { found = true; return false; } return true; }));
     if (!found) throw new HttpError(404, 'Code introuvable.');
+    return json({ ok: true });
+  }
+
+  /* ============================== Catalogue du shop (géré depuis l'espace admin) ==============================
+     Chaque entrée est soit un nouvel asset, soit une modification d'un asset écrit dans promo.js (même id). */
+  const CATS = ['models', 'scripts', 'ui', 'gfx', 'templates', 'audio', 'discord'];
+  const imgUrl = (v) => { const u = String(v || '').trim(); return /^(https:\/\/|img\/|assets\/)[^\s"'<>]{1,400}$/.test(u) ? u : ''; };
+  if (path === '/api/products' && method === 'GET') {
+    return new Response(JSON.stringify(await getVal(env, 'products', [])), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-cache' } });
+  }
+  // Image envoyée depuis l'espace admin (couverture, galerie)
+  if (path === '/api/admin/images' && method === 'POST') {
+    const user = await auth(env, request); adminOnly(user);
+    const b = await readJson(request);
+    const mm = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(String(b.image || ''));
+    if (!mm) throw new HttpError(400, 'Image invalide (JPEG, PNG ou WebP).');
+    const bytes = fromB64(mm[2]);
+    if (bytes.length > SHOT_MAX_BYTES) throw new HttpError(413, 'Image trop lourde (2 Mo max).');
+    if (!env.FILES) throw new HttpError(500, 'Stockage KV non lié (variable FILES).');
+    const id = newId();
+    await env.FILES.put(shotKey(id), bytes, { metadata: { type: mm[1] } });
+    return json({ ok: true, id, url: `${url.origin}/api/shots/${id}` });
+  }
+  if (path === '/api/admin/products' && method === 'POST') {
+    const user = await auth(env, request); adminOnly(user);
+    const b = await readJson(request);
+    const slug = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+    const id = slug(b.id) || slug(b.name);
+    if (!id || id.length < 2) throw new HttpError(400, 'Nom manquant.');
+    const name = clampStr(b.name, 80).trim();
+    if (!name) throw new HttpError(400, 'Nom manquant.');
+    if (!CATS.includes(b.cat)) throw new HttpError(400, 'Catégorie inconnue.');
+    const eur = Math.round((+b.eur || 0) * 100) / 100, rbx = Math.round(+b.rbx || 0);
+    if (!(eur > 0 && eur <= 10000)) throw new HttpError(400, 'Prix en euros invalide.');
+    const gallery = (Array.isArray(b.gallery) ? b.gallery : []).slice(0, 30).map((g) => [imgUrl(g && g[0]), clampStr(g && g[1], 80).trim()]).filter((g) => g[0]);
+    const cover = imgUrl(b.cover) || (gallery[0] && gallery[0][0]) || '';
+    if (!cover) throw new HttpError(400, 'Ajoute au moins une image.');
+    const product = {
+      id, name, cat: b.cat, eur, rbx: rbx > 0 ? rbx : Math.round(eur * 80),
+      badge: clampStr(b.badge, 20).trim() || 'New',
+      desc: clampStr(b.desc, 400).trim(),
+      tags: (Array.isArray(b.tags) ? b.tags : String(b.tags || '').split(',')).map((t) => clampStr(t, 24).trim()).filter(Boolean).slice(0, 6),
+      cover, gallery: gallery.length ? gallery : [[cover, name]],
+      hidden: !!b.hidden, builtin: !!b.builtin,
+      rank: Number.isFinite(+b.rank) ? +b.rank : 50,
+      updatedAt: Date.now()
+    };
+    await updateVal(env, 'products', [], (list) => {
+      const old = list.find((x) => x.id === id);
+      if (old && b.isNew) throw new HttpError(409, 'Un asset avec ce nom existe déjà.');
+      product.added = old ? old.added : Date.now();
+      return old ? list.map((x) => (x.id === id ? product : x)) : [...list, product].slice(0, 200);
+    });
+    return json({ ok: true, product });
+  }
+  // Supprimer : un nouvel asset disparaît ; un asset de promo.js revient à sa version d'origine
+  if ((m = /^\/api\/admin\/products\/([^/]+)$/.exec(path)) && method === 'DELETE') {
+    const user = await auth(env, request); adminOnly(user);
+    const id = decodeURIComponent(m[1]);
+    let removed = null;
+    await updateVal(env, 'products', [], (list) => list.filter((x) => { if (x.id === id) { removed = x; return false; } return true; }));
+    if (!removed) throw new HttpError(404, 'Asset introuvable.');
+    // Images envoyées pour cet asset (hébergées ici) : on les efface aussi
+    const mine = [removed.cover, ...(removed.gallery || []).map((g) => g[0])].map((u) => (/\/api\/shots\/([a-z0-9]+)$/.exec(u || '') || [])[1]).filter(Boolean);
+    if (env.FILES) for (const k of new Set(mine)) await env.FILES.delete(shotKey(k)).catch(() => {});
     return json({ ok: true });
   }
 

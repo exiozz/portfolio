@@ -292,11 +292,14 @@
   let cat = "all", cur = "eur", sort = "pop", q = "";
   const sorts = [["pop", "Most popular", (a, b) => a.rank - b.rank], ["new", "Newest", (a, b) => b.added - a.added], ["asc", "Price: low to high", (a, b) => a.eur - b.eur], ["desc", "Price: high to low", (a, b) => b.eur - a.eur], ["az", "Name (A → Z)", (a, b) => a.name.localeCompare(b.name, "en")]];
   const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-  $("#stat-count").textContent = X.PRODUCTS.length;
-  $("#cats").innerHTML = X.CATEGORIES.map(([id, label]) => {
-    const n = id === "all" ? X.PRODUCTS.length : X.PRODUCTS.filter(p => p.cat === id).length;
-    return `<button aria-pressed="${id === cat}" data-cat="${id}">${label}<span class="n">${n}</span></button>`;
-  }).join("");
+  const renderCats = () => {
+    $("#stat-count").textContent = X.PRODUCTS.length;
+    $("#cats").innerHTML = X.CATEGORIES.map(([id, label]) => {
+      const n = id === "all" ? X.PRODUCTS.length : X.PRODUCTS.filter(p => p.cat === id).length;
+      return `<button aria-pressed="${id === cat}" data-cat="${id}">${label}<span class="n">${n}</span></button>`;
+    }).join("");
+  };
+  renderCats();
   $("#sort-menu").innerHTML = sorts.map(([k, l]) => `<li><button role="option" aria-selected="${k === sort}" data-sort="${k}"><span><b>${l}</b></span><i class="tick" data-lucide="check"></i></button></li>`).join("");
   /* Favoris, notes des acheteurs et pack groupé */
   const A = UI.Account, esc = UI.esc;
@@ -523,10 +526,18 @@
   });
 
   render(); renderFaq(); loadRatings(); loadMyOrders();
+  // Catalogue mis à jour depuis le serveur (asset ajouté, modifié ou masqué dans l'espace admin)
+  document.addEventListener("catalogchange", () => {
+    renderCats(); render();
+    if (current) { current = X.PRODUCTS.find(p => p.id === current.id) || null; if (current) renderDetails(); else closeModal(); }
+    const w = new URLSearchParams(location.search).get("product");
+    if (w && !modal.classList.contains("open") && !openedFromUrl && X.PRODUCTS.some(p => p.id === w)) { openedFromUrl = true; openDetails(w); }
+  });
   window.ShopPage = { open: openDetails };
   UI.palette.add(() => faq.map(([qq, a], i) => ({ g: "FAQ", label: qq, hint: a, icon: "circle-help", run: () => { open = i; renderFaq(); $("#faq").scrollIntoView({ behavior: "smooth" }); } })));
   const qs = new URLSearchParams(location.search), wanted = qs.get("product") || qs.get("produit");
-  if (wanted) openDetails(wanted);
+  let openedFromUrl = false;
+  if (wanted && X.PRODUCTS.some(p => p.id === wanted)) { openedFromUrl = true; openDetails(wanted); }
   icons();
 })();
 </script>

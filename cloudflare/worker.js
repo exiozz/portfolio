@@ -48,7 +48,10 @@ function safeEqual(a, b) {
 const newId = () => Date.now().toString(36) + Array.from(crypto.getRandomValues(new Uint8Array(4)), (b) => b.toString(16).padStart(2, '0')).join('');
 const clampStr = (s, max) => String(s == null ? '' : s).slice(0, max);
 const isHttps = (u) => /^https:\/\//i.test(u || '');
-const frontUrl = (env) => String(env.FRONT_URL || 'https://exiozz.github.io/portfolio').replace(/\/+$/, '');
+const frontUrl = (env) => String(env.FRONT_URL || 'https://exiozz.xyz').replace(/\/+$/, '');
+// Sites autorisés à appeler le serveur : le domaine exiozz.xyz (avec ou sans www) est toujours accepté,
+// l'ancienne adresse GitHub Pages aussi le temps que tout le monde passe sur le nouveau domaine
+const BASE_ORIGINS = ['https://exiozz.xyz', 'https://www.exiozz.xyz', 'https://exiozz.github.io'];
 
 class HttpError extends Error { constructor(status, message) { super(message); this.status = status; } }
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json; charset=utf-8' } });
@@ -1160,7 +1163,7 @@ async function route(request, env, ctx) {
 export default {
   async fetch(request, env, ctx) {
     const origin = request.headers.get('Origin');
-    const allowed = String(env.ALLOWED_ORIGINS || new URL(frontUrl(env)).origin).split(',').map((s) => s.trim());
+    const allowed = [...new Set([...String(env.ALLOWED_ORIGINS || new URL(frontUrl(env)).origin).split(',').map((s) => s.trim()), ...BASE_ORIGINS])];
     const cors = origin && allowed.includes(origin) ? {
       'Access-Control-Allow-Origin': origin,
       'Vary': 'Origin',

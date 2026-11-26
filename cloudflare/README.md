@@ -50,7 +50,7 @@ Toujours dans ton worker → **Settings** → **Variables and Secrets** → **Ad
 | `DISCORD_CLIENT_SECRET` | Discord Developer Portal → ton application → OAuth2 → Client Secret |
 | `DISCORD_REDIRECT_URI` | `https://exiozz-shop.<ton-nom>.workers.dev/auth/discord` |
 | `ADMIN_DISCORD_ID` | `799725583213920276` |
-| `FRONT_URL` | `https://exiozz.github.io/portfolio` |
+| `FRONT_URL` | `https://exiozz.xyz` |
 | `DISCORD_BOT_TOKEN` | *(optionnel)* Token d'un bot de ton serveur Discord, pour prévenir le client en MP quand ses fichiers sont prêts |
 | `DISCORD_ORDERS_WEBHOOK_URL` | *(optionnel)* Webhook d'un salon privé, pour être prévenu de chaque commande |
 

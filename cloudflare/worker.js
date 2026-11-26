@@ -116,14 +116,40 @@ async function discordDM(env, discordId, content) {
   } catch (e) { console.warn(`MP Discord à ${discordId} impossible :`, e.message); }
 }
 // Profil Discord public (pseudo @, avatar) via le bot : sert à compléter les fiches clients
+let botError = '';
 async function discordUser(env, discordId) {
-  if (!env.DISCORD_BOT_TOKEN || !/^\d{17,20}$/.test(discordId)) return null;
+  botError = '';
+  if (!/^\d{17,20}$/.test(discordId)) { botError = 'ID Discord invalide'; return null; }
+  if (!env.DISCORD_BOT_TOKEN) { botError = 'la variable DISCORD_BOT_TOKEN n\'est pas réglée sur le worker'; return null; }
   try {
-    const r = await fetch(`https://discord.com/api/v10/users/${discordId}`, { headers: { Authorization: `Bot ${env.DISCORD_BOT_TOKEN}` } });
-    if (!r.ok) return null;
+    const r = await fetch(`https://discord.com/api/v10/users/${discordId}`, { headers: { Authorization: `Bot ${String(env.DISCORD_BOT_TOKEN).trim().replace(/^Bot\s+/i, '')}` } });
+    if (!r.ok) {
+      botError = r.status === 401 ? 'DISCORD_BOT_TOKEN refusé par Discord (jeton invalide ou régénéré)'
+        : r.status === 404 ? 'aucun compte Discord avec cet ID'
+        : r.status === 429 ? 'Discord limite les requêtes, réessaie dans une minute'
+        : `Discord a répondu ${r.status}`;
+      return null;
+    }
     const u = await r.json();
     return { username: u.username, name: u.global_name || u.username, avatar: u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128` : '' };
-  } catch (e) { return null; }
+  } catch (e) { botError = 'Discord injoignable'; return null; }
+}
+// Quand un client se connecte, ses commandes reprennent son vrai nom, son @pseudo et son avatar
+// (utile pour les commandes créées par l'admin alors que le bot n'avait pas pu lire le profil)
+async function healProfile(env, user) {
+  if (!user || !user.id) return;
+  const orders = await getVal(env, 'orders', []);
+  const needs = (o) => o.discordId === user.id && ((o.pendingProfile && user.name && o.customerName !== user.name) || (user.username && o.discordUsername !== user.username) || (user.avatar && !o.avatar));
+  if (!orders.some(needs)) return;
+  await updateVal(env, 'orders', [], (list) => {
+    for (const o of list) {
+      if (o.discordId !== user.id) continue;
+      if (o.pendingProfile && user.name) { o.customerName = user.name; delete o.pendingProfile; }
+      if (user.username) o.discordUsername = user.username;
+      if (user.avatar && !o.avatar) o.avatar = user.avatar;
+    }
+    return list;
+  });
 }
 async function notifyAdmin(env, content) {
   if (!isHttps(env.DISCORD_ORDERS_WEBHOOK_URL)) return;
@@ -279,6 +305,7 @@ async function route(request, env, ctx) {
 
   if (path === '/api/me' && method === 'GET') {
     const user = await auth(env, request);
+    if (!user.isAdmin) ctx.waitUntil(healProfile(env, user).catch(() => {}));
     return json({ user: { id: user.id, name: user.name, avatar: user.avatar }, isAdmin: user.isAdmin, subscription: null });
   }
 
@@ -315,6 +342,7 @@ async function route(request, env, ctx) {
     const user = await auth(env, request);
     const discordId = decodeURIComponent(m[1]);
     if (discordId !== user.id && !user.isAdmin) throw new HttpError(403, 'Accès refusé.');
+    if (discordId === user.id) await healProfile(env, user).catch(() => {});
     const orders = await getVal(env, 'orders', []);
     return json(orders.filter((o) => o.discordId === discordId).map((o) => ({ ...publicOrder(o), unread: chatUnread(o, false) })));
   }
@@ -347,8 +375,9 @@ async function route(request, env, ctx) {
     if (!/^\d{17,20}$/.test(discordId)) throw new HttpError(400, 'ID Discord invalide (17 à 20 chiffres).');
     const prof = await discordUser(env, discordId);
     // nom facultatif : sinon le nom Discord du compte (via le bot)
-    const customerName = clampStr(b.customerName, 80).trim() || (prof ? prof.name : '');
-    if (!customerName) throw new HttpError(400, 'Nom du client manquant (le bot n\'a pas trouvé ce compte Discord).');
+    const typed = clampStr(b.customerName, 80).trim();
+    const customerName = typed || (prof ? prof.name : `Discord user ··${discordId.slice(-4)}`);
+    const pendingProfile = !typed && !prof; // le vrai nom arrivera quand le client se connectera
     const items = (Array.isArray(b.items) ? b.items : []).slice(0, 30).map((it) => ({
       title: clampStr(it.title, 200).trim(),
       price: Math.max(0, +it.price || 0),
@@ -362,11 +391,11 @@ async function route(request, env, ctx) {
       total: items.reduce((s, it) => s + it.price, 0),
       currency: b.currency === 'R$' ? 'R$' : '€', source: 'admin',
       note: clampStr(b.note, 1000).trim() || undefined,
-      status, timestamp: Date.now(), files: []
+      status, timestamp: Date.now(), files: [], pendingProfile: pendingProfile || undefined
     };
     await updateVal(env, 'orders', [], (orders) => { orders.unshift(order); return orders; });
     if (b.notify) ctx.waitUntil(discordDM(env, discordId, `🧾 Exiozz a créé ta commande : ${items.map((it) => `**${it.title}**`).join(', ')} — ${order.total} ${order.currency}\nSuis-la sur ${FRONT}/shop.html → menu Discord → « Mes commandes ».`));
-    return json({ ok: true, id: order.id });
+    return json({ ok: true, id: order.id, name: customerName, botError: prof ? '' : botError });
   }
 
   if ((m = /^\/api\/orders\/([^/]+)$/.exec(path)) && method === 'PATCH') {
@@ -400,6 +429,7 @@ async function route(request, env, ctx) {
   // Messages non lus pour la personne connectée (pastille dans le menu)
   if (path === '/api/messages/unread' && method === 'GET') {
     const user = await auth(env, request);
+    if (!user.isAdmin) ctx.waitUntil(healProfile(env, user).catch(() => {}));
     const orders = await getVal(env, 'orders', []);
     const mine = user.isAdmin ? orders : orders.filter((o) => o.discordId === user.id);
     const un = mine.filter((o) => chatUnread(o, user.isAdmin)).sort((x, y) => y.chat.last.ts - x.chat.last.ts);

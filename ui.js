@@ -147,6 +147,8 @@
   cartD.querySelector(".drawer-head b").innerHTML = `Cart <span class="c-count" id="c-count"></span>`;
   const ordersD = makeDrawer("orders-drawer", "My orders");
   const adminD = makeDrawer("admin-drawer", "Admin area", true);
+  const chatD = makeDrawer("chat-drawer", "Messages");
+  chatD.classList.add("chat-drawer");
   let openD = null;
   // Le panier s'ouvre en carte sous l'icône du panier (ordi) ou en carte qui monte du bas (mobile)
   const isSheet = () => innerWidth <= 640;
@@ -307,16 +309,17 @@
   /* Menu du compte dans la barre */
   const discordSvg = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.058a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.009c.12.1.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.029 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03ZM8.02 15.331c-1.183 0-2.157-1.086-2.157-2.42 0-1.333.956-2.418 2.157-2.418 1.21 0 2.176 1.095 2.157 2.419 0 1.333-.956 2.419-2.157 2.419Zm7.975 0c-1.183 0-2.157-1.086-2.157-2.42 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.095 2.157 2.419 0 1.333-.946 2.419-2.157 2.419Z"/></svg>';
   const avatarOf = u => u.avatar || "https://cdn.discordapp.com/embed/avatars/0.png";
+  let unreadN = 0;
   function paintAccount() {
     const btn = $("#login-btn"), menu = $("#login-menu");
     if (!btn || !menu) return;
     if (user) {
-      btn.innerHTML = `<img class="acc-av" src="${esc(avatarOf(user))}" alt=""><span>${esc(user.name)}</span>`;
+      btn.innerHTML = `<img class="acc-av" src="${esc(avatarOf(user))}" alt=""><span>${esc(user.name)}</span>${unreadN ? '<i class="acc-dot" aria-label="New messages"></i>' : ""}`;
       menu.innerHTML = `<div class="acc-head"><img src="${esc(avatarOf(user))}" alt=""><div><b>${esc(user.name)}</b><span>${isAdmin() ? "Admin" : "Signed in with Discord"}</span></div></div>
-        <button role="menuitem" data-open-orders><i data-lucide="package"></i>My orders</button>
+        <button role="menuitem" data-open-orders><i data-lucide="package"></i>My orders${unreadN && !isAdmin() ? `<span class="m-dot">${unreadN}</span>` : ""}</button>
         <button role="menuitem" data-open-cart><i data-lucide="shopping-cart"></i>My cart</button>
         <button role="menuitem" data-open-wish><i data-lucide="heart"></i>Wishlist</button>
-        ${isAdmin() ? '<button role="menuitem" data-open-admin><i data-lucide="lock"></i>Admin area</button>' : ""}
+        ${isAdmin() ? `<button role="menuitem" data-open-admin><i data-lucide="lock"></i>Admin area${unreadN ? `<span class="m-dot">${unreadN}</span>` : ""}</button>` : ""}
         <button role="menuitem" data-signout><i data-lucide="log-out"></i>Sign out</button>`;
     } else {
       btn.innerHTML = `<i data-lucide="log-in"></i><span>Sign in</span>`;
@@ -389,7 +392,8 @@
           ${timeline(o)}
           <ul>${(o.items || []).map(i => `<li><span>${esc(i.title)}</span><span>${X.money(i.price, curOf(o))}</span></li>`).join("")}</ul>
           ${filesHTML(o)}
-          <div class="o-tot"><span>Total</span><b>${X.money(o.total || 0, curOf(o))}</b></div></div>`).join("")
+          <div class="o-tot"><span>Total</span><b>${X.money(o.total || 0, curOf(o))}</b></div>
+          <button class="btn ${o.unread ? "btn-w" : "btn-o"} wide o-chat" data-chat="${esc(o.id)}"><i data-lucide="message-circle"></i>${o.unread ? "New message from Exiozz" : "Message Exiozz"}${o.unread ? '<span class="m-dot">1</span>' : ""}</button></div>`).join("")
         : `<div class="d-empty"><i data-lucide="package"></i><b>No orders yet</b><span>Your orders will show up here</span><a class="btn btn-w" href="shop.html">Open the shop</a></div>`;
       icons();
     } catch (e) { errorBox(body, e.message); }
@@ -402,6 +406,92 @@
     catch (err) { toast(err.message); }
     b.disabled = false;
   });
+
+  /* ---------- Messagerie d'une commande (client ⇄ admin) ---------- */
+  let chat = null; // { id, back, msgs, timer, sending }
+  const openChat = (id, back) => { if (chat && chat.timer) clearInterval(chat.timer); chat = { id, back: back || openD || (isAdmin() ? adminD : ordersD), msgs: null }; open(chatD); };
+  const dayKey = ts => new Date(ts).toDateString();
+  const dayLbl = ts => { const d = new Date(ts), n = new Date(); const y = new Date(n - 864e5); return d.toDateString() === n.toDateString() ? "Today" : d.toDateString() === y.toDateString() ? "Yesterday" : d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }); };
+  const hhmm = ts => new Date(ts).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  const linkify = t => esc(t).replace(/https?:\/\/[^\s<]+/g, u => `<a href="${u}" target="_blank" rel="noopener nofollow">${u}</a>`);
+  function paintMsgs(data) {
+    const list = chatD.querySelector(".ch-list"); if (!list) return;
+    const me = isAdmin() ? "admin" : "client";
+    const atBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 80;
+    let html = "", prevDay = "", prevFrom = "";
+    if (!data.messages.length) html = `<div class="ch-empty"><i data-lucide="messages-square"></i><b>${isAdmin() ? "Start the conversation" : "Questions about your order?"}</b><span>${isAdmin() ? "The client gets a Discord DM with your message." : "Write here — Exiozz gets notified and replies on this page."}</span></div>`;
+    data.messages.forEach((m, i) => {
+      if (dayKey(m.ts) !== prevDay) { html += `<div class="ch-day">${dayLbl(m.ts)}</div>`; prevDay = dayKey(m.ts); prevFrom = ""; }
+      const mine = m.from === me, next = data.messages[i + 1];
+      const tail = !next || next.from !== m.from || dayKey(next.ts) !== dayKey(m.ts);
+      const seen = mine && tail && !next && data.seenUntil >= m.ts;
+      html += `<div class="ch-msg ${mine ? "me" : "them"}${prevFrom === m.from ? " cont" : ""}${tail ? " tail" : ""}"><p>${linkify(m.text)}</p>${tail ? `<span>${hhmm(m.ts)}${seen ? " · Seen" : ""}</span>` : ""}</div>`;
+      prevFrom = m.from;
+    });
+    list.innerHTML = html; icons();
+    if (atBottom || !chat.painted) list.scrollTop = list.scrollHeight;
+    chat.painted = true; chat.msgs = data.messages.length; chat.seen = data.seenUntil;
+  }
+  async function loadMsgs(first) {
+    if (!chat) return;
+    try {
+      const data = await api(`/api/orders/${encodeURIComponent(chat.id)}/messages`);
+      if (openD !== chatD) return;
+      if (first) {
+        const c = data.client, who = chatD.querySelector(".ch-who");
+        if (who) who.innerHTML = isAdmin()
+          ? `${c.avatar ? `<img src="${esc(c.avatar)}" alt="">` : `<span class="ch-av">${esc((c.name || "?").charAt(0).toUpperCase())}</span>`}<div><b>${esc(c.name || "Client")}</b><span>${c.username ? "@" + esc(c.username) : "Order #" + esc(chat.id.slice(-6).toUpperCase())}</span></div>`
+          : `<span class="ch-av brand"></span><div><b>Exiozz</b><span>Order #${esc(chat.id.slice(-6).toUpperCase())} · usually replies within a few hours</span></div>`;
+      }
+      if (first || data.messages.length !== chat.msgs || data.seenUntil !== chat.seen) paintMsgs(data);
+      if (first) checkUnread();
+    } catch (e) { if (first) errorBox(chatD.querySelector(".ch-list"), e.message); }
+  }
+  function renderChat() {
+    if (!chat) return;
+    chatD.querySelector(".drawer-head b").textContent = "Messages";
+    chatD.querySelector(".drawer-body").innerHTML = `<button class="ch-back" data-chat-back><i data-lucide="arrow-left"></i>${isAdmin() ? "All orders" : "My orders"}</button><div class="ch-who"></div><div class="ch-list" aria-live="polite"></div>`;
+    chatD.querySelector(".drawer-foot").innerHTML = `<form class="ch-form" data-chat-form><label class="sr" for="ch-in">Message</label><textarea id="ch-in" rows="1" maxlength="2000" placeholder="Write a message…" enterkeyhint="send"></textarea><button class="ch-send" aria-label="Send"><i data-lucide="arrow-up"></i></button></form>`;
+    icons(); loading(chatD.querySelector(".ch-list"));
+    chat.painted = false; chat.msgs = null;
+    loadMsgs(true);
+    clearInterval(chat.timer);
+    chat.timer = setInterval(() => { if (openD !== chatD) { clearInterval(chat.timer); return; } if (!document.hidden) loadMsgs(false); }, 4000);
+    setTimeout(() => { if (innerWidth > 640) $("#ch-in")?.focus(); }, 450);
+  }
+  async function sendMsg() {
+    const ta = $("#ch-in"); if (!ta || !chat || chat.sending) return;
+    const text = ta.value.trim(); if (!text) return;
+    chat.sending = true; ta.value = ""; ta.style.height = "";
+    // affichage immédiat, confirmé par le serveur juste après
+    const list = chatD.querySelector(".ch-list");
+    list.querySelector(".ch-empty")?.remove();
+    list.insertAdjacentHTML("beforeend", `<div class="ch-msg me tail pending"><p>${linkify(text)}</p><span>Sending…</span></div>`);
+    list.scrollTop = list.scrollHeight;
+    try { const r = await api(`/api/orders/${encodeURIComponent(chat.id)}/messages`, { method: "POST", body: JSON.stringify({ text }) }); chat.painted = true; paintMsgs({ messages: r.messages, seenUntil: chat.seen || 0 }); list.scrollTop = list.scrollHeight; }
+    catch (e) { list.querySelector(".pending")?.remove(); ta.value = text; toast(e.message); }
+    chat.sending = false;
+  }
+  document.addEventListener("submit", e => { if (e.target.closest("[data-chat-form]")) { e.preventDefault(); sendMsg(); } });
+  document.addEventListener("keydown", e => { if (e.target.id === "ch-in" && e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); sendMsg(); } });
+  document.addEventListener("input", e => { if (e.target.id === "ch-in") { const t = e.target; t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 140) + "px"; } });
+  document.addEventListener("click", e => {
+    const c = e.target.closest("[data-chat]"); if (c) { e.preventDefault(); openChat(c.dataset.chat, openD); return; }
+    if (e.target.closest("[data-chat-back]")) { clearInterval(chat && chat.timer); open(chat && chat.back && chat.back !== chatD ? chat.back : (isAdmin() ? adminD : ordersD)); }
+  });
+  // Pastille « nouveau message » : vérifiée au chargement puis toutes les 60 s
+  async function checkUnread() {
+    if (!user) { if (unreadN) { unreadN = 0; paintAccount(); } return; }
+    try { const r = await api("/api/messages/unread"); if (r.count !== unreadN) { const more = r.count > unreadN; unreadN = r.count; paintAccount(); if (more && openD !== chatD) toast(isAdmin() ? "New message from a client" : "New message from Exiozz"); } } catch (e) {}
+  }
+  setTimeout(checkUnread, 1200);
+  setInterval(() => { if (!document.hidden) checkUnread(); }, 60000);
+  document.addEventListener("authchange", checkUnread);
+  // Lien reçu en MP Discord : shop.html#chat=<commande>
+  {
+    const hm = /^#chat=([\w-]+)$/.exec(location.hash);
+    if (hm) { history.replaceState({}, "", location.pathname + location.search); setTimeout(() => user ? openChat(hm[1], isAdmin() ? adminD : ordersD) : (open(ordersD), toast("Sign in to read your message")), 500); }
+  }
 
   /* Fiche commande complète : qui est le client, comment le joindre, ce qu'il a pris */
   const SRC = { shop: "Shop", index: "Portfolio", admin: "Created by you", site: "Website", quote: "Quote form" };
@@ -421,7 +511,8 @@
         <div class="ao-total">${X.money(o.total || 0, curOf(o))}</div>
       </header>
       <div class="ao-contact">
-        <a class="btn btn-w" href="https://discord.com/users/${id}" target="_blank" rel="noopener"><i data-lucide="message-circle"></i>Open on Discord</a>
+        <button class="btn btn-w" data-chat="${esc(o.id)}"><i data-lucide="messages-square"></i>${o.unread ? "New message · reply" : `Chat${o.chat && o.chat.n ? ` · ${o.chat.n}` : ""}`}${o.unread ? '<span class="m-dot">1</span>' : ""}</button>
+        <a class="btn btn-o" href="https://discord.com/users/${id}" target="_blank" rel="noopener"><i data-lucide="external-link"></i>Discord</a>
         ${uname ? `<button class="btn btn-o" data-acopy="${uname}" data-label="Username"><i data-lucide="at-sign"></i>Copy @</button>` : ""}
         <button class="btn btn-o" data-acopy="${id}" data-label="Discord ID"><i data-lucide="copy"></i>Copy ID</button>
       </div>
@@ -965,7 +1056,7 @@
   paintWish(); pullWish();
 
   const render = d => {
-    if (d === cartD) { renderCart(); icons(); } else if (d === ordersD) renderOrders(); else if (d === wishD) renderWish(); else renderAdmin();
+    if (d === cartD) { renderCart(); icons(); } else if (d === ordersD) renderOrders(); else if (d === wishD) renderWish(); else if (d === chatD) renderChat(); else renderAdmin();
   };
   const refresh = () => { if (openD === cartD) render(cartD); paintCount(); };
   const paintCount = () => document.querySelectorAll("[data-cart-count]").forEach(el => { const n = X.Cart.count(); el.textContent = n || ""; el.hidden = !n; });

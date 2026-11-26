@@ -409,7 +409,7 @@
     const body = adminD.querySelector(".drawer-body");
     adminD.querySelector(".drawer-foot").innerHTML = `<a class="btn btn-o wide" href="admin.html"><i data-lucide="folder-cog"></i>Full admin panel · files, asset library, new order</a>`;
     if (!isAdmin()) { body.innerHTML = `<div class="d-empty"><i data-lucide="lock"></i><b>Admin only</b><span>Sign in with the admin Discord account</span></div>`; icons(); return; }
-    const tabs = [["orders", "Orders"], ["avail", "Availability"], ["promo", "Promo codes"], ["community", "Community"]];
+    const tabs = [["orders", "Orders"], ["avail", "Availability"], ["shots", "Showcase"], ["promo", "Promo codes"], ["community", "Community"]];
     const head = `<div class="a-tabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${k === adminTab}" data-atab="${k}">${l}</button>`).join("")}</div>`;
     if (adminTab === "orders") {
       body.innerHTML = head + `<div id="a-orders"></div>`; const box = $("#a-orders");
@@ -441,6 +441,16 @@
           <button class="btn btn-w wide">Save availability</button>
           ${a.updatedAt ? `<p class="d-note">Last updated ${fmtWhen(a.updatedAt)}</p>` : ""}
         </form>`;
+    } else if (adminTab === "shots") {
+      body.innerHTML = head + `<div id="a-shots"></div>`; const box = $("#a-shots");
+      loading(box);
+      try {
+        const all = await (await fetch(API + "/api/asset-reviews")).json();
+        const shots = Object.entries(all || {}).flatMap(([pid, list]) => (list || []).filter(r => r.image).map(r => ({ ...r, pid, pname: (X.PRODUCTS.find(p => p.id === pid) || { name: pid }).name })));
+        box.innerHTML = shots.length ? `<p class="d-note" style="margin:0 0 14px">Screenshots buyers attached to their rating. They show under each asset in the shop (“Made with this asset”).</p><div class="a-shots">${shots.map(s => `<figure class="a-shot"><a href="${API}/api/shots/${encodeURIComponent(s.image)}" target="_blank" rel="noopener"><img src="${API}/api/shots/${encodeURIComponent(s.image)}" alt="" loading="lazy"></a><figcaption><b>${esc(s.name || "Buyer")}</b><span>${esc(s.pname)} · ${"★".repeat(s.rating)}</span></figcaption><button class="btn btn-o" data-ashot="${esc(s.pid)}|${esc(s.discordId)}"><i data-lucide="trash-2"></i>Remove image</button></figure>`).join("")}</div>`
+          : `<div class="d-empty"><i data-lucide="image"></i><b>No screenshot yet</b><span>Buyers can add one with their rating in the shop</span></div>`;
+        icons();
+      } catch (e) { errorBox(box, e.message); }
     } else if (adminTab === "promo") {
       const codes = Object.entries(X.PROMO.codes);
       body.innerHTML = head + (codes.length ? `<div class="a-list">${codes.map(([code, p]) => `<div class="a-item"><span class="pb-code">${esc(code)}</span><div><b>${esc(p.label)}</b><span>−${p.pct}%${p.until ? " · until " + esc(p.until) : ""}</span></div></div>`).join("")}</div>` : `<div class="d-empty"><i data-lucide="ticket"></i><b>No promo code active</b><span>Add one at the top of promo.js</span></div>`);
@@ -473,6 +483,13 @@
   });
   document.addEventListener("click", async e => {
     const at = e.target.closest("[data-atab]"); if (at) { adminTab = at.dataset.atab; renderAdmin(); return; }
+    const ash = e.target.closest("[data-ashot]");
+    if (ash) {
+      if (!confirm("Remove this screenshot? The rating stays.")) return;
+      const [pid, uid] = ash.dataset.ashot.split("|");
+      try { await api(`/api/asset-reviews/${encodeURIComponent(pid)}/${encodeURIComponent(uid)}/image`, { method: "DELETE" }); toast("Screenshot removed"); } catch (err) { toast(err.message); }
+      renderAdmin(); return;
+    }
     const del = e.target.closest("[data-del]");
     if (del) {
       if (!confirm("Delete this order? Its files are deleted too. This can't be undone.")) return;

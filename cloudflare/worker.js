@@ -8,6 +8,7 @@
  *    envoyés au client en un clic depuis une commande
  *  - Avis clients, notes des assets, liste d'envies, disponibilités
  *  - Activité récente anonyme, avatar Roblox pour le badge de l'accueil
+ *  - Communauté : mur d'idées, réactions, compteur en direct, livre d'or
  *  - Récupération automatique des avis et commandes de l'ancien serveur
  *
  * À coller tel quel dans l'éditeur Cloudflare (Workers → ton worker → Edit code).
@@ -121,6 +122,9 @@ async function notifyAdmin(env, content) {
 const liveFiles = (order) => (order.files || []).filter((f) => f.expiresAt > Date.now());
 const publicOrder = (o) => ({ ...o, files: liveFiles(o).map((f) => ({ id: f.id, name: f.name, size: f.size, kind: f.url ? 'link' : 'file', expiresAt: f.expiresAt })) });
 const partKey = (id, i) => `file:${id}:${i}`;
+const shotKey = (id) => `shot:${id}`;           // captures de la vitrine des clients
+const SHOT_MAX_BYTES = 2 * 1048576;
+const fromB64 = (str) => Uint8Array.from(atob(str), (c) => c.charCodeAt(0));
 const libKey = (id, i) => `lib:${id}:${i}`;
 // Un fichier de commande peut pointer vers un fichier de la bibliothèque (champ lib)
 const fileKey = (f, i) => (f.lib ? libKey(f.lib, i) : partKey(f.id, i));
@@ -600,21 +604,63 @@ async function route(request, env, ctx) {
     const orders = await getVal(env, 'orders', []);
     const bought = orders.some((o) => o.discordId === user.id && o.status === 'Payée' && (o.items || []).some((it) => it.productId === productId));
     if (!bought && !user.isAdmin) throw new HttpError(403, 'Seuls les clients qui ont acheté cet asset peuvent le noter.');
+    // Capture d'écran facultative (vitrine « Made with this asset ») : envoyée en data URL, gardée dans KV
+    let image = null;
+    if (b.image) {
+      const mm = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(String(b.image));
+      if (!mm) throw new HttpError(400, 'Image invalide (JPEG, PNG ou WebP).');
+      const bytes = fromB64(mm[2]);
+      if (bytes.length > SHOT_MAX_BYTES) throw new HttpError(413, 'Image trop lourde (2 Mo max).');
+      if (!env.FILES) throw new HttpError(500, 'Stockage KV non lié (variable FILES).');
+      image = newId();
+      await env.FILES.put(shotKey(image), bytes, { metadata: { type: mm[1] } });
+    }
     const review = { discordId: user.id, name: user.name, avatar: user.avatar || '', rating, text, timestamp: Date.now() };
+    let oldImage = null;
     await updateVal(env, 'assetReviews', {}, (all) => {
+      const old = (all[productId] || []).find((r) => r.discordId === user.id);
+      if (old && old.image) { if (image || b.removeImage) oldImage = old.image; else review.image = old.image; }
+      if (image) review.image = image;
       all[productId] = [review, ...(all[productId] || []).filter((r) => r.discordId !== user.id)];
       return all;
     });
+    if (oldImage) await env.FILES.delete(shotKey(oldImage)).catch(() => {});
+    return json({ ok: true, review });
+  }
+  // Image de la vitrine (publique, mise en cache)
+  if ((m = /^\/api\/shots\/([a-z0-9]+)$/.exec(path)) && method === 'GET') {
+    if (!env.FILES) throw new HttpError(404, 'Image introuvable.');
+    const { value, metadata } = await env.FILES.getWithMetadata(shotKey(m[1]), 'arrayBuffer');
+    if (!value) throw new HttpError(404, 'Image introuvable.');
+    return new Response(value, { headers: { 'Content-Type': (metadata && metadata.type) || 'image/jpeg', 'Cache-Control': 'public, max-age=86400' } });
+  }
+  // Retirer seulement l'image d'une note (l'auteur ou l'admin)
+  if ((m = /^\/api\/asset-reviews\/([^/]+)\/([^/]+)\/image$/.exec(path)) && method === 'DELETE') {
+    const user = await auth(env, request);
+    const productId = decodeURIComponent(m[1]), discordId = decodeURIComponent(m[2]);
+    if (discordId !== user.id && !user.isAdmin) throw new HttpError(403, 'Accès refusé.');
+    let img = null;
+    await updateVal(env, 'assetReviews', {}, (all) => {
+      const r = (all[productId] || []).find((x) => x.discordId === discordId);
+      if (r && r.image) { img = r.image; delete r.image; }
+      return all;
+    });
+    if (!img) throw new HttpError(404, 'Pas d\'image sur cette note.');
+    await env.FILES.delete(shotKey(img)).catch(() => {});
     return json({ ok: true });
   }
   if ((m = /^\/api\/asset-reviews\/([^/]+)\/([^/]+)$/.exec(path)) && method === 'DELETE') {
     const user = await auth(env, request);
     const productId = decodeURIComponent(m[1]), discordId = decodeURIComponent(m[2]);
     if (discordId !== user.id && !user.isAdmin) throw new HttpError(403, 'Accès refusé.');
+    let img = null;
     await updateVal(env, 'assetReviews', {}, (all) => {
-      all[productId] = (all[productId] || []).filter((r) => r.discordId !== discordId);
+      const r = (all[productId] || []).find((x) => x.discordId === discordId);
+      if (r && r.image) img = r.image;
+      all[productId] = (all[productId] || []).filter((x) => x.discordId !== discordId);
       return all;
     });
+    if (img && env.FILES) await env.FILES.delete(shotKey(img)).catch(() => {});
     return json({ ok: true });
   }
 
@@ -660,6 +706,142 @@ async function route(request, env, ctx) {
     const t = tr.ok ? ((await tr.json()).data || [])[0] : null;
     if (!t || !t.imageUrl) throw new HttpError(502, 'Avatar indisponible pour le moment, réessaie.');
     return new Response(JSON.stringify({ id: u.id, name: u.name, displayName: u.displayName || u.name, img: t.imageUrl }), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=600' } });
+  }
+
+  /* ============================== Communauté ============================== */
+  // Identifiant anonyme d'un navigateur (pour les réactions, le livre d'or et le compteur en direct) :
+  // on ne garde qu'une empreinte signée, jamais l'identifiant lui-même.
+  const anonId = async (raw) => { const v = String(raw || ''); if (!/^[a-z0-9-]{16,64}$/i.test(v)) throw new HttpError(400, 'Identifiant invalide.'); return (await hmac(env, 'anon:' + v)).slice(0, 22); };
+  const ipKey = async () => (await hmac(env, 'ip:' + (request.headers.get('CF-Connecting-IP') || 'x'))).slice(0, 22);
+  const optUser = async () => { try { return await auth(env, request); } catch (e) { return null; } };
+
+  /* --- Mur d'idées : proposer (connecté), voter (connecté), l'admin marque « prévue » ou « faite » --- */
+  const IDEA_STATUSES = ['open', 'planned', 'done'];
+  const publicIdea = (me) => ({ voters, ...i }) => ({ ...i, votes: (voters || []).length, voted: !!me && (voters || []).includes(me) });
+  if (path === '/api/ideas' && method === 'GET') {
+    const me = (await optUser()) || null;
+    const list = (await getVal(env, 'ideas', [])).map(publicIdea(me && me.id));
+    return json(list);
+  }
+  if (path === '/api/ideas' && method === 'POST') {
+    const user = await auth(env, request);
+    const b = await readJson(request);
+    const title = clampStr(b.title, 90).trim(), text = clampStr(b.text, 300).trim();
+    const cat = ['asset', 'system', 'ui', 'site', 'other'].includes(b.cat) ? b.cat : 'other';
+    if (title.length < 4) throw new HttpError(400, 'Ton idée est trop courte.');
+    if (/https?:\/\/|www\./i.test(title + ' ' + text)) throw new HttpError(400, 'Les liens ne sont pas autorisés.');
+    let idea = null;
+    await updateVal(env, 'ideas', [], (ideas) => {
+      if (!user.isAdmin && ideas.filter((i) => i.authorId === user.id && i.status === 'open').length >= 3) throw new HttpError(429, 'Tu as déjà 3 idées ouvertes. Attends qu\'elles avancent.');
+      idea = { id: newId(), title, text, cat, authorId: user.id, author: user.name, avatar: user.avatar || '', status: 'open', voters: [user.id], timestamp: Date.now() };
+      return [idea, ...ideas].slice(0, 300);
+    });
+    ctx.waitUntil(notifyAdmin(env, `💡 Nouvelle idée de **${user.name}** : ${title}${text ? `\n> ${text}` : ''}`));
+    return json({ ok: true, idea: publicIdea(user.id)(idea) });
+  }
+  if ((m = /^\/api\/ideas\/([^/]+)\/vote$/.exec(path)) && method === 'POST') {
+    const user = await auth(env, request);
+    let out = null;
+    await updateVal(env, 'ideas', [], (ideas) => {
+      const i = ideas.find((x) => x.id === decodeURIComponent(m[1])); if (!i) return ideas;
+      const set = new Set(i.voters || []); set.has(user.id) ? set.delete(user.id) : set.add(user.id); i.voters = [...set];
+      out = { voted: set.has(user.id), votes: set.size }; return ideas;
+    });
+    if (!out) throw new HttpError(404, 'Idée introuvable.');
+    return json({ ok: true, ...out });
+  }
+  if ((m = /^\/api\/ideas\/([^/]+)$/.exec(path)) && method === 'PATCH') {
+    const user = await auth(env, request); adminOnly(user);
+    const { status } = await readJson(request);
+    if (!IDEA_STATUSES.includes(status)) throw new HttpError(400, 'Statut inconnu.');
+    await updateVal(env, 'ideas', [], (ideas) => { const i = ideas.find((x) => x.id === decodeURIComponent(m[1])); if (i) i.status = status; return ideas; });
+    return json({ ok: true });
+  }
+  if ((m = /^\/api\/ideas\/([^/]+)$/.exec(path)) && method === 'DELETE') {
+    const user = await auth(env, request);
+    let found = false;
+    await updateVal(env, 'ideas', [], (ideas) => ideas.filter((i) => {
+      if (i.id !== decodeURIComponent(m[1])) return true;
+      if (i.authorId !== user.id && !user.isAdmin) throw new HttpError(403, 'Accès refusé.');
+      found = true; return false;
+    }));
+    if (!found) throw new HttpError(404, 'Idée introuvable.');
+    return json({ ok: true });
+  }
+
+  /* --- Réactions (🔥 😍 🤯) sur les projets et les assets, sans compte --- */
+  const REACTIONS = ['fire', 'love', 'wow'];
+  const countsOf = (r) => Object.fromEntries(REACTIONS.map((k) => [k, ((r || {})[k] || []).length]));
+  if (path === '/api/reactions' && method === 'GET') {
+    const cid = url.searchParams.get('cid'); const me = cid ? await anonId(cid).catch(() => null) : null;
+    const all = await getVal(env, 'reactions', {});
+    return new Response(JSON.stringify(Object.fromEntries(Object.entries(all).map(([t, r]) => [t, { ...countsOf(r), mine: me ? REACTIONS.filter((k) => (r[k] || []).includes(me)) : [] }]))), { headers: { 'Content-Type': 'application/json; charset=utf-8' } });
+  }
+  if (path === '/api/reactions' && method === 'POST') {
+    const b = await readJson(request);
+    const target = String(b.target || ''), kind = String(b.kind || '');
+    if (!/^[a-z0-9-]{2,60}$/.test(target) || !REACTIONS.includes(kind)) throw new HttpError(400, 'Réaction invalide.');
+    const me = await anonId(b.cid);
+    let out = null;
+    await updateVal(env, 'reactions', {}, (all) => {
+      if (!all[target] && Object.keys(all).length >= 200) throw new HttpError(400, 'Trop de cibles.');
+      const r = all[target] || (all[target] = {});
+      const set = new Set(r[kind] || []); set.has(me) ? set.delete(me) : set.add(me); r[kind] = [...set].slice(-5000);
+      out = { ...countsOf(r), mine: REACTIONS.filter((k) => (r[k] || []).includes(me)) };
+      return all;
+    });
+    return json({ ok: true, ...out });
+  }
+
+  /* --- Compteur « en ce moment sur le site » : chaque onglet ouvert envoie un signe toutes les 45 s --- */
+  if (path === '/api/presence' && method === 'POST') {
+    const b = await readJson(request);
+    const me = await anonId(b.cid), now = Date.now(), page = b.page === 'shop' ? 'shop' : 'index';
+    let out = null;
+    await updateVal(env, 'presence', {}, (all) => {
+      for (const [k, v] of Object.entries(all)) if (now - v.t > 90e3) delete all[k];
+      all[me] = { t: now, p: page };
+      const vals = Object.values(all);
+      out = { online: vals.length, shop: vals.filter((v) => v.p === 'shop').length };
+      return all;
+    });
+    return json(out);
+  }
+
+  /* --- Livre d'or : un petit mot ou un emoji, sans être client --- */
+  const GB_EMOJIS = ['👋', '🔥', '❤️', '🎮', '🧱', '⭐', '🚀', '😎'];
+  const GB_COLORS = ['sun', 'mint', 'sky', 'rose', 'lilac', 'peach'];
+  if (path === '/api/guestbook' && method === 'GET') {
+    return json((await getVal(env, 'guestbook', [])).map(({ ip, cid, ...e }) => e));
+  }
+  if (path === '/api/guestbook' && method === 'POST') {
+    const b = await readJson(request);
+    const user = await optUser();
+    const me = await anonId(b.cid), ip = await ipKey();
+    const emoji = GB_EMOJIS.includes(b.emoji) ? b.emoji : '👋', color = GB_COLORS.includes(b.color) ? b.color : 'sun';
+    const text = clampStr(b.text, 140).replace(/\s+/g, ' ').trim();
+    const name = user ? user.name : clampStr(b.name, 24).replace(/\s+/g, ' ').trim() || 'Visitor';
+    if (/https?:\/\/|www\.|discord\.gg|\.(com|net|gg|io|xyz)\b/i.test(text + ' ' + name)) throw new HttpError(400, 'Les liens ne sont pas autorisés.');
+    const now = Date.now();
+    let entry = null;
+    await updateVal(env, 'guestbook', [], (list) => {
+      if (!(user && user.isAdmin) && list.some((e) => (e.ip === ip || e.cid === me) && now - e.timestamp < 5 * 60e3)) throw new HttpError(429, 'Doucement ! Un message toutes les 5 minutes.');
+      entry = { id: newId(), name, text, emoji, color, verified: !!user, avatar: user ? user.avatar || '' : '', discordId: user ? user.id : undefined, ip, cid: me, timestamp: now };
+      return [entry, ...list].slice(0, 150);
+    });
+    const { ip: _i, cid: _c, ...pub } = entry;
+    return json({ ok: true, entry: pub });
+  }
+  if ((m = /^\/api\/guestbook\/([^/]+)$/.exec(path)) && method === 'DELETE') {
+    const user = await auth(env, request);
+    let found = false;
+    await updateVal(env, 'guestbook', [], (list) => list.filter((e) => {
+      if (e.id !== decodeURIComponent(m[1])) return true;
+      if (!user.isAdmin && e.discordId !== user.id) throw new HttpError(403, 'Accès refusé.');
+      found = true; return false;
+    }));
+    if (!found) throw new HttpError(404, 'Message introuvable.');
+    return json({ ok: true });
   }
 
   return json({ error: 'Route inconnue.' }, 404);

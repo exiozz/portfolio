@@ -123,6 +123,34 @@
 .ar-lock { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: 12px; color: var(--ink-4); }
 .ar-lock svg { width: 15px; height: 15px; flex: none; }
 .ar-lock .btn { margin-left: auto; height: 34px; }
+.sc { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
+.sc-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.sc-item { position: relative; }
+.sc-open { position: relative; display: block; width: 100%; aspect-ratio: 16 / 10; border-radius: 10px; overflow: hidden; background: var(--card-2); border: 1px solid var(--line); }
+.sc-open img { width: 100%; height: 100%; object-fit: cover; border-radius: 0; transition: transform .4s var(--ease); }
+.sc-open:hover img { transform: scale(1.06); }
+.sc-open span { position: absolute; left: 6px; bottom: 6px; max-width: calc(100% - 12px); height: 20px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 6px; background: rgba(10,10,10,.75); color: #f2f2f2; font: 500 10px/1 var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sc-del { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 12px; background: rgba(10,10,10,.8); color: #fff; font-size: 16px; line-height: 1; }
+.sc-del:hover { background: #e5484d; }
+.cmt-shot { display: block; width: 120px; aspect-ratio: 16 / 10; margin-top: 8px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); }
+.cmt-shot img { width: 100%; height: 100%; object-fit: cover; border-radius: 0; }
+.shot-pick { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; border: 1px dashed var(--line-2); background: var(--card); cursor: pointer; transition: border-color .2s var(--ease), background-color .2s var(--ease); }
+.shot-pick:hover, .shot-pick:focus-within { border-color: var(--ink-3); background: var(--card-2); }
+.shot-pick > svg { width: 22px; height: 22px; color: var(--accent); flex: none; }
+.shot-pick b { display: block; font-size: 13px; font-weight: 600; }
+.shot-pick span { font-size: 11px; color: var(--ink-4); }
+.shot-pick.has { border-style: solid; cursor: default; }
+.shot-pick.has img { width: 72px; height: 46px; object-fit: cover; border-radius: 8px; flex: none; }
+.shot-pick.has .btn { margin-left: auto; height: 32px; }
+.shot-lb { position: fixed; inset: 0; z-index: 95; display: grid; place-items: center; padding: 24px; background: rgba(0,0,0,.86); backdrop-filter: blur(6px); opacity: 0; transition: opacity .25s var(--ease); }
+.shot-lb.open { opacity: 1; }
+.shot-lb[hidden] { display: none; }
+.shot-lb figure { margin: 0; max-width: min(1200px, 100%); text-align: center; transform: scale(.96); transition: transform .35s cubic-bezier(.34, 1.4, .64, 1); }
+.shot-lb.open figure { transform: none; }
+.shot-lb img { max-width: 100%; max-height: 80vh; border-radius: 14px; }
+.shot-lb figcaption { margin-top: 12px; font: 400 13px/1.4 var(--mono); color: #bdbdbd; }
+.shot-lb figcaption b { color: #fff; }
+.shot-lb .close { position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; border-radius: 20px; display: grid; place-items: center; background: #1a1a1a; color: #fff; border: 1px solid rgba(255,255,255,.15); }
 .stars-pick { display: flex; gap: 2px; }
 .stars-pick button { font-size: 22px; line-height: 1; color: var(--ink-4); padding: 2px; }
 .stars-pick button.on { color: #f5c542; }
@@ -169,7 +197,7 @@
 <main>
 <section class="s-hero" id="top">
   <div class="wrap">
-    <div class="avail rv"><i></i>New assets added regularly</div>
+    <div class="hero-pills"><div class="avail rv"><i></i>New assets added regularly</div><div class="presence rv" data-presence hidden><i></i><span data-presence-text></span></div></div>
     <h1 class="big rv">Asset<span>Shop</span></h1>
     <div class="s-hero-row">
       <div>
@@ -296,6 +324,7 @@
         <div class="pcard-img" data-details="${p.id}" role="button" tabindex="0" aria-label="Details: ${p.name}"><span class="flag">${p.badge}</span><img src="${p.cover}" alt="${p.name}" loading="lazy"></div>
         <div class="pcard-body"><span class="cat">${p.catLabel}${rateHTML(p.id)}</span><h3>${p.name}</h3><p>${p.desc}</p>
           <div class="tags">${p.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
+          <div class="react" data-react="${p.id}"></div>
           <div class="item-foot">${X.priceHTML(p.eur, cur, "", p.rbx)}
             <button class="btn ${inCart ? "in-cart" : "btn-w"}" data-add="${p.id}">${inCart ? '<i data-lucide="check"></i>In cart' : '<i data-lucide="plus"></i>Add'}</button>
             ${heartHTML(p)}
@@ -340,16 +369,30 @@
     return `<div class="zoomable" data-zoom style="width:100%;height:100%"><img src="${m.src}" alt="${m.cap}"></div><span class="g-hint"><i data-lucide="zoom-in"></i>Click to zoom</span>`;
   };
   const thumbBadge = m => m.type === "video" ? `<span class="t-badge"><i data-lucide="play"></i></span>` : m.type === "3d" ? `<span class="t-badge txt">3D</span>` : m.type === "compare" ? `<span class="t-badge"><i data-lucide="split"></i></span>` : "";
+  // Vitrine des clients : capture d'écran de leur jeu, jointe à leur note
+  const shotUrl = id => `${A.API}/api/shots/${encodeURIComponent(id)}`;
+  let shotData = null, shotRemove = false, draftText = null;
+  const canManage = r => A.user && (r.discordId === A.user.id || A.isAdmin());
+  const showcaseHTML = list => {
+    const shots = list.filter(r => r.image);
+    if (!shots.length) return "";
+    return `<div class="sc"><div class="ar-head"><b>Made with this asset</b><span class="mono" style="font-size:11px;color:var(--ink-4)">${shots.length} screenshot${shots.length > 1 ? "s" : ""} from buyers</span></div>
+      <div class="sc-grid">${shots.map(r => `<div class="sc-item"><button class="sc-open" data-shot="${esc(r.image)}" data-shot-by="${esc(r.name || "Buyer")}" aria-label="Enlarge ${esc(r.name || "Buyer")}'s screenshot"><img src="${shotUrl(r.image)}" alt="Screenshot by ${esc(r.name || "a buyer")}" loading="lazy"><span>${esc(r.name || "Buyer")}</span></button>${canManage(r) ? `<button class="sc-del" data-shotdel="${esc(r.discordId)}" aria-label="Remove this screenshot">×</button>` : ""}</div>`).join("")}</div></div>`;
+  };
   const reviewsHTML = p => {
     const list = ratings[p.id] || [], a = avgOf(p.id);
     const mine = A.user && list.find(r => r.discordId === A.user.id);
-    const items = list.slice(0, 4).map(r => `<div class="cmt">${r.avatar ? `<img class="av" src="${esc(r.avatar)}" alt="">` : `<span class="av">${esc((r.name || "?").slice(0, 1).toUpperCase())}</span>`}<div><b>${esc(r.name || "Buyer")}</b> <span class="rate"><i>${"★".repeat(r.rating)}</i></span>${r.text ? `<p>${esc(r.text)}</p>` : ""}</div>${A.user && (r.discordId === A.user.id || A.isAdmin()) ? `<button class="like" data-ardel="${esc(r.discordId)}" aria-label="Delete this rating"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>` : "<span></span>"}</div>`).join("");
+    const items = list.slice(0, 4).map(r => `<div class="cmt">${r.avatar ? `<img class="av" src="${esc(r.avatar)}" alt="">` : `<span class="av">${esc((r.name || "?").slice(0, 1).toUpperCase())}</span>`}<div><b>${esc(r.name || "Buyer")}</b> <span class="rate"><i>${"★".repeat(r.rating)}</i></span>${r.text ? `<p>${esc(r.text)}</p>` : ""}${r.image ? `<button class="cmt-shot" data-shot="${esc(r.image)}" data-shot-by="${esc(r.name || "Buyer")}" aria-label="Enlarge screenshot"><img src="${shotUrl(r.image)}" alt="" loading="lazy"></button>` : ""}</div>${canManage(r) ? `<button class="like" data-ardel="${esc(r.discordId)}" aria-label="Delete this rating"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>` : "<span></span>"}</div>`).join("");
     let form;
     if (!A.user) form = `<div class="ar-lock"><i data-lucide="lock"></i><span>Bought it? Sign in to rate it.</span><button class="btn btn-o" data-signin>Sign in</button></div>`;
     else if (myOrders === null) form = `<div class="ar-lock"><i data-lucide="loader"></i><span>Checking your purchases…</span></div>`;
     else if (!boughtIt(p.id)) form = `<div class="ar-lock"><i data-lucide="shield-check"></i><span>Only verified buyers can rate this asset.</span></div>`;
-    else form = `<form class="ar-form" id="ar-form"><b style="font-size:13px">${mine ? "Update your rating" : "Rate this asset"}</b><div class="stars-pick" role="radiogroup" aria-label="Your rating">${[1, 2, 3, 4, 5].map(v => `<button type="button" role="radio" aria-checked="${v === pick}" aria-label="${v} star${v > 1 ? "s" : ""}" data-pick="${v}" class="${v <= pick ? "on" : ""}">★</button>`).join("")}</div><label class="sr" for="ar-text">Your review</label><textarea id="ar-text" name="text" maxlength="600" placeholder="What did you think? (optional)">${mine ? esc(mine.text || "") : ""}</textarea><button class="btn btn-w">Post rating</button></form>`;
-    return `<div class="ar"><div class="ar-head"><b>Buyer ratings</b>${a ? `<span class="rate"><i>★</i>${a.avg.toFixed(1)}<small>(${a.n})</small></span>` : `<span class="mono" style="font-size:11px;color:var(--ink-4)">No rating yet</span>`}</div>${items ? `<div class="ar-list">${items}</div>` : ""}${form}</div>`;
+    else form = `<form class="ar-form" id="ar-form"><b style="font-size:13px">${mine ? "Update your rating" : "Rate this asset"}</b><div class="stars-pick" role="radiogroup" aria-label="Your rating">${[1, 2, 3, 4, 5].map(v => `<button type="button" role="radio" aria-checked="${v === pick}" aria-label="${v} star${v > 1 ? "s" : ""}" data-pick="${v}" class="${v <= pick ? "on" : ""}">★</button>`).join("")}</div><label class="sr" for="ar-text">Your review</label><textarea id="ar-text" name="text" maxlength="600" placeholder="What did you think? (optional)">${esc(draftText !== null ? draftText : mine ? mine.text || "" : "")}</textarea>
+      ${(() => { const cur = shotData || (!shotRemove && mine && mine.image ? shotUrl(mine.image) : null); return cur
+        ? `<div class="shot-pick has"><img src="${cur}" alt="Your screenshot"><div><b>${shotData ? "New screenshot" : "Your screenshot"}</b><span>Shown in “Made with this asset”</span></div><button type="button" class="btn btn-o" data-shot-clear>Remove</button></div>`
+        : `<label class="shot-pick"><input type="file" accept="image/png,image/jpeg,image/webp" id="shot-file" class="sr"><i data-lucide="image-plus"></i><div><b>Add a screenshot of your game</b><span>Optional · show what you built with it (PNG, JPG, WebP)</span></div></label>`; })()}
+      <button class="btn btn-w">Post rating</button></form>`;
+    return `${showcaseHTML(list)}<div class="ar"><div class="ar-head"><b>Buyer ratings</b>${a ? `<span class="rate"><i>★</i>${a.avg.toFixed(1)}<small>(${a.n})</small></span>` : `<span class="mono" style="font-size:11px;color:var(--ink-4)">No rating yet</span>`}</div>${items ? `<div class="ar-list">${items}</div>` : ""}${form}</div>`;
   };
   const renderDetails = () => {
     const p = current; if (!p || !modal.classList.contains("open")) return;
@@ -362,6 +405,7 @@
         <div class="d-head"><span class="kicker">${p.catLabel} · ${p.badge}</span>${heartHTML(p)}</div>
         <h3>${p.name}</h3><p>${p.desc}</p>
         <div class="tags">${p.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
+        <div class="react" data-react="${p.id}" style="margin:-6px 0 4px"></div>
         <div class="offers" role="radiogroup" aria-label="Offer">
           <button class="offer" role="radio" aria-checked="${offer === "single"}" data-offer="single"><span class="radio"></span><span><b>Single purchase</b><small>Current version of the asset</small></span>${X.priceHTML(p.eur, cur, "", p.rbx)}</button>
           <button class="offer" role="radio" aria-checked="${offer === "pass"}" data-offer="pass"><span class="radio"></span><span><b>Asset Pass</b><small>+ every future update, for life</small></span><span class="mono" style="font-size:12px;color:var(--ink-4)">on Discord</span></button>
@@ -381,7 +425,7 @@
     $('meta[name="description"]').content = p ? `${p.desc} ${X.money(p.eur)} · ready for Roblox, source files and documentation included.` : baseMeta.desc;
     $('link[rel="canonical"]').href = p ? `${baseMeta.canon}?product=${p.id}` : baseMeta.canon;
   };
-  const openDetails = id => { current = X.PRODUCTS.find(p => p.id === id); if (!current) return; offer = "single"; gal = 0; pick = 5; modal.classList.add("open"); renderDetails(); setMeta(current); };
+  const openDetails = id => { current = X.PRODUCTS.find(p => p.id === id); if (!current) return; offer = "single"; gal = 0; pick = 5; shotData = null; shotRemove = false; draftText = null; modal.classList.add("open"); renderDetails(); setMeta(current); };
   const closeModal = () => { modal.classList.remove("open"); modal.querySelectorAll("video").forEach(v => v.pause()); setMeta(null); };
   $("#modal-close").addEventListener("click", closeModal);
   modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
@@ -392,6 +436,10 @@
     const z = e.target.closest("[data-zoom]");
     if (z) { const on = z.classList.toggle("zoom"); if (on) zoomAt(z, e); }
     const sp = e.target.closest("[data-pick]"); if (sp) { pick = +sp.dataset.pick; $$("[data-pick]").forEach(b => { b.classList.toggle("on", +b.dataset.pick <= pick); b.setAttribute("aria-checked", +b.dataset.pick === pick); }); }
+    const sh = e.target.closest("[data-shot]"); if (sh) { openShot(sh.dataset.shot, sh.dataset.shotBy); return; }
+    const sd = e.target.closest("[data-shotdel]");
+    if (sd) { if (confirm("Remove this screenshot?")) A.api(`/api/asset-reviews/${encodeURIComponent(current.id)}/${encodeURIComponent(sd.dataset.shotdel)}/image`, { method: "DELETE" }).then(() => { toast("Screenshot removed"); loadRatings(); }).catch(err => toast(err.message)); return; }
+    if (e.target.closest("[data-shot-clear]")) { shotData = null; shotRemove = true; renderDetails(); return; }
     const del = e.target.closest("[data-ardel]");
     if (del && confirm("Delete this rating?")) A.api(`/api/asset-reviews/${encodeURIComponent(current.id)}/${encodeURIComponent(del.dataset.ardel)}`, { method: "DELETE" }).then(() => { toast("Rating deleted"); loadRatings(); }).catch(err => toast(err.message));
   });
@@ -399,13 +447,47 @@
   const zoomAt = (z, e) => { const r = z.getBoundingClientRect(), img = z.querySelector("img"); img.style.transformOrigin = `${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`; };
   $("#modal-in").addEventListener("pointermove", e => { const z = e.target.closest(".zoomable.zoom"); if (z) zoomAt(z, e); });
   $("#modal-in").addEventListener("input", e => { const c = e.target.closest("[data-cmp]"); if (c) c.parentElement.style.setProperty("--pos", c.value + "%"); });
+  // Image réduite dans le navigateur (1600 px max) avant l'envoi, pour rester légère
+  const shrink = file => new Promise((res, rej) => {
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) return rej(new Error("Use a PNG, JPG or WebP image"));
+    if (file.size > 15 * 1048576) return rej(new Error("This image is too big (15 MB max)"));
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const k = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      let out = c.toDataURL("image/webp", .82); if (!out.startsWith("data:image/webp")) out = c.toDataURL("image/jpeg", .85);
+      res(out);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("Couldn't read this image")); };
+    img.src = url;
+  });
+  $("#modal-in").addEventListener("change", async e => {
+    if (e.target.id !== "shot-file" || !e.target.files[0]) return;
+    try { shotData = await shrink(e.target.files[0]); shotRemove = false; renderDetails(); } catch (err) { toast(err.message); }
+  });
+  $("#modal-in").addEventListener("input", e => { if (e.target.id === "ar-text") draftText = e.target.value; });
   $("#modal-in").addEventListener("submit", async e => {
     if (e.target.id !== "ar-form") return;
     e.preventDefault();
-    const btn = e.target.querySelector(".btn"); btn.disabled = true;
-    try { await A.api("/api/asset-reviews", { method: "POST", body: JSON.stringify({ productId: current.id, rating: pick, text: e.target.text.value }) }); toast("Thanks for your rating!"); await loadRatings(); }
-    catch (err) { toast(err.message); btn.disabled = false; }
+    const btn = e.target.querySelector(".btn-w"); btn.disabled = true;
+    try {
+      await A.api("/api/asset-reviews", { method: "POST", body: JSON.stringify({ productId: current.id, rating: pick, text: e.target.text.value, image: shotData || undefined, removeImage: shotRemove && !shotData }) });
+      shotData = null; shotRemove = false; draftText = null;
+      toast("Thanks for your rating!"); await loadRatings();
+    } catch (err) { toast(err.message); btn.disabled = false; }
   });
+  // Grande image de la vitrine
+  const shotBox = document.createElement("div");
+  shotBox.className = "shot-lb"; shotBox.hidden = true; shotBox.setAttribute("role", "dialog"); shotBox.setAttribute("aria-modal", "true"); shotBox.setAttribute("aria-label", "Screenshot");
+  document.body.appendChild(shotBox);
+  const openShot = (id, by) => {
+    shotBox.innerHTML = `<figure><img src="${shotUrl(id)}" alt="Screenshot by ${esc(by)}"><figcaption>Made by <b>${esc(by)}</b> with ${esc(current ? current.name : "this asset")}</figcaption></figure><button class="close" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>`;
+    shotBox.hidden = false; requestAnimationFrame(() => shotBox.classList.add("open")); shotBox.querySelector(".close").focus();
+  };
+  const closeShot = () => { shotBox.classList.remove("open"); setTimeout(() => { shotBox.hidden = true; }, 250); };
+  shotBox.addEventListener("click", e => { if (e.target === shotBox || e.target.closest(".close")) closeShot(); });
+  addEventListener("keydown", e => { if (e.key === "Escape" && !shotBox.hidden) { e.stopImmediatePropagation(); closeShot(); } }, true);
   document.addEventListener("click", e => {
     const d = e.target.closest("[data-details]"); if (d) openDetails(d.dataset.details);
     const a = e.target.closest("[data-add]");

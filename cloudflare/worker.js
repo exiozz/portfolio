@@ -527,7 +527,27 @@ async function route(request, env, ctx) {
   /* --- Avis --- */
   if (path === '/api/reviews' && method === 'GET') {
     await ensureImported(env);
-    return json(await getVal(env, 'reviews', []));
+    // Connecté (facultatif) : on indique les avis que la personne a déjà aimés. La liste des « j'aime » n'est jamais envoyée.
+    let me = null; try { me = (await auth(env, request)).id; } catch (e) {}
+    return json((await getVal(env, 'reviews', [])).map(({ likedBy, ...r }) => ({ ...r, likes: (likedBy || []).length, liked: !!me && (likedBy || []).includes(me) })));
+  }
+  // « J'aime » sur un avis (un par compte Discord, on clique encore pour retirer)
+  if ((m = /^\/api\/reviews\/([^/]+)\/like$/.exec(path)) && method === 'POST') {
+    const user = await auth(env, request);
+    const author = decodeURIComponent(m[1]);
+    if (author === user.id) throw new HttpError(400, 'Tu ne peux pas aimer ton propre avis.');
+    let out = null;
+    await updateVal(env, 'reviews', [], (reviews) => {
+      const r = reviews.find((x) => x.discordId === author);
+      if (!r) return reviews;
+      const set = new Set(r.likedBy || []);
+      if (set.has(user.id)) set.delete(user.id); else set.add(user.id);
+      r.likedBy = [...set];
+      out = { liked: set.has(user.id), likes: set.size };
+      return reviews;
+    });
+    if (!out) throw new HttpError(404, 'Avis introuvable.');
+    return json({ ok: true, ...out });
   }
   if (path === '/api/reviews' && method === 'POST') {
     const user = await auth(env, request);
@@ -540,7 +560,8 @@ async function route(request, env, ctx) {
     // Pays facultatif (code ISO à 2 lettres), affiché sur le globe des avis
     const country = /^[A-Z]{2}$/.test(String(b.country || '').toUpperCase()) ? String(b.country).toUpperCase() : undefined;
     const review = { discordId: user.id, name: user.name, avatar: user.avatar || '', rating, text, country, timestamp: Date.now() };
-    await updateVal(env, 'reviews', [], (reviews) => [review, ...reviews.filter((r) => r.discordId !== user.id)]);
+    // Un nouvel avis remplace l'ancien, en gardant ses « j'aime »
+    await updateVal(env, 'reviews', [], (reviews) => { const old = reviews.find((r) => r.discordId === user.id); if (old && old.likedBy) review.likedBy = old.likedBy; return [review, ...reviews.filter((r) => r.discordId !== user.id)]; });
     return json({ ok: true });
   }
   if ((m = /^\/api\/reviews\/([^/]+)$/.exec(path)) && method === 'DELETE') {

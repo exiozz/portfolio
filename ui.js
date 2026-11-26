@@ -142,21 +142,75 @@
     return d;
   };
   const cartD = makeDrawer("cart-drawer", "My cart");
-  cartD.classList.add("cart-sheet");
+  cartD.classList.add("cart-pop");
+  cartD.insertAdjacentHTML("afterbegin", '<span class="pop-grab" aria-hidden="true"></span>');
   cartD.querySelector(".drawer-head b").innerHTML = `Cart <span class="c-count" id="c-count"></span>`;
   const ordersD = makeDrawer("orders-drawer", "My orders");
   const adminD = makeDrawer("admin-drawer", "Admin area", true);
   let openD = null;
+  // Le panier s'ouvre en carte sous l'icône du panier (ordi) ou en carte qui monte du bas (mobile)
+  const isSheet = () => innerWidth <= 640;
+  const placeCart = () => {
+    const btn = document.querySelector(".nav-tools .icon-btn[data-open-cart]");
+    if (!btn || isSheet()) return;
+    const r = btn.getBoundingClientRect(), right = Math.max(12, innerWidth - r.right - 12);
+    cartD.style.setProperty("--pop-top", `${r.bottom + 14}px`);
+    cartD.style.setProperty("--pop-right", `${right}px`);
+    cartD.style.setProperty("--caret", `${innerWidth - r.right + r.width / 2 - right - 7}px`);
+  };
+  addEventListener("resize", () => { if (openD === cartD) placeCart(); });
   const open = d => {
     if (openD && openD !== d) close(openD, true);
-    openD = d; render(d); d.classList.add("open"); d.setAttribute("aria-hidden", "false"); scrim.classList.add("open");
-    document.documentElement.style.overflow = "hidden";
-    setTimeout(() => d.querySelector("[data-close]").focus(), 60);
+    const pop = d === cartD;
+    if (pop) placeCart();
+    openD = d; render(d); d.classList.add("open"); d.setAttribute("aria-hidden", "false");
+    scrim.classList.toggle("clear", pop && !isSheet()); scrim.classList.add("open");
+    if (!pop || isSheet()) document.documentElement.style.overflow = "hidden";
+    setTimeout(() => d.querySelector("[data-close]").focus({ preventScroll: true }), 60);
   };
   const close = (d, keep) => {
-    d.classList.remove("open"); d.setAttribute("aria-hidden", "true");
+    d.classList.remove("open"); d.setAttribute("aria-hidden", "true"); d.style.removeProperty("--drag");
     if (!keep) { scrim.classList.remove("open"); document.documentElement.style.overflow = ""; openD = null; }
   };
+  // Mobile : on glisse la carte vers le bas pour la fermer
+  {
+    let y0 = null, dy = 0;
+    cartD.addEventListener("pointerdown", e => { if (!isSheet() || !e.target.closest(".drawer-head, .pop-grab")) return; y0 = e.clientY; dy = 0; cartD.classList.add("dragging"); cartD.setPointerCapture(e.pointerId); });
+    cartD.addEventListener("pointermove", e => { if (y0 === null) return; dy = Math.max(0, e.clientY - y0); cartD.style.setProperty("--drag", dy + "px"); });
+    const end = () => { if (y0 === null) return; y0 = null; cartD.classList.remove("dragging"); if (dy > 90) close(cartD); else cartD.style.removeProperty("--drag"); };
+    cartD.addEventListener("pointerup", end); cartD.addEventListener("pointercancel", end);
+  }
+  // Ajout au panier : l'image de l'article vole jusqu'à l'icône, qui saute
+  let flyFrom = null, flyAt = 0, lastCount = null;
+  document.addEventListener("click", e => { const b = e.target.closest("[data-add], [data-quick], [data-svc]"); if (b) { flyFrom = b; flyAt = performance.now(); } }, true);
+  const flyToCart = () => {
+    const icon = document.querySelector(".nav-tools .icon-btn[data-open-cart]"); if (!icon) return;
+    const ir = icon.getBoundingClientRect();
+    const bump = () => icon.animate([{ transform: "scale(1)" }, { transform: "scale(1.3) rotate(-8deg)" }, { transform: "scale(.92)" }, { transform: "none" }], { duration: 520, easing: "cubic-bezier(.34, 1.56, .64, 1)" });
+    const src = flyFrom && flyFrom.isConnected ? flyFrom : null;
+    const card = src && src.closest("article, .modal-in, .c-sug-item, .plan, .ci");
+    const img = card && card.querySelector("img");
+    if (reduce || !src || !document.body.contains(src)) { bump(); return; }
+    const from = (img || src).getBoundingClientRect();
+    const fly = document.createElement(img ? "img" : "span");
+    fly.className = "fly-item"; fly.setAttribute("aria-hidden", "true");
+    if (img) fly.src = img.currentSrc || img.src;
+    const size = Math.min(72, from.width, from.height) || 40;
+    fly.style.cssText = `left:${from.left + from.width / 2 - size / 2}px;top:${from.top + from.height / 2 - size / 2}px;width:${size}px;height:${size}px`;
+    document.body.appendChild(fly);
+    const dx = ir.left + ir.width / 2 - (from.left + from.width / 2), dy = ir.top + ir.height / 2 - (from.top + from.height / 2);
+    fly.animate([
+      { transform: "translate(0, 0) scale(1)", opacity: 1 },
+      { transform: `translate(${dx * .5}px, ${dy * .5 - 80}px) scale(.7)`, opacity: 1, offset: .55 },
+      { transform: `translate(${dx}px, ${dy}px) scale(.18)`, opacity: .4 }
+    ], { duration: 750, easing: "cubic-bezier(.5, 0, .3, 1)" }).finished.then(() => { fly.replaceWith(); bump(); });
+  };
+  document.addEventListener("cartchange", () => {
+    const n = X.Cart.count();
+    if (lastCount !== null && n > lastCount && performance.now() - flyAt < 600) flyToCart();
+    lastCount = n;
+  });
+  lastCount = X.Cart.count();
   scrim.addEventListener("click", () => openD && close(openD));
   document.addEventListener("click", e => { const b = e.target.closest("[data-close]"); if (b) close(b.closest(".drawer")); });
   addEventListener("keydown", e => { if (e.key === "Escape" && openD) close(openD); });

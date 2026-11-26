@@ -58,22 +58,49 @@
 
   /* ---------- Codes promo ---------- */
   const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+  // Les codes créés dans l'espace admin sont gardés et vérifiés sur le serveur ; ceux écrits ici (et ceux de l'Avent) restent locaux
+  const API = "https://exiozz-shop.tomokari-perso.workers.dev";
+  const norm = raw => String(raw || "").trim().toUpperCase().replace(/\s+/g, "");
+  const dateOk = p => !(p.from && today() < p.from) && !(p.until && today() > p.until);
   const lookup = raw => {
-    const code = String(raw || "").trim().toUpperCase().replace(/\s+/g, "");
+    const code = norm(raw);
     if (!code) return { ok: false, msg: "Enter a code" };
     const p = PROMO.codes[code];
-    if (!p) return { ok: false, msg: "This code doesn't exist" };
+    if (!p) return { ok: false, msg: "This code doesn't exist", missing: true };
     if (p.from && today() < p.from) return { ok: false, msg: "This code isn't active yet" };
     if (p.until && today() > p.until) return { ok: false, msg: "This code has expired" };
     return { ok: true, code, ...p };
   };
+  const check = async raw => {
+    const local = lookup(raw);
+    if (local.ok || !local.missing) return local;
+    try {
+      const r = await fetch(API + "/api/promos/check", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: norm(raw) }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) return { ok: false, msg: d.error || "This code doesn't exist" };
+      return { ok: true, remote: true, code: d.code, pct: d.pct, label: d.label, from: d.from, until: d.until };
+    } catch (e) { return { ok: false, msg: "Couldn't check this code, try again" }; }
+  };
+  let remoteBanner = null;
   const Promo = {
-    active() { const c = store.get("exiozz-promo", null); const r = c && lookup(c); return r && r.ok ? r : null; },
-    apply(raw) { const r = lookup(raw); if (r.ok) { store.set("exiozz-promo", r.code); emit("promochange"); } return r; },
+    active() {
+      const c = store.get("exiozz-promo", null);
+      if (!c) return null;
+      if (typeof c === "object") return c.code && c.pct && dateOk(c) ? { ok: true, ...c } : null;
+      const r = lookup(c); return r.ok ? r : null;
+    },
+    async apply(raw) {
+      const r = await check(raw);
+      if (r.ok) { store.set("exiozz-promo", r.remote ? { code: r.code, pct: r.pct, label: r.label, from: r.from, until: r.until, remote: true } : r.code); emit("promochange"); }
+      return r;
+    },
     clear() { store.set("exiozz-promo", null); emit("promochange"); },
     price(eur) { const a = Promo.active(); return a ? Math.round(eur * (100 - a.pct)) / 100 : eur; },
-    banner() { const r = PROMO.banner && lookup(PROMO.banner); return r && r.ok ? r : null; }
+    banner() { const r = PROMO.banner && lookup(PROMO.banner); return r && r.ok ? r : remoteBanner; }
   };
+  // Code mis en avant depuis l'espace admin, et code du serveur déjà appliqué : on revérifie (supprimé, épuisé…)
+  fetch(API + "/api/promos/banner").then(r => r.ok ? r.json() : null).then(d => { if (d && d.code) { remoteBanner = { ok: true, ...d }; emit("promochange"); } }).catch(() => {});
+  { const c = store.get("exiozz-promo", null); if (c && typeof c === "object") check(c.code).then(r => { if (!r.ok && !/check this code/.test(r.msg)) Promo.clear(); }); }
   // Lien partageable : ?promo=CODE applique le code
   const fromUrl = new URLSearchParams(location.search).get("promo");
   if (fromUrl) Promo.apply(fromUrl);
@@ -126,10 +153,12 @@
         : `<form class="promo-form" novalidate><label class="sr" for="${el.id}-in">Promo code</label><input id="${el.id}-in" class="promo-in" placeholder="Promo code" autocomplete="off" spellcheck="false"><button class="promo-go">Apply</button></form><span class="promo-msg" role="status">${msg}</span>`;
       window.lucide && lucide.createIcons();
     };
-    el.addEventListener("submit", e => {
+    el.addEventListener("submit", async e => {
       e.preventDefault();
-      const r = Promo.apply(el.querySelector(".promo-in").value);
-      if (!r.ok) { render(r.msg); el.querySelector(".promo-in").focus(); }
+      const input = el.querySelector(".promo-in"), btn = el.querySelector(".promo-go");
+      btn.disabled = true; btn.textContent = "…";
+      const r = await Promo.apply(input.value);
+      if (!r.ok) { const v = input.value; render(r.msg); const i2 = el.querySelector(".promo-in"); i2.value = v; i2.focus(); }
     });
     el.addEventListener("click", e => { if (e.target.closest("[data-clear]")) Promo.clear(); });
     document.addEventListener("promochange", () => render());

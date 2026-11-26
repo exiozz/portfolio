@@ -355,7 +355,7 @@
         const d = X.Cart.deal(i, t.list), tag = d.by === "bundle" ? ` (bundle −${d.pct}%)` : d.by === "promo" ? ` (code ${promo.code})` : "";
         return { title: i.name + tag, price: X.Cart.priceOf(i, t.list), productId: i.kind === "asset" ? i.id : undefined, type: i.kind === "service" ? "service" : "asset" };
       });
-      const r = await api("/api/order", { method: "POST", body: JSON.stringify({ items, currency: "€", source: PAGE }) });
+      const r = await api("/api/order", { method: "POST", body: JSON.stringify({ items, currency: "€", source: PAGE, promo: promo ? promo.code : undefined }) });
       X.Cart.clear();
       toast("Order sent · Exiozz will contact you on Discord");
       open(ordersD);
@@ -452,9 +452,7 @@
         icons();
       } catch (e) { errorBox(box, e.message); }
     } else if (adminTab === "promo") {
-      const codes = Object.entries(X.PROMO.codes);
-      body.innerHTML = head + (codes.length ? `<div class="a-list">${codes.map(([code, p]) => `<div class="a-item"><span class="pb-code">${esc(code)}</span><div><b>${esc(p.label)}</b><span>−${p.pct}%${p.until ? " · until " + esc(p.until) : ""}</span></div></div>`).join("")}</div>` : `<div class="d-empty"><i data-lucide="ticket"></i><b>No promo code active</b><span>Add one at the top of promo.js</span></div>`);
-      icons();
+      body.innerHTML = head + `<div id="a-promo"></div>`; renderPromoAdmin($("#a-promo"));
     } else {
       body.innerHTML = head + `<div class="a-stats"><div><b data-discord="members">—</b><span>Discord members</span></div><div><b data-discord="online">—</b><span>Online</span></div><div><b id="a-rev">—</b><span>Reviews</span></div></div>
         <a class="btn btn-o" href="https://discord.gg/rGcdngHsCe"><i data-lucide="message-circle"></i>Open the Discord server</a>`;
@@ -462,6 +460,59 @@
       fetch(API + "/api/reviews").then(r => r.json()).then(l => { const el = $("#a-rev"); if (el) el.textContent = l.length; }).catch(() => {});
     }
   }
+  /* Codes promo : création depuis l'espace admin (gardés sur le serveur) */
+  const STATE_EN = { active: ["Active", "ok"], scheduled: ["Scheduled", "run"], expired: ["Expired", "off"], "used up": ["Used up", "off"] };
+  const genCode = () => "EXIOZZ-" + Array.from(crypto.getRandomValues(new Uint8Array(4)), b => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[b % 32]).join("");
+  async function renderPromoAdmin(box) {
+    loading(box);
+    let list = [];
+    try { list = await api("/api/admin/promos"); } catch (e) { errorBox(box, e.message); return; }
+    const local = Object.entries(X.PROMO.codes);
+    const base = location.origin + location.pathname.replace(/[^/]*$/, "");
+    box.innerHTML = `<form class="a-form a-promo-form" id="promo-new">
+        <div class="a-grid2">
+          <label class="a-lbl">Code<div class="a-inline"><input name="code" maxlength="24" placeholder="e.g. NOEL10" required autocomplete="off" spellcheck="false"><button type="button" class="btn btn-o" data-gen-code>Generate</button></div></label>
+          <label class="a-lbl">Discount<div class="a-inline"><input name="pct" type="number" min="1" max="90" value="10" required><span class="a-unit">%</span></div></label>
+        </div>
+        <label class="a-lbl">Text shown to clients <input name="label" maxlength="80" placeholder="e.g. Christmas sale · 10% off everything"></label>
+        <div class="a-grid3">
+          <label class="a-lbl">Starts <input name="from" type="date"></label>
+          <label class="a-lbl">Ends <input name="until" type="date"></label>
+          <label class="a-lbl">Max uses <input name="maxUses" type="number" min="1" placeholder="Unlimited"></label>
+        </div>
+        <label class="a-check"><input type="checkbox" name="banner"><span>Show it in the bar at the top of the site</span></label>
+        <button class="btn btn-w wide"><i data-lucide="ticket-plus"></i>Create code</button>
+      </form>
+      <div class="a-sub">Your codes <span>${list.length}</span></div>
+      ${list.length ? `<div class="a-list">${list.map(p => { const [st, cls] = STATE_EN[p.state] || [p.state, "wait"]; return `<div class="a-item a-promo">
+          <span class="pb-code">${esc(p.code)}</span>
+          <div><b>−${p.pct}% · ${esc(p.label)}</b><span>${p.from ? "from " + esc(p.from) + " " : ""}${p.until ? "until " + esc(p.until) + " · " : ""}${p.uses || 0}${p.maxUses ? " / " + p.maxUses : ""} use${(p.uses || 0) === 1 ? "" : "s"}${p.banner ? " · in top bar" : ""}</span></div>
+          <span class="st ${cls}">${st}</span>
+          <div class="a-acts"><button class="c-rm" data-promo-copy="${esc(base + "shop.html?promo=" + p.code)}" aria-label="Copy share link"><i data-lucide="link"></i></button><button class="c-rm" data-promo-del="${esc(p.code)}" aria-label="Delete ${esc(p.code)}"><i data-lucide="trash-2"></i></button></div>
+        </div>`; }).join("")}</div>` : `<div class="d-empty" style="padding:28px 12px"><i data-lucide="ticket"></i><b>No code yet</b><span>Create your first one above</span></div>`}
+      ${local.length ? `<details class="a-local"><summary>Automatic codes (${local.length}) · Advent calendar</summary><div class="a-list">${local.map(([code, p]) => `<div class="a-item"><span class="pb-code">${esc(code)}</span><div><b>${esc(p.label)}</b><span>−${p.pct}%${p.from ? " · " + esc(p.from) : ""}</span></div></div>`).join("")}</div></details>` : ""}`;
+    icons();
+  }
+  document.addEventListener("click", async e => {
+    if (e.target.closest("[data-gen-code]")) { const f = $("#promo-new"); f.code.value = genCode(); f.code.focus(); return; }
+    const cp = e.target.closest("[data-promo-copy]");
+    if (cp) { try { await navigator.clipboard.writeText(cp.dataset.promoCopy); toast("Link copied · it applies the code automatically"); } catch (err) { toast(cp.dataset.promoCopy); } return; }
+    const dl = e.target.closest("[data-promo-del]");
+    if (dl) {
+      if (!confirm(`Delete the code ${dl.dataset.promoDel}? Clients won't be able to use it anymore.`)) return;
+      try { await api(`/api/admin/promos/${encodeURIComponent(dl.dataset.promoDel)}`, { method: "DELETE" }); toast("Code deleted"); } catch (err) { toast(err.message); }
+      renderPromoAdmin($("#a-promo"));
+    }
+  });
+  document.addEventListener("submit", async e => {
+    if (e.target.id !== "promo-new") return;
+    e.preventDefault();
+    const f = e.target, btn = f.querySelector(".btn-w"); btn.disabled = true;
+    try {
+      const r = await api("/api/admin/promos", { method: "POST", body: JSON.stringify({ code: f.code.value, pct: +f.pct.value, label: f.label.value, from: f.from.value || null, until: f.until.value || null, maxUses: f.maxUses.value ? +f.maxUses.value : null, banner: f.banner.checked }) });
+      toast(`Code ${r.promo.code} created`); renderPromoAdmin($("#a-promo"));
+    } catch (err) { toast(err.message); btn.disabled = false; }
+  });
   document.addEventListener("click", e => {
     const b = e.target.closest("[data-slot]"); if (!b) return;
     const inp = b.parentElement.querySelector("input"); inp.value = Math.max(0, Math.min(99, (+inp.value || 0) + +b.dataset.slot));

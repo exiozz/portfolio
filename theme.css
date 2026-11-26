@@ -1427,3 +1427,39 @@ html[data-theme="light"] .btn-w::after, html[data-theme="light"] .nav-shop::afte
 .acc-dot { position: absolute; top: 4px; left: 26px; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--bg); }
 #login-btn { position: relative; }
 .o-chat { margin-top: 14px; width: 100%; justify-content: center; }
+
+/* ===== Boîte de réception (Chat) ===== */
+.ib-list { display: grid; gap: 4px; }
+.ib-row { width: 100%; display: grid; grid-template-columns: 46px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px; border-radius: 14px; text-align: left; color: var(--ink); transition: background-color .2s var(--ease); }
+.ib-row:hover { background: var(--fill-2); }
+.ib-av { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; display: grid; place-items: center; background: var(--raised); font: 600 17px/1 var(--display); color: var(--ink-2); }
+.ib-av.brand { border-radius: 13px; background: var(--accent); }
+.ib-av.brand::after { content: ""; width: 40%; height: 40%; border-radius: 50%; background: rgba(255, 255, 255, .25); }
+.ib-main { min-width: 0; display: grid; gap: 2px; }
+.ib-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.ib-top b { font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ib-top time { flex: none; font: 400 11px/1 var(--mono); color: var(--ink-4); }
+.ib-sub { font: 400 11px/1.4 var(--mono); color: var(--ink-4); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ib-last { font-size: 13px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ib-row.unread .ib-last { color: var(--ink); font-weight: 600; }
+.ib-row.unread time { color: var(--accent); }
+.ib-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.ib-sep { margin: 18px 12px 8px; font: 400 10px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-4); }
+
+/* ===== Cloche : section Messages ===== */
+.news-scroll { overflow-y: auto; scrollbar-width: thin; overscroll-behavior: contain; }
+.news-scroll .news-list { overflow: visible; }
+.news-sec { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px 2px; font: 400 10px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-4); }
+.news-sec button { font: 500 12px/1 var(--body, inherit); letter-spacing: 0; text-transform: none; color: var(--accent); padding: 4px 6px; margin-right: -6px; border-radius: 6px; }
+.news-sec button:hover { background: var(--fill-2); }
+.news-none { margin: 6px 20px 4px; font-size: 13px; color: var(--ink-4); }
+.news-list li.nm > button { width: 100%; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; align-items: start; padding: 12px; border-radius: 12px; text-align: left; color: inherit; transition: background-color .2s var(--ease); }
+.news-list li.nm > button:hover { background: var(--fill-2); }
+.nm-av { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; display: grid; place-items: center; background: var(--raised); font: 600 14px/1 var(--display); color: var(--ink-2); }
+.nm-av.brand { border-radius: 10px; background: var(--accent); }
+.nm-av.brand::after { content: ""; width: 40%; height: 40%; border-radius: 50%; background: rgba(255, 255, 255, .25); }
+.nm-txt { min-width: 0; display: grid; gap: 5px; }
+.nm-txt b { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nm-txt b em { font-style: normal; font: 400 11px/1 var(--mono); color: var(--ink-4); }
+.nm-txt > span:last-child { font-size: 13px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.news-list li.nm > button { background: rgba(255, 90, 31, .06); }

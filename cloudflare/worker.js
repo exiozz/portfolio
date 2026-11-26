@@ -398,8 +398,14 @@ async function route(request, env, ctx) {
     const user = await auth(env, request);
     const orders = await getVal(env, 'orders', []);
     const mine = user.isAdmin ? orders : orders.filter((o) => o.discordId === user.id);
-    const ids = mine.filter((o) => chatUnread(o, user.isAdmin)).map((o) => o.id);
-    return json({ count: ids.length, orders: ids });
+    const un = mine.filter((o) => chatUnread(o, user.isAdmin)).sort((x, y) => y.chat.last.ts - x.chat.last.ts);
+    // aperçu pour la cloche des notifications : qui a écrit, quoi, quand
+    const items = un.slice(0, 20).map((o) => ({
+      id: o.id, ts: o.chat.last.ts, text: o.chat.last.text,
+      who: user.isAdmin ? (o.customerName || 'Client') : 'Exiozz',
+      username: user.isAdmin ? o.discordUsername || '' : '', avatar: user.isAdmin ? o.avatar || '' : ''
+    }));
+    return json({ count: un.length, orders: un.map((o) => o.id), items });
   }
 
   if ((m = /^\/api\/orders\/([^/]+)\/messages$/.exec(path)) && (method === 'GET' || method === 'POST')) {

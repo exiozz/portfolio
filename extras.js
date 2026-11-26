@@ -321,13 +321,32 @@
   document.body.appendChild(news);
   const fmtDate = d => new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
   let newsBtn = null;
-  const paintNewsBtn = () => { if (!newsBtn) return; const n = unseen(); newsBtn.classList.toggle("has-new", n > 0); newsBtn.setAttribute("aria-label", n ? `What's new: ${n} update${n > 1 ? "s" : ""} since your last visit` : "What's new"); };
+  // Messages non lus de la messagerie des commandes (fournis par ui.js)
+  const chatUnread = () => (UI.Chat ? UI.Chat.unread() : []);
+  const agoShort = ts => { const m = Math.round((Date.now() - ts) / 6e4); return m < 1 ? "now" : m < 60 ? `${m}m ago` : m < 1440 ? `${Math.round(m / 60)}h ago` : `${Math.round(m / 1440)}d ago`; };
+  const msgSection = () => {
+    if (!UI.Chat || !UI.Chat.signedIn()) return "";
+    const items = chatUnread();
+    const rows = items.map(m => `<li class="fresh nm"><button data-news-chat="${esc(m.id)}">
+        ${m.avatar ? `<img class="nm-av" src="${esc(m.avatar)}" alt="">` : `<span class="nm-av${m.who === "Exiozz" ? " brand" : ""}">${m.who === "Exiozz" ? "" : esc(m.who.charAt(0).toUpperCase())}</span>`}
+        <span class="nm-txt"><span class="news-meta"><span class="news-tag">Message</span>${agoShort(m.ts)}<span class="news-new">New</span></span>
+        <b>${esc(m.who)}${m.username ? ` <em>@${esc(m.username)}</em>` : ""} · #${esc(m.id.slice(-6).toUpperCase())}</b><span>${esc(m.text)}</span></span></button></li>`).join("");
+    return `<div class="news-sec"><span>Messages</span><button data-news-inbox>Open chat</button></div>
+      ${rows ? `<ol class="news-list">${rows}</ol>` : `<p class="news-none">No new messages</p>`}
+      <div class="news-sec"><span>Updates</span></div>`;
+  };
+  const paintNewsBtn = () => {
+    if (!newsBtn) return;
+    const n = unseen(), m = chatUnread().length;
+    newsBtn.classList.toggle("has-new", n + m > 0);
+    newsBtn.setAttribute("aria-label", [m ? `${m} new message${m > 1 ? "s" : ""}` : "", n ? `${n} update${n > 1 ? "s" : ""} since your last visit` : ""].filter(Boolean).join(", ") || "Notifications");
+  };
   const openNews = () => {
     const n = unseen();
-    news.innerHTML = `<div class="news-head"><b>What's new</b><button class="drawer-x" data-news-close aria-label="Close"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
-      <ol class="news-list">${CHANGELOG.map((c, i) => `<li class="${i < n ? "fresh" : ""}" style="--i:${i}">${c.href ? `<a href="${c.href}" data-news-go>` : "<div>"}
+    news.innerHTML = `<div class="news-head"><b>Notifications</b><button class="drawer-x" data-news-close aria-label="Close"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+      <div class="news-scroll">${msgSection()}<ol class="news-list">${CHANGELOG.map((c, i) => `<li class="${i < n ? "fresh" : ""}" style="--i:${i}">${c.href ? `<a href="${c.href}" data-news-go>` : "<div>"}
         <span class="news-meta"><span class="news-tag">${esc(c.tag)}</span>${fmtDate(c.date)}${i < n ? '<span class="news-new">New</span>' : ""}</span>
-        <b>${esc(c.title)}</b><span>${esc(c.text)}</span>${c.href ? "</a>" : "</div>"}</li>`).join("")}</ol>`;
+        <b>${esc(c.title)}</b><span>${esc(c.text)}</span>${c.href ? "</a>" : "</div>"}</li>`).join("")}</ol></div>`;
     news.hidden = false; requestAnimationFrame(() => news.classList.add("open"));
     try { localStorage.setItem(SEEN_KEY, CHANGELOG[0].id); } catch (e) {}
     paintNewsBtn();
@@ -340,7 +359,10 @@
     tools.insertBefore(newsBtn, tools.querySelector("#theme-btn"));
     paintNewsBtn();
   }
+  document.addEventListener("chatunread", () => { paintNewsBtn(); if (news.classList.contains("open")) { const sc = news.querySelector(".news-scroll"), y = sc ? sc.scrollTop : 0; openNews(); const s2 = news.querySelector(".news-scroll"); if (s2) s2.scrollTop = y; } });
   document.addEventListener("click", e => {
+    const nc = e.target.closest("[data-news-chat]"); if (nc) { closeNews(); UI.Chat.open(nc.dataset.newsChat); return; }
+    if (e.target.closest("[data-news-inbox]")) { closeNews(); UI.openInbox(); return; }
     if (e.target.closest("[data-open-news]")) { e.stopPropagation(); news.classList.contains("open") ? closeNews() : openNews(); return; }
     if (e.target.closest("[data-news-close]") || e.target.closest("[data-news-go]") || (!news.hidden && !e.target.closest("#news"))) closeNews();
   });

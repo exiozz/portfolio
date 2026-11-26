@@ -251,6 +251,8 @@
 
   const refreshAuth = () => { renderIdeaForm(); renderGbForm(); loadIdeas(); renderNotes(); };
   document.addEventListener("authchange", refreshAuth);
+  // Supprimé depuis l'espace admin : on recharge la liste concernée
+  document.addEventListener("moderated", e => { if (e.detail === "ideas") loadIdeas(); if (e.detail === "guestbook") loadNotes(); });
   renderIdeaForm(); renderGbForm();
   // On charge quand la section approche de l'écran
   const io = new IntersectionObserver(es => { if (es.some(x => x.isIntersecting)) { io.disconnect(); loadIdeas(); loadNotes(); } }, { rootMargin: "600px" });

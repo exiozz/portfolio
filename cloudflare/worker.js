@@ -9,7 +9,7 @@
  *  - Avis clients, notes des assets, liste d'envies, disponibilités
  *  - Activité récente anonyme, avatar Roblox pour le badge de l'accueil
  *  - Communauté : mur d'idées, réactions, compteur en direct, livre d'or
- *  - Codes promo et catalogue du shop gérés depuis l'espace admin
+ *  - Codes promo, catalogue du shop, tarifs, projets et photos gérés depuis l'espace admin
  *  - Récupération automatique des avis et commandes de l'ancien serveur
  *
  * À coller tel quel dans l'éditeur Cloudflare (Workers → ton worker → Edit code).
@@ -989,6 +989,58 @@ async function route(request, env, ctx) {
     // Images envoyées pour cet asset (hébergées ici) : on les efface aussi
     const mine = [removed.cover, ...(removed.gallery || []).map((g) => g[0])].map((u) => (/\/api\/shots\/([a-z0-9]+)$/.exec(u || '') || [])[1]).filter(Boolean);
     if (env.FILES) for (const k of new Set(mine)) await env.FILES.delete(shotKey(k)).catch(() => {});
+    return json({ ok: true });
+  }
+
+  /* ============================== Contenu de l'accueil (tarifs, projets, photos) ==============================
+     Modifié depuis l'espace admin ; une section absente = les valeurs par défaut du site (content.js). */
+  const PLAN_CATS = ['roblox', 'script', 'build', 'web', 'uiux', 'gfx', 'discord', '3d'];
+  const anyImg = (v) => { const u = String(v || '').trim(); return /^(https:\/\/|img\/|assets\/)[^\s"'<>]{1,400}$/.test(u) || /^[\w.-]{1,80}\.(webp|png|jpe?g|gif)$/i.test(u) ? u : ''; };
+  const cleanContent = {
+    plans: (v) => {
+      if (!v || typeof v !== 'object' || Array.isArray(v)) throw new HttpError(400, 'Tarifs invalides.');
+      const out = {};
+      for (const c of PLAN_CATS) {
+        out[c] = (Array.isArray(v[c]) ? v[c] : []).slice(0, 12).map((r) => {
+          const price = Math.round((+(r && r[2]) || 0) * 100) / 100;
+          const name = clampStr(r && r[0], 60).trim();
+          if (!name || !(price > 0 && price <= 100000)) throw new HttpError(400, `Service invalide dans « ${c} » : nom et prix (> 0) obligatoires.`);
+          return [name, clampStr(r[1], 240).trim(), price, clampStr(r[3], 60).trim(), (Array.isArray(r[4]) ? r[4] : []).map((f) => clampStr(f, 60).trim()).filter(Boolean).slice(0, 6)];
+        });
+      }
+      return out;
+    },
+    projects: (v) => (Array.isArray(v) ? v : []).slice(0, 30).map((pr) => {
+      const t = clampStr(pr && pr.t, 80).trim(), img = anyImg(pr && pr.img);
+      if (!t || !img) throw new HttpError(400, 'Chaque projet a besoin d\'un titre et d\'une image.');
+      const uid = String((pr && pr.universeId) || '').trim();
+      return { id: clampStr(pr.id, 60).toLowerCase().replace(/[^a-z0-9-]/g, '') || t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''), t, img,
+        short: clampStr(pr.short, 160).trim(), d: clampStr(pr.d, 600).trim(), status: clampStr(pr.status, 30).trim() || 'Completed',
+        tech: (Array.isArray(pr.tech) ? pr.tech : []).map((x) => clampStr(x, 30).trim()).filter(Boolean).slice(0, 8), universeId: /^\d{1,15}$/.test(uid) ? +uid : null };
+    }),
+    packs: (v) => (Array.isArray(v) ? v : []).slice(0, 20).map((pk) => {
+      const name = clampStr(pk && pk.name, 80).trim();
+      const imgs = (Array.isArray(pk && pk.imgs) ? pk.imgs : []).slice(0, 60).map((g) => [anyImg(g && g[0]), clampStr(g && g[1], 80).trim(), g && g[2] === 'sq' ? 'sq' : undefined].filter((x) => x !== undefined)).filter((g) => g[0]);
+      if (!name || !imgs.length) throw new HttpError(400, 'Chaque pack de photos a besoin d\'un nom et d\'au moins une image.');
+      return { name, desc: clampStr(pk.desc, 200).trim(), id: clampStr(pk.id, 60).trim() || '', imgs };
+    })
+  };
+  if (path === '/api/content' && method === 'GET') {
+    return new Response(JSON.stringify(await getVal(env, 'content', {})), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-cache' } });
+  }
+  if (path === '/api/admin/content' && method === 'POST') {
+    const user = await auth(env, request); adminOnly(user);
+    const b = await readJson(request);
+    if (!cleanContent[b.section]) throw new HttpError(400, 'Section inconnue.');
+    const value = cleanContent[b.section](b.value);
+    await updateVal(env, 'content', {}, (c) => { c[b.section] = value; return c; });
+    return json({ ok: true, section: b.section, value });
+  }
+  // Revenir aux valeurs par défaut d'une section
+  if ((m = /^\/api\/admin\/content\/([a-z]+)$/.exec(path)) && method === 'DELETE') {
+    const user = await auth(env, request); adminOnly(user);
+    if (!cleanContent[m[1]]) throw new HttpError(400, 'Section inconnue.');
+    await updateVal(env, 'content', {}, (c) => { delete c[m[1]]; return c; });
     return json({ ok: true });
   }
 

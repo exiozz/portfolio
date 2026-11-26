@@ -1338,3 +1338,25 @@ html[data-theme="light"] .btn-w::after, html[data-theme="light"] .nav-shop::afte
 .acc-head b { display: block; font-size: 14px; font-weight: 600; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .acc-head span { font: 400 11px/1.3 var(--mono); color: var(--ink-4); }
 @media (max-width: 960px) { .nav-tools .login-btn { padding: 0 6px; } }
+
+/* Admin : tarifs, projets, photos, modération */
+.a-pcats { margin-bottom: 12px; }
+.a-svcs { display: grid; gap: 8px; margin-bottom: 10px; }
+.a-svc { display: grid; gap: 8px; padding: 12px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); }
+.a-svc input, .a-svc textarea { width: 100%; padding: 9px 11px; border-radius: 9px; border: 1px solid var(--line-2); background: var(--card-2); color: var(--ink); font: 400 13px/1.4 var(--body); }
+.a-svc textarea { resize: vertical; margin-top: 8px; }
+.a-svc-top { display: grid; grid-template-columns: minmax(0, 1fr) 110px 34px; gap: 8px; align-items: center; }
+.a-svc-top [data-f=name] { font-weight: 600; }
+.a-price { position: relative; }
+.a-price span { position: absolute; right: 11px; top: 50%; translate: 0 -50%; color: var(--ink-3); font-weight: 600; pointer-events: none; }
+.a-price input { padding-right: 26px; font: 700 15px/1 var(--display); }
+.a-svc details summary { cursor: pointer; font: 400 12px/1.4 var(--mono); color: var(--ink-3); }
+.a-save { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.a-save .btn-w { flex: 1; justify-content: center; height: 44px; }
+.a-modtabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.a-modtabs button { height: 32px; padding: 0 14px; border-radius: 16px; border: 1px solid var(--line-2); font-size: 13px; color: var(--ink-3); }
+.a-modtabs button[aria-selected="true"] { background: var(--inv); color: var(--inv-ink); border-color: var(--inv); }
+.a-mod { grid-template-columns: minmax(0, 1fr) auto; }
+.a-mod p { margin: 4px 0; font-size: 13px; color: var(--ink-2); line-height: 1.5; word-break: break-word; }
+@media (max-width: 640px) { .a-svc-top { grid-template-columns: minmax(0, 1fr) 90px 34px; } }
+.a-pcats button .n { margin-left: 6px; font: 400 11px/1 var(--mono); opacity: .6; }

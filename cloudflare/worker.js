@@ -62,7 +62,7 @@ async function hmac(env, data) {
   return b64url(new Uint8Array(await crypto.subtle.sign('HMAC', hmacKey, enc.encode(data))));
 }
 async function signToken(env, user) {
-  const payload = b64url(enc.encode(JSON.stringify({ id: user.id, name: user.name, avatar: user.avatar, exp: Date.now() + SESSION_DAYS * 864e5 })));
+  const payload = b64url(enc.encode(JSON.stringify({ id: user.id, name: user.name, username: user.username || '', avatar: user.avatar, exp: Date.now() + SESSION_DAYS * 864e5 })));
   return payload + '.' + await hmac(env, payload);
 }
 async function verifyToken(env, token) {
@@ -111,6 +111,16 @@ async function discordDM(env, discordId, content) {
     const msg = await fetch(`https://discord.com/api/v10/channels/${id}/messages`, { method: 'POST', headers, body: JSON.stringify({ content }) });
     if (!msg.ok) throw new Error('envoi ' + msg.status);
   } catch (e) { console.warn(`MP Discord à ${discordId} impossible :`, e.message); }
+}
+// Profil Discord public (pseudo @, avatar) via le bot : sert à compléter les fiches clients
+async function discordUser(env, discordId) {
+  if (!env.DISCORD_BOT_TOKEN || !/^\d{17,20}$/.test(discordId)) return null;
+  try {
+    const r = await fetch(`https://discord.com/api/v10/users/${discordId}`, { headers: { Authorization: `Bot ${env.DISCORD_BOT_TOKEN}` } });
+    if (!r.ok) return null;
+    const u = await r.json();
+    return { username: u.username, name: u.global_name || u.username, avatar: u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128` : '' };
+  } catch (e) { return null; }
 }
 async function notifyAdmin(env, content) {
   if (!isHttps(env.DISCORD_ORDERS_WEBHOOK_URL)) return;
@@ -256,7 +266,7 @@ async function route(request, env, ctx) {
     const meRes = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${access_token}` } });
     if (!meRes.ok) return back('#login_error=1');
     const u = await meRes.json();
-    const user = { id: u.id, name: u.global_name || u.username, avatar: u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128` : '' };
+    const user = { id: u.id, name: u.global_name || u.username, username: u.username, avatar: u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128` : '' };
     // Le jeton passe dans le # de l'URL : il n'est jamais envoyé à un serveur.
     const p = new URLSearchParams({ token: await signToken(env, user), discord_id: user.id, discord_user: user.name, discord_avatar: user.avatar });
     return back('#' + p.toString());
@@ -280,7 +290,7 @@ async function route(request, env, ctx) {
     }));
     if (!items.length) throw new HttpError(400, 'Panier vide.');
     const order = {
-      id: newId(), customerName: user.name, discordId: user.id, items,
+      id: newId(), customerName: user.name, discordId: user.id, discordUsername: user.username || undefined, avatar: user.avatar || undefined, items,
       total: items.reduce((s, it) => s + it.price, 0),
       currency: clampStr(b.currency || '€', 5), source: clampStr(b.source || 'site', 20),
       note: clampStr(b.note, 1000).trim() || undefined, // message du client (demande de devis)
@@ -292,7 +302,7 @@ async function route(request, env, ctx) {
       ctx.waitUntil(updateVal(env, 'promos', [], (list) => { const pr = list.find((x) => x.code === promoCode); if (pr) pr.uses = (pr.uses || 0) + 1; return list; }).catch(() => {}));
     }
     await updateVal(env, 'orders', [], (orders) => { orders.unshift(order); return orders; });
-    ctx.waitUntil(notifyAdmin(env, `🛒 Nouvelle commande de **${order.customerName}** (<@${order.discordId}>) — ${order.total} ${order.currency}\n` + items.map((it) => `• ${it.title} — ${it.price}`).join('\n') + (order.note ? `\n> ${order.note.slice(0, 500)}` : '')));
+    ctx.waitUntil(notifyAdmin(env, `🛒 Nouvelle commande de **${order.customerName}**${order.discordUsername ? ` (@${order.discordUsername})` : ''} — <@${order.discordId}> — ${order.total} ${order.currency}\n` + items.map((it) => `• ${it.title} — ${it.price}`).join('\n') + (order.note ? `\n> ${order.note.slice(0, 500)}` : '')));
     return json({ ok: true, id: order.id });
   }
 
@@ -307,7 +317,21 @@ async function route(request, env, ctx) {
   if (path === '/api/admin/orders' && method === 'GET') {
     const user = await auth(env, request); adminOnly(user);
     await ensureImported(env);
-    return json((await getVal(env, 'orders', [])).map(publicOrder));
+    let orders = await getVal(env, 'orders', []);
+    // Complète les fiches sans pseudo Discord (anciennes commandes) grâce au bot, puis les garde en base
+    const missing = [...new Set(orders.filter((o) => !o.discordUsername && o.discordId).map((o) => o.discordId))].slice(0, 15);
+    if (missing.length) {
+      const found = Object.fromEntries((await Promise.all(missing.map(async (id) => [id, await discordUser(env, id)]))).filter(([, u]) => u));
+      if (Object.keys(found).length) {
+        orders = await updateVal(env, 'orders', [], (list) => {
+          for (const o of list) { const u = found[o.discordId]; if (u && !o.discordUsername) { o.discordUsername = u.username; if (!o.avatar) o.avatar = u.avatar; } }
+          return list;
+        });
+      }
+    }
+    // nombre de commandes par client, pour repérer les habitués
+    const count = {}; for (const o of orders) count[o.discordId] = (count[o.discordId] || 0) + 1;
+    return json(orders.map((o) => ({ ...publicOrder(o), clientOrders: count[o.discordId] || 1 })));
   }
 
   // Commande créée par l'admin pour un client (ex. demande reçue en MP Discord)
@@ -326,8 +350,9 @@ async function route(request, env, ctx) {
     })).filter((it) => it.title);
     if (!items.length) throw new HttpError(400, 'Ajoute au moins un article.');
     const status = ORDER_STATUSES.includes(b.status) ? b.status : 'Confirmée';
+    const prof = await discordUser(env, discordId);
     const order = {
-      id: newId(), customerName, discordId, items,
+      id: newId(), customerName, discordId, discordUsername: prof ? prof.username : undefined, avatar: prof ? prof.avatar || undefined : undefined, items,
       total: items.reduce((s, it) => s + it.price, 0),
       currency: b.currency === 'R$' ? 'R$' : '€', source: 'admin',
       note: clampStr(b.note, 1000).trim() || undefined,

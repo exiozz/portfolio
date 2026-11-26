@@ -403,6 +403,46 @@
     b.disabled = false;
   });
 
+  /* Fiche commande complète : qui est le client, comment le joindre, ce qu'il a pris */
+  const SRC = { shop: "Shop", index: "Portfolio", admin: "Created by you", site: "Website", quote: "Quote form" };
+  const ago = ts => { const m = Math.round((Date.now() - ts) / 6e4); return m < 1 ? "just now" : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
+  function orderCard(o) {
+    const id = esc(o.discordId || ""), uname = o.discordUsername ? esc(o.discordUsername) : "";
+    const initial = esc((o.customerName || "?").trim().charAt(0).toUpperCase());
+    const items = (o.items || []).map(i => `<li><span>${esc(i.title)}${i.offer === "pass" ? " <em>· pass</em>" : ""}${i.type && i.type !== "asset" ? ` <em>· ${esc(i.type)}</em>` : ""}</span><b>${X.money(i.price || 0, curOf(o))}</b></li>`).join("");
+    const files = (o.files || []).length ? `<div class="ao-meta"><i data-lucide="paperclip"></i>${o.files.length} file${o.files.length > 1 ? "s" : ""} delivered</div>` : "";
+    return `<article class="ao">
+      <header class="ao-head">
+        ${o.avatar ? `<img class="ao-av" src="${esc(o.avatar)}" alt="" loading="lazy">` : `<span class="ao-av">${initial}</span>`}
+        <div class="ao-who">
+          <b>${esc(o.customerName || "?")}${o.clientOrders > 1 ? ` <span class="ao-badge">${o.clientOrders} orders</span>` : ""}</b>
+          <span>${uname ? `@${uname}` : "Discord username unknown"}</span>
+        </div>
+        <div class="ao-total">${X.money(o.total || 0, curOf(o))}</div>
+      </header>
+      <div class="ao-contact">
+        <a class="btn btn-w" href="https://discord.com/users/${id}" target="_blank" rel="noopener"><i data-lucide="message-circle"></i>Open on Discord</a>
+        ${uname ? `<button class="btn btn-o" data-acopy="${uname}" data-label="Username"><i data-lucide="at-sign"></i>Copy @</button>` : ""}
+        <button class="btn btn-o" data-acopy="${id}" data-label="Discord ID"><i data-lucide="copy"></i>Copy ID</button>
+      </div>
+      <ul class="ao-items">${items}</ul>
+      ${o.note ? `<blockquote class="ao-note">${esc(o.note)}</blockquote>` : ""}
+      <div class="ao-grid">
+        <div><span>Ordered</span><b>${fmtWhen(o.timestamp)}<br>${ago(o.timestamp)}</b></div>
+        <div><span>From</span><b>${esc(SRC[o.source] || o.source || "—")}</b></div>
+        <div><span>Pays in</span><b>${o.currency === "R$" ? "Robux" : "Euros"}</b></div>
+        <div><span>Promo</span><b>${o.promo ? esc(o.promo) : "—"}</b></div>
+        <div><span>Discord ID</span><b>${id || "—"}</b></div>
+        <div><span>Order</span><b>#${esc(String(o.id).slice(-6))}</b></div>
+      </div>
+      ${files}
+      <div class="ao-foot">
+        <select class="a-select" aria-label="Order status" id="st-${esc(o.id)}" data-status="${esc(o.id)}">${STATUSES.map(s => `<option value="${s}"${s === o.status ? " selected" : ""}>${stEn(s)}</option>`).join("")}</select>
+        <button class="c-rm" data-link="${esc(o.id)}" aria-label="Send a download link" title="Send a download link"><i data-lucide="link"></i></button>
+        <button class="c-rm" data-del="${esc(o.id)}" aria-label="Delete order" title="Delete order"><i data-lucide="trash-2"></i></button>
+      </div>
+    </article>`;
+  }
   /* Espace admin (réservé à ton compte Discord : le serveur le vérifie à chaque appel) */
   let adminTab = "orders", adminOrders = null;
   async function renderAdmin() {
@@ -419,13 +459,7 @@
         const pending = adminOrders.filter(o => o.status === "En attente de contact").length;
         const paid = adminOrders.filter(o => o.status === "Payée").reduce((s, o) => s + (o.currency === "R$" ? 0 : o.total || 0), 0);
         box.innerHTML = `<div class="a-stats"><div><b>${adminOrders.length}</b><span>Orders</span></div><div><b>${pending}</b><span>To contact</span></div><div><b>${X.money(Math.round(paid * 100) / 100)}</b><span>Paid (€)</span></div></div>` +
-          (adminOrders.length ? `<div class="a-table" role="table">${adminOrders.map(o => `<div class="a-row" role="row">
-            <div><b>${esc(o.customerName || "?")}</b><span>${fmtWhen(o.timestamp)}</span></div>
-            <div class="a-items">${(o.items || []).map(i => esc(i.title)).join(", ")}${o.note ? `<span title="${esc(o.note)}">“${esc(o.note)}”</span>` : ""}</div>
-            <div class="a-total">${X.money(o.total || 0, curOf(o))}</div>
-            <label class="sr" for="st-${esc(o.id)}">Status</label>
-            <select class="a-select" id="st-${esc(o.id)}" data-status="${esc(o.id)}">${STATUSES.map(s => `<option value="${s}"${s === o.status ? " selected" : ""}>${stEn(s)}</option>`).join("")}</select>
-            <div class="a-acts"><button class="c-rm" data-link="${esc(o.id)}" aria-label="Send a download link"><i data-lucide="link"></i></button><button class="c-rm" data-del="${esc(o.id)}" aria-label="Delete order"><i data-lucide="trash-2"></i></button></div></div>`).join("")}</div>`
+          (adminOrders.length ? `<div class="a-table">${adminOrders.map(orderCard).join("")}</div>`
             : `<div class="d-empty"><i data-lucide="inbox"></i><b>No orders yet</b><span>They show up here as soon as a client orders</span></div>`);
         icons();
       } catch (e) { errorBox(box, e.message); }
@@ -856,6 +890,8 @@
   });
   document.addEventListener("click", async e => {
     const at = e.target.closest("[data-atab]"); if (at) { adminTab = at.dataset.atab; renderAdmin(); return; }
+    const ac = e.target.closest("[data-acopy]");
+    if (ac) { try { await navigator.clipboard.writeText(ac.dataset.acopy); toast(`${ac.dataset.label} copied`); } catch (err) { toast(ac.dataset.acopy); } return; }
     const ash = e.target.closest("[data-ashot]");
     if (ash) {
       if (!confirm("Remove this screenshot? The rating stays.")) return;

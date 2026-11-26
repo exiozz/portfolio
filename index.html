@@ -100,7 +100,7 @@
   <div class="nav-in" id="nav-in">
     <a href="#home" class="brand"><b>exiozz</b>.dev</a>
     <nav class="links" aria-label="Sections">
-      <a href="#home" class="on">Home</a><a href="#about">About</a><a href="#portfolio">Portfolio</a><a href="#quote">Quote</a><a href="#world">World</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
+      <a href="#home" class="on">Home</a><a href="#about">About</a><a href="#portfolio">Portfolio</a><a href="#quote">Quote</a><a href="#world">World</a><a href="#community">Community</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
     </nav>
     <div class="nav-tools">
       <button class="icon-btn" id="theme-btn" aria-label="Switch theme"></button>
@@ -128,7 +128,7 @@
 <section class="hero" id="home">
   <div class="wrap">
     <div data-parallax=".12">
-      <div class="avail rv" data-avail><i></i><span data-avail-text>Available for work</span></div>
+      <div class="hero-pills"><div class="avail rv" data-avail><i></i><span data-avail-text>Available for work</span></div><div class="presence rv" data-presence hidden><i></i><span data-presence-text></span></div></div>
       <h1 class="big rv">Roblox<span>Developer</span></h1>
       <div class="typing rv" id="typing" aria-live="polite"></div>
       <p class="lead rv">I build custom games, systems, visuals and websites — a complete universe, not just a single piece.</p>
@@ -216,6 +216,7 @@
         <article class="pcard">
           <div class="pcard-img"><img src="img/bomb-duels.jpg" alt="Bomb Duels" loading="lazy"><span class="pc-live" data-proj-live="0" hidden></span></div>
           <div class="pcard-body"><h3>Bomb Duels</h3><p>Roblox arena game with a smooth movement system.</p>
+            <div class="react" data-react="bomb-duels"></div>
             <div class="pcard-foot"><span class="mono">Completed</span><button class="details" data-proj="0">Details <i data-lucide="arrow-right"></i></button></div></div>
         </article>
         <article class="pcard empty">
@@ -318,6 +319,48 @@
     <div class="globe-wrap rv">
       <canvas id="globe" aria-label="Interactive globe of Exiozz's projects and reviews" role="img"></canvas>
       <div class="globe-loading" id="globe-loading">Loading the globe…</div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="community">
+  <div class="wrap">
+    <div class="cm-top">
+      <div>
+        <div class="kicker rv">Community</div>
+        <h2 class="title rv" style="margin-top:16px">Your turn<br>to play</h2>
+        <p class="subtitle rv">Suggest what I should build next and vote for your favourites, or just leave a little message on the wall.</p>
+      </div>
+      <div class="a-tabs rv cm-tabs" role="tablist" aria-label="Community">
+        <button role="tab" aria-selected="true" data-cmtab="ideas"><i data-lucide="lightbulb"></i>Ideas wall</button>
+        <button role="tab" aria-selected="false" data-cmtab="guestbook"><i data-lucide="sticky-note"></i>Guestbook</button>
+      </div>
+    </div>
+
+    <div class="cm-panel" id="cm-ideas" role="tabpanel">
+      <div class="cm-grid">
+        <div class="cm-side"><div id="idea-form-wrap"></div><p class="d-note"><i data-lucide="info" style="width:14px;height:14px;flex:none;margin-top:2px"></i>The most voted ideas get built first. Planned and done ideas are marked by Exiozz.</p></div>
+        <div>
+          <div class="cm-bar"><div class="rv-sort" role="group" aria-label="Sort ideas" style="margin:0"><button type="button" aria-pressed="true" data-isort="top">Top</button><button type="button" aria-pressed="false" data-isort="new">Newest</button><button type="button" aria-pressed="false" data-isort="planned">Planned &amp; done</button></div><span class="mono cm-count" id="idea-count"></span></div>
+          <div class="idea-list" id="idea-list"><div class="cm-empty"><i data-lucide="loader"></i><span>Loading ideas…</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cm-panel" id="cm-guestbook" role="tabpanel" hidden>
+      <form class="gb-form" id="gb-form" novalidate>
+        <div class="gb-fields">
+          <label class="sr" for="gb-text">Your message</label>
+          <textarea id="gb-text" maxlength="140" placeholder="Say hi, share some love, or tell me what you're building…"></textarea>
+          <div class="gb-row" id="gb-name-wrap"><label class="sr" for="gb-name">Your name</label><input id="gb-name" maxlength="24" placeholder="Your name or Roblox username" autocomplete="nickname"></div>
+          <div class="gb-pick"><span class="qs-lbl">Emoji</span><div class="gb-emojis" id="gb-emojis" role="radiogroup" aria-label="Emoji"></div></div>
+          <div class="gb-pick"><span class="qs-lbl">Color</span><div class="gb-colors" id="gb-colors" role="radiogroup" aria-label="Note color"></div></div>
+          <div class="gb-foot"><span class="cm-hint" id="gb-as"></span><span class="cm-hint" id="gb-left">140</span><button class="btn btn-w"><i data-lucide="pin"></i>Pin it</button></div>
+        </div>
+        <div class="gb-side" aria-hidden="true"><span class="qs-lbl">Preview</span><figure class="note gb-prev c-sun" id="gb-preview"><span class="note-pin"></span><span class="note-e" id="gb-prev-e">👋</span><blockquote id="gb-prev-t">Your message…</blockquote><figcaption><b id="gb-prev-n">Visitor</b><span>just now</span></figcaption></figure></div>
+      </form>
+      <div class="cm-bar" style="margin-top:28px"><b class="cm-wall-t">The wall</b><span class="mono cm-count" id="gb-count"></span></div>
+      <div class="gb-wall" id="gb-wall"><div class="cm-empty"><i data-lucide="loader"></i><span>Loading the wall…</span></div></div>
     </div>
   </div>
 </section>
@@ -429,6 +472,7 @@
 <script src="advent.js"></script>
 <script src="ui.js"></script>
 <script src="extras.js"></script>
+<script src="community.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script src="globe.js"></script>

@@ -25,7 +25,7 @@
   <div class="nav-in" id="nav-in">
     <a href="#home" class="brand"><b>exiozz</b>.dev</a>
     <nav class="links" aria-label="Sections">
-      <a href="#home" class="on">Home</a><a href="#about">About</a><a href="#portfolio">Portfolio</a><a href="#world">World</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
+      <a href="#home" class="on">Home</a><a href="#about">About</a><a href="#portfolio">Portfolio</a><a href="#quote">Quote</a><a href="#world">World</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
     </nav>
     <div class="nav-tools">
       <button class="icon-btn" id="theme-btn" aria-label="Switch theme"></button>
@@ -53,7 +53,7 @@
 <section class="hero" id="home">
   <div class="wrap">
     <div>
-      <div class="avail rv"><i></i>Available for work</div>
+      <div class="avail rv" data-avail><i></i><span data-avail-text>Available for work</span></div>
       <h2 class="big rv">Roblox<span>Developer</span></h2>
       <div class="typing rv" id="typing" aria-live="polite"></div>
       <p class="lead rv">I build custom games, systems, visuals and websites — a complete universe, not just a single piece.</p>
@@ -125,7 +125,7 @@
     <div class="panel" id="p-projects" role="tabpanel">
       <div class="proj-grid">
         <article class="pcard">
-          <div class="pcard-img"><img src="img/bomb-duels.jpg" alt="Bomb Duels" loading="lazy"></div>
+          <div class="pcard-img"><img src="img/bomb-duels.jpg" alt="Bomb Duels" loading="lazy"><span class="pc-live" data-proj-live="0" hidden></span></div>
           <div class="pcard-body"><h3>Bomb Duels</h3><p>Roblox arena game with a smooth movement system.</p>
             <div class="pcard-foot"><span class="mono">Completed</span><button class="details" data-proj="0">Details <i data-lucide="arrow-right"></i></button></div></div>
         </article>
@@ -168,6 +168,41 @@
   </div>
 </section>
 
+<section class="sec" id="quote">
+  <div class="wrap">
+    <div class="center">
+      <div class="kicker rv">Quote simulator</div>
+      <h2 class="title rv" style="margin-top:16px">How much for<br>your project?</h2>
+      <p class="subtitle rv">Pick what you need and get a price range right away. The final price is confirmed together.</p>
+    </div>
+    <div class="qs rv" id="qs">
+      <div class="qs-form">
+        <div class="qs-step"><span class="qs-n">01</span><div><b>What do you need?</b>
+          <div class="cats qs-cats" id="qs-cats" role="group" aria-label="Category"></div>
+          <div class="qs-svcs" id="qs-svcs" role="radiogroup" aria-label="Service"></div></div></div>
+        <div class="qs-step"><span class="qs-n">02</span><div><b>How big is it?</b>
+          <div class="qs-seg" id="qs-size" role="radiogroup" aria-label="Size"></div></div></div>
+        <div class="qs-step"><span class="qs-n">03</span><div><b>Extras</b>
+          <div class="qs-extras" id="qs-extras"></div></div></div>
+        <div class="qs-step"><span class="qs-n">04</span><div><b>When do you need it?</b>
+          <div class="qs-seg" id="qs-time" role="radiogroup" aria-label="Deadline"></div></div></div>
+        <div class="qs-step"><span class="qs-n">05</span><div><b>Tell me more <small>optional</small></b>
+          <label class="field plain" style="margin:12px 0 0"><span class="sr">Your project in a few words</span><textarea id="qs-msg" maxlength="900" placeholder="Your idea in a few words: game genre, references, links…" style="min-height:84px"></textarea></label></div></div>
+      </div>
+      <aside class="qs-res" aria-live="polite">
+        <span class="kicker">Estimated price</span>
+        <div class="qs-price" id="qs-price"></div>
+        <div class="qs-rbx" id="qs-rbx"></div>
+        <div class="qs-meta"><div><i data-lucide="clock"></i><span id="qs-days"></span></div><div class="avail" data-avail style="margin:0"><i></i><span data-avail-text>Taking new projects</span></div></div>
+        <ul class="qs-sum" id="qs-sum"></ul>
+        <button class="btn btn-w wide" id="qs-send"><i data-lucide="send"></i>Send this request</button>
+        <div class="qs-alt"><button class="btn btn-o" id="qs-copy" type="button"><i data-lucide="copy"></i>Copy for Discord</button><a class="btn btn-o" id="qs-mail" href="#"><i data-lucide="mail"></i>Email</a></div>
+        <p class="d-note"><i data-lucide="info" style="width:14px;height:14px;flex:none;margin-top:2px"></i>An estimate, not a final price. Sending it creates a request in “My orders”, then I contact you on Discord.</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
 <section class="sec" id="world">
   <div class="wrap globe-grid">
     <div>
@@ -198,6 +233,7 @@
         <div><b>Another question?</b><span>Message me directly, I'll answer on Discord or by email.</span></div>
         <div class="btns" style="margin-top:4px">
           <a class="btn btn-w" href="https://discord.gg/rGcdngHsCe"><i data-lucide="message-circle"></i>Discord</a>
+          <button class="btn btn-o copy-btn" type="button" data-copy-discord><i class="copy-ic" data-lucide="copy"></i><i class="copy-ok" data-lucide="check"></i><b style="font-weight:500">Copy @zo7q</b></button>
           <a class="btn btn-o" href="mailto:tomokari.pro@gmail.com"><i data-lucide="mail"></i>Email</a>
         </div>
       </div>
@@ -231,6 +267,7 @@
           <span class="mono">Find me</span>
           <div class="socials">
             <a class="social" href="https://discord.gg/rGcdngHsCe"><i data-lucide="message-circle"></i><div><b>Discord</b><span class="live"><span><span data-discord="members">124</span> members</span> <span><span data-discord="online">38</span> online</span></span></div></a>
+            <button class="social copy-btn full" type="button" data-copy-discord aria-label="Copy my Discord username zo7q"><i class="copy-ic" data-lucide="copy"></i><i class="copy-ok" data-lucide="check"></i><div style="text-align:left"><b>Copy my Discord username</b><span data-handle>@zo7q</span></div></button>
             <a class="social" href="https://www.roblox.com/users/1675753236/profile"><i data-lucide="gamepad-2"></i><div><b>Roblox</b><span>@Noah_646467</span></div></a>
             <a class="social" href="mailto:tomokari.pro@gmail.com"><i data-lucide="mail"></i><div><b>Email</b><span>Write to me</span></div></a>
             <a class="social" href="shop.html"><i data-lucide="shopping-bag"></i><div><b>Shop</b><span>My assets</span></div></a>
@@ -273,6 +310,7 @@
 
 <script src="promo.js"></script>
 <script src="ui.js"></script>
+<script src="extras.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script src="globe.js"></script>
@@ -483,15 +521,35 @@
   });
 
   /* Projets : fenêtre de détails */
+  // universeId : l'identifiant Roblox du jeu, pour afficher joueurs et visites en direct (null = rien n'est affiché)
+  const BOMB_DUELS_UNIVERSE = null;
   const projects = [
-    { t: "Bomb Duels", img: "img/bomb-duels.jpg", d: "Roblox arena game with a smooth movement system, built for fast-paced duels.", tech: ["Lua", "Movement system", "Arena"] }
+    { t: "Bomb Duels", img: "img/bomb-duels.jpg", d: "Roblox arena game with a smooth movement system, built for fast-paced duels.", tech: ["Lua", "Movement system", "Arena"], universeId: BOMB_DUELS_UNIVERSE }
   ];
+  // Joueurs et visites en direct sur les cartes projets
+  const liveCards = {};
+  async function liveProjects() {
+    const ids = projects.map((p, i) => [p.universeId, i]).filter(([u]) => u);
+    if (!ids.length) return;
+    try {
+      const d = (await (await fetch(`https://games.roproxy.com/v1/games?universeIds=${ids.map(([u]) => u).join(",")}`)).json()).data || [];
+      d.forEach(g => {
+        const hit = ids.find(([u]) => u === g.id); if (!hit) return;
+        liveCards[hit[1]] = g;
+        const el = $(`[data-proj-live="${hit[1]}"]`);
+        if (el) { el.hidden = false; el.innerHTML = `<span class="live">${fmtN(g.playing)} playing</span><span>${fmtN(g.visits)} visits</span>`; }
+      });
+    } catch (e) { /* miroir indisponible */ }
+  }
+  liveProjects(); setInterval(liveProjects, 60000);
   const modal = $("#modal");
   document.addEventListener("click", e => {
     const b = e.target.closest("[data-proj]"); if (!b) return;
     const p = projects[+b.dataset.proj];
     $("#modal-in").className = "modal-in";
+    const g = liveCards[+b.dataset.proj];
     $("#modal-in").innerHTML = `<img src="${p.img}" alt="${p.t}"><div><span class="kicker">Project · Completed</span><h3>${p.t}</h3><p>${p.d}</p>
+      ${g ? `<div class="a-stats" style="margin-bottom:20px"><div><b>${fmtN(g.playing)}</b><span>Playing now</span></div><div><b>${fmtN(g.visits)}</b><span>Visits</span></div><div><b>${fmtN(g.favoritedCount || 0)}</b><span>Favourites</span></div></div>` : ""}
       <div class="kicker" style="margin-bottom:12px">Technologies</div><div class="tags">${p.tech.map(x => `<span class="tag">${x}</span>`).join("")}</div>
       <a href="#contact" class="btn btn-w" id="modal-cta">Similar project? Contact me</a></div>`;
     modal.classList.add("open"); icons();
@@ -521,7 +579,7 @@
       <h3>${n}</h3><p>${d}</p><span class="from">Starting at</span>
       <div class="price">${X.priceHTML(eur, cur)}</div><span class="note">${note}</span>
       <ul>${feats.map(f => `<li><i data-lucide="check"></i>${f}</li>`).join("")}</ul>
-      <div class="plan-btns"><a class="btn btn-w" href="mailto:tomokari.pro@gmail.com?subject=${encodeURIComponent("Quote - " + n)}">Request a quote</a><button class="btn btn-o" data-svc="${n}|${eur}" aria-label="Add ${n} to cart"><i data-lucide="shopping-cart"></i></button></div>
+      <div class="plan-btns"><a class="btn btn-w" href="mailto:tomokari.pro@gmail.com?subject=${encodeURIComponent("Quote - " + n)}">Request a quote</a><a class="btn btn-o" href="#quote" data-quote="${cat}:${plans[cat].findIndex(x => x[0] === n)}" aria-label="Estimate ${n}"><i data-lucide="calculator"></i></a><button class="btn btn-o" data-svc="${n}|${eur}" aria-label="Add ${n} to cart"><i data-lucide="shopping-cart"></i></button></div>
     </article>`).join("");
     icons();
   };
@@ -714,7 +772,7 @@
   /* Globe : deux catégories, Projets et Avis */
   const PROJECTS = [
     { name: "Exiozz · base", place: "France", lat: 46.6, lon: 2.4, desc: "Where everything is built: scripts, builds, GFX, websites and Discord bots.", tags: ["Roblox", "Web", "GFX", "Discord"] },
-    { name: "Bomb Duels", place: "Roblox arena game", at: 0, desc: "Roblox arena game with a smooth movement system.", tags: ["Lua", "Movement system", "Arena"] }
+    { name: "Bomb Duels", place: "Roblox arena game", at: 0, desc: "Roblox arena game with a smooth movement system.", tags: ["Lua", "Movement system", "Arena"], universeId: BOMB_DUELS_UNIVERSE }
     // Ajoute tes clients : { name: "Client project", place: "Montreal, Canada", lat: 45.5, lon: -73.57, desc: "…", tags: ["Lua"], universeId: 1234567890 },
   ];
   let worldMode = "projects", globe = null, list = [], markers = [];
@@ -801,6 +859,89 @@
     X.Cart.add({ id, name, eur: +eur, kind: "service" });
     toast(`${name} added to cart`);
   });
+
+  /* Simulateur de devis : une fourchette de prix tout de suite, envoyée en demande sur le serveur */
+  const SIZES = [["small", "Small", "A simple version", 1], ["medium", "Medium", "The usual scope", 1.8], ["large", "Large", "Big and detailed", 3]];
+  const TIMES = [["flex", "Flexible", "No rush · −10%", .9, 1.4], ["std", "Standard", "Usual timeline", 1, 1], ["fast", "Fast", "+30%", 1.3, .7], ["rush", "Rush", "ASAP · +60%", 1.6, .5]];
+  const EXTRAS = [["polish", "UI & visual polish", "+25%", { pct: 25 }], ["rev", "Extra revisions", "+15%", { pct: 15 }], ["support", "30-day support", "+€10", { add: 10 }], ["doc", "Setup guide & docs", "+€5", { add: 5 }]];
+  const qs = { cat: "roblox", svc: 0, size: "medium", time: "std", extras: new Set() };
+  const round5 = n => Math.max(5, Math.round(n / 5) * 5);
+  const quote = () => {
+    const [name, , base] = plans[qs.cat][qs.svc];
+    const size = SIZES.find(x => x[0] === qs.size), time = TIMES.find(x => x[0] === qs.time);
+    let pct = 0, add = 0; qs.extras.forEach(k => { const e = EXTRAS.find(x => x[0] === k)[3]; pct += e.pct || 0; add += e.add || 0; });
+    const est = (base * size[3] * (1 + pct / 100) + add) * time[3];
+    const low = Math.max(base, round5(est * .9)), high = Math.max(low + 5, round5(est * 1.25));
+    const d = Math.max(1, Math.ceil(base * size[3] / 10 * time[4]));
+    const days = [d, Math.ceil(d * 1.6)];
+    const dur = days[1] > 14 ? `About ${Math.round(days[0] / 7) || 1}–${Math.ceil(days[1] / 7)} weeks` : days[1] <= 1 ? "About 1 day" : `About ${days[0]}–${days[1]} days`;
+    const cat = cats.find(c => c[0] === qs.cat)[1];
+    const extras = [...qs.extras].map(k => EXTRAS.find(x => x[0] === k)[1]);
+    return { name, cat, low, high, dur, size: size[1], time: time[1], extras };
+  };
+  const summary = q => `Quote request · ${q.cat} — ${q.name}\nSize: ${q.size} · Deadline: ${q.time}${q.extras.length ? "\nExtras: " + q.extras.join(", ") : ""}\nEstimate: €${q.low}–€${q.high} (${q.dur.toLowerCase()})${$("#qs-msg").value.trim() ? "\n\n" + $("#qs-msg").value.trim() : ""}`;
+  let shownLow = 0, shownHigh = 0;
+  const countTo = (lo, hi) => {
+    const el = $("#qs-price"), from = [shownLow, shownHigh], t0 = performance.now(), dur = reduce || !shownHigh ? 0 : 450;
+    const tick = now => {
+      const k = dur ? Math.min(1, (now - t0) / dur) : 1, e = 1 - Math.pow(1 - k, 3);
+      const a = Math.round(from[0] + (lo - from[0]) * e), b = Math.round(from[1] + (hi - from[1]) * e);
+      el.innerHTML = `<b>${X.money(a)}</b><span>–</span><b>${X.money(b)}</b>`;
+      if (k < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick); shownLow = lo; shownHigh = hi;
+  };
+  const renderQuote = () => {
+    $("#qs-cats").innerHTML = cats.map(([id, l]) => `<button type="button" aria-pressed="${id === qs.cat}" data-qcat="${id}">${l}</button>`).join("");
+    $("#qs-svcs").innerHTML = plans[qs.cat].map(([n, d, eur], i) => `<button type="button" class="qs-svc" role="radio" aria-checked="${i === qs.svc}" data-qsvc="${i}"><span class="radio"></span><span><b>${n}</b><small>${d}</small></span><span class="mono">from ${X.money(eur)}</span></button>`).join("");
+    $("#qs-size").innerHTML = SIZES.map(([k, l, h]) => `<button type="button" role="radio" aria-checked="${k === qs.size}" data-qsize="${k}"><b>${l}</b><small>${h}</small></button>`).join("");
+    $("#qs-time").innerHTML = TIMES.map(([k, l, h]) => `<button type="button" role="radio" aria-checked="${k === qs.time}" data-qtime="${k}"><b>${l}</b><small>${h}</small></button>`).join("");
+    $("#qs-extras").innerHTML = EXTRAS.map(([k, l, h]) => `<label class="qs-x"><input type="checkbox" data-qx="${k}"${qs.extras.has(k) ? " checked" : ""}><span class="qs-box"><i data-lucide="check"></i></span><span>${l}</span><small>${h}</small></label>`).join("");
+    paintQuote(); icons();
+  };
+  const paintQuote = () => {
+    const q = quote();
+    countTo(q.low, q.high);
+    $("#qs-rbx").textContent = `≈ R$ ${fmtN(X.inCur(q.low, "rbx"))} – ${fmtN(X.inCur(q.high, "rbx"))}`;
+    $("#qs-days").textContent = q.dur;
+    $("#qs-sum").innerHTML = [["Service", `${q.cat} · ${q.name}`], ["Size", q.size], ["Deadline", q.time], ["Extras", q.extras.join(", ") || "None"]].map(([k, v]) => `<li><span>${k}</span><b>${esc(v)}</b></li>`).join("");
+    $("#qs-mail").href = `mailto:tomokari.pro@gmail.com?subject=${encodeURIComponent("Quote - " + q.name)}&body=${encodeURIComponent(summary(q))}`;
+  };
+  $("#qs").addEventListener("click", e => {
+    const c = e.target.closest("[data-qcat]"); if (c) { qs.cat = c.dataset.qcat; qs.svc = 0; renderQuote(); return; }
+    const sv = e.target.closest("[data-qsvc]"); if (sv) { qs.svc = +sv.dataset.qsvc; $$("[data-qsvc]").forEach(b => b.setAttribute("aria-checked", b === sv)); paintQuote(); }
+    const sz = e.target.closest("[data-qsize]"); if (sz) { qs.size = sz.dataset.qsize; $$("[data-qsize]").forEach(b => b.setAttribute("aria-checked", b === sz)); paintQuote(); }
+    const tm = e.target.closest("[data-qtime]"); if (tm) { qs.time = tm.dataset.qtime; $$("[data-qtime]").forEach(b => b.setAttribute("aria-checked", b === tm)); paintQuote(); }
+  });
+  $("#qs").addEventListener("change", e => { const x = e.target.closest("[data-qx]"); if (x) { x.checked ? qs.extras.add(x.dataset.qx) : qs.extras.delete(x.dataset.qx); paintQuote(); } });
+  $("#qs-msg").addEventListener("input", () => { clearTimeout(paintQuote.t); paintQuote.t = setTimeout(paintQuote, 300); });
+  $("#qs-copy").addEventListener("click", async e => {
+    const text = summary(quote());
+    try { await navigator.clipboard.writeText(text); toast("Copied · paste it in my Discord DMs (@zo7q)"); } catch (err) { toast("Couldn't copy, use Email instead"); }
+  });
+  $("#qs-send").addEventListener("click", async e => {
+    const A = UI.Account, q = quote(), btn = e.currentTarget;
+    if (!A.user) { toast("Sign in with Discord to send your request"); setTimeout(A.signIn, 900); return; }
+    btn.disabled = true;
+    try {
+      await A.api("/api/order", { method: "POST", body: JSON.stringify({
+        items: [{ title: `Quote · ${q.cat} — ${q.name} · ${q.size} · ${q.time}${q.extras.length ? " · " + q.extras.join(", ") : ""} (estimate €${q.low}–€${q.high})`, price: q.low, type: "quote" }],
+        currency: "€", source: "quote", note: $("#qs-msg").value.trim() }) });
+      toast("Request sent · I'll contact you on Discord"); $("#qs-msg").value = ""; UI.openOrders();
+    } catch (err) { toast(err.message); }
+    btn.disabled = false;
+  });
+  renderQuote();
+  document.addEventListener("click", e => { const b = e.target.closest("[data-quote]"); if (!b) return; const [c, i] = b.dataset.quote.split(":"); qs.cat = c; qs.svc = +i; renderQuote(); });
+
+  /* Barre de commande : questions, projets, packs, services */
+  UI.palette.add(() => [
+    ...faq.map(([c, q, a], i) => ({ g: "FAQ", label: q, hint: a, icon: "circle-help", run: () => { faqF = "all"; faqOpen = i; $$("#faq-filters [data-f]").forEach(x => x.setAttribute("aria-pressed", x.dataset.f === "all")); renderFaq(false); $("#faq").scrollIntoView({ behavior: "smooth" }); } })),
+    ...projects.map((p, i) => ({ g: "Projects", label: p.t, hint: p.d, img: p.img, k: p.tech.join(" "), run: () => { showTab("projects"); $(`[data-proj="${i}"]`).click(); } })),
+    ...packs.map((p, i) => ({ g: "Photos", label: p.name + " · photos", hint: p.desc, img: "img/" + p.imgs[0][0], run: () => { showTab("photos"); packIdx = i; renderPack(); $("#portfolio").scrollIntoView({ behavior: "smooth" }); } })),
+    { g: "Go to", label: "Quote simulator", hint: "Get a price range for your project", icon: "calculator", k: "price estimate devis cost", run: () => $("#quote").scrollIntoView({ behavior: "smooth" }), top: true },
+    ...Object.entries(plans).flatMap(([c, list]) => list.map(([n, d, eur], i) => ({ g: "Services", label: n, hint: `${cats.find(x => x[0] === c)[1]} · from ${X.money(eur)}`, icon: "receipt", k: d + " price pricing service", run: () => { qs.cat = c; qs.svc = i; renderQuote(); $("#quote").scrollIntoView({ behavior: "smooth" }); } })))
+  ]);
 
   icons();
 })();

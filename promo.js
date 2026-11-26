@@ -15,6 +15,14 @@
     banner: null
   };
   const ROBUX_PER_EURO = 80;
+  // Packs groupés : à partir de "min" assets dans le panier, chaque asset prend "pct" % de remise.
+  // Pas de cumul avec un code promo : le client a la plus grosse des deux remises. pct: 0 pour désactiver.
+  const BUNDLE = { min: 2, pct: 20 };
+
+  /* Champs facultatifs d'un asset :
+     video:   { src, poster } → vidéo de présentation dans la fiche
+     model:   "assets/.../modele.glb" → aperçu 3D qu'on fait tourner (exporte en .glb depuis Blender)
+     compare: { before, after, labels: ["Before", "After"] } → curseur avant / après */
 
   const PRODUCTS = [
     { id: "modern-school-ui", name: "UI Kit — Dark Modern", cat: "ui", catLabel: "UI Kits", eur: 5, rbx: 400, badge: "Best-seller", rank: 1, added: 1,
@@ -25,11 +33,11 @@
       cover: "img/hud.webp", gallery: [["img/hud.webp", "HUD & Quests — in game"]] },
     { id: "lava-mounts-pack", name: "Lava Mounts Pack", cat: "models", catLabel: "3D Models", eur: 25, rbx: 2000, badge: "New", rank: 3, added: 4,
       desc: "Rigged lava dragon and horse, summoning bell and fire portal — ready for Roblox.", tags: ["Mounts", "Rigged", "FBX"],
-      cover: "img/lava-cover.jpg",
+      cover: "img/lava-cover.jpg", video: { src: "assets/lava-mounts-pack/presentation.mp4", poster: "assets/lava-mounts-pack/presentation-poster.jpg" },
       gallery: [["img/dragon.webp", "Lava dragon"], ["img/dragon-profil.webp", "Lava dragon — side"], ["img/dragon-tete.webp", "Lava dragon — head"], ["img/cheval.webp", "Lava horse"], ["img/cheval-profil.webp", "Lava horse — side"], ["img/portail.webp", "Fire portal"], ["img/cloche.webp", "Summoning bell"]] },
     { id: "stylized-forest-pack", name: "Stylized Forest Pack", cat: "models", catLabel: "3D Models", eur: 15, rbx: 1200, badge: "New", rank: 4, added: 3,
       desc: "18 stylized nature assets: trees, bushes, rocks, mushrooms, flowers… ready for Roblox.", tags: ["Low Poly", "Nature", "FBX"],
-      cover: "img/forest.jpg",
+      cover: "img/forest.jpg", video: { src: "assets/forest-pack/presentation.mp4", poster: "assets/forest-pack/presentation-poster.jpg" },
       gallery: [["img/forest.jpg", "Forest Pack — full scene"]].concat(["Oak", "Oak — variant", "Autumn tree", "Birch", "Pine", "Pine — variant", "Bush", "Berry bush", "Stump", "Log", "Large rock", "Medium rock", "Small rock", "Red mushroom", "Brown mushrooms", "Flowers", "Grass", "Fern"].map((n, i) => [`img/forest-${String(i + 1).padStart(2, "0")}.webp`, n])) }
   ];
   const CATEGORIES = [["all", "All", "folder-open"], ["models", "3D Models", "box"], ["scripts", "Scripts", "terminal"], ["ui", "UI Kits", "pen-tool"], ["gfx", "GFX Packs", "palette"], ["templates", "Templates", "layout-grid"], ["audio", "Audio", "audio-lines"], ["discord", "Discord", "bot"]];
@@ -139,13 +147,24 @@
     add(x) { const it = toItem(x); if (it && !Cart.has(it.id)) { store.set("exiozz-cart", [...Cart.items(), it]); emit("cartchange"); } },
     remove(id) { store.set("exiozz-cart", Cart.items().filter(i => i.id !== id)); emit("cartchange"); },
     clear() { store.set("exiozz-cart", []); emit("cartchange"); },
+    // Remise d'un article : la plus grosse entre le code promo et le pack groupé (assets uniquement)
+    deal(item, list = Cart.items()) {
+      const promo = Promo.active(), assets = list.filter(i => i.kind === "asset").length;
+      const bundle = BUNDLE.pct > 0 && item.kind === "asset" && assets >= BUNDLE.min ? BUNDLE.pct : 0;
+      const pct = Math.max(promo ? promo.pct : 0, bundle);
+      return { pct, by: !pct ? null : bundle >= (promo ? promo.pct : 0) ? "bundle" : "promo" };
+    },
+    priceOf(item, list = Cart.items()) { const d = Cart.deal(item, list); return Math.round(item.eur * (100 - d.pct)) / 100; },
     totals(cur) {
       const list = Cart.items();
       const sub = list.reduce((s, p) => s + p.eur, 0);
-      const after = list.reduce((s, p) => s + Promo.price(p.eur), 0);
-      return { list, sub: inCur(sub, cur), discount: inCur(sub - after, cur), total: inCur(after, cur), subEur: sub, totalEur: after };
+      let after = 0, bundleOff = 0, promoOff = 0;
+      list.forEach(p => { const now = Cart.priceOf(p, list), d = Cart.deal(p, list); after += now; if (d.by === "bundle") bundleOff += p.eur - now; if (d.by === "promo") promoOff += p.eur - now; });
+      const assets = list.filter(i => i.kind === "asset").length;
+      return { list, sub: inCur(sub, cur), discount: inCur(sub - after, cur), total: inCur(after, cur), subEur: sub, totalEur: after,
+        bundleOff: inCur(bundleOff, cur), promoOff: inCur(promoOff, cur), bundleMissing: BUNDLE.pct > 0 && assets > 0 && assets < BUNDLE.min ? BUNDLE.min - assets : 0 };
     }
   };
 
-  window.Exiozz = { PRODUCTS, CATEGORIES, PROMO, Promo, Cart, money, inCur, priceHTML, mountBar, mountPromoForm };
+  window.Exiozz = { PRODUCTS, CATEGORIES, PROMO, BUNDLE, Promo, Cart, money, inCur, priceHTML, mountBar, mountPromoForm };
 })();

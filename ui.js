@@ -89,7 +89,7 @@
     if (typed === SECRET) { typed = ""; bricks(); }
   });
   function bricks() {
-    toast("Easter egg found · brick by brick");
+    toast("Easter egg found · now type “play”");
     if (reduce) return;
     const colors = ["#e5484d", "#f5a524", "#3e8ef7", "#2fbf71", "#f2f2f2", "#8f8f8f"];
     const layer = document.createElement("div");
@@ -166,6 +166,10 @@
   const thumb = i => i.img
     ? `<img src="${esc(i.img)}" alt="">`
     : `<span class="ci-svc"><i data-lucide="${i.kind === "service" ? "sparkles" : "box"}"></i></span>`;
+  const linePrice = (i, list) => {
+    const now = X.Cart.priceOf(i, list);
+    return now < i.eur ? `<span class="pr"><s>${X.money(i.eur)}</s><b>${X.money(now)}</b></span>` : `<span class="pr"><b>${X.money(i.eur)}</b></span>`;
+  };
   const renderCart = () => {
     const t = X.Cart.totals("eur"), n = t.list.length;
     $("#c-count").textContent = n ? n : "";
@@ -181,15 +185,18 @@
       foot.innerHTML = `<a class="btn btn-o wide" href="shop.html"><i data-lucide="shopping-bag"></i>Browse the shop</a>`;
       return;
     }
-    body.innerHTML = `<div class="c-items">${t.list.map((i, k) => `<article class="ci" style="--i:${k}">
+    const nudge = t.bundleMissing ? `<div class="c-bundle"><i data-lucide="gift"></i><span>Add <b>${t.bundleMissing} more asset${t.bundleMissing > 1 ? "s" : ""}</b> and get <b>−${X.BUNDLE.pct}%</b> on every asset</span><a href="shop.html#catalog">Shop</a></div>`
+      : t.bundleOff > 0 ? `<div class="c-bundle on"><i data-lucide="badge-check"></i><span>Bundle unlocked · <b>−${X.BUNDLE.pct}%</b> on every asset</span></div>` : "";
+    body.innerHTML = nudge + `<div class="c-items">${t.list.map((i, k) => `<article class="ci" style="--i:${k}">
         <div class="ci-img">${thumb(i)}</div>
-        <div class="ci-info"><span class="ci-kind">${i.kind === "service" ? "Service · starting price" : esc(i.cat || "Asset")}</span><b>${esc(i.name)}</b>${X.priceHTML(i.eur, "eur")}</div>
+        <div class="ci-info"><span class="ci-kind">${i.kind === "service" ? "Service · starting price" : esc(i.cat || "Asset")}</span><b>${esc(i.name)}</b>${linePrice(i, t.list)}</div>
         <button class="ci-rm" data-rm="${esc(i.id)}" aria-label="Remove ${esc(i.name)}"><i data-lucide="x"></i></button>
       </article>`).join("")}</div>`;
     foot.innerHTML = `<div id="cart-promo"></div>
       <div class="c-sum">
         <div><span>Subtotal · ${n} item${n > 1 ? "s" : ""}</span><span>${X.money(t.sub)}</span></div>
-        ${t.discount > 0 ? `<div class="disc"><span>Code ${esc(X.Promo.active().code)}</span><span>−${X.money(t.discount)}</span></div>` : ""}
+        ${t.bundleOff > 0 ? `<div class="disc"><span>Bundle · ${X.BUNDLE.min}+ assets −${X.BUNDLE.pct}%</span><span>−${X.money(t.bundleOff)}</span></div>` : ""}
+        ${t.promoOff > 0 ? `<div class="disc"><span>Code ${esc(X.Promo.active().code)}</span><span>−${X.money(t.promoOff)}</span></div>` : ""}
       </div>
       <button class="c-pay" id="checkout"><span>Checkout</span><b>${X.money(t.total)}</b><i data-lucide="arrow-right"></i></button>
       <p class="c-note"><i data-lucide="shield-check"></i>Pay with PayPal or Robux · services confirmed by quote</p>`;
@@ -254,6 +261,7 @@
       menu.innerHTML = `<div class="acc-head"><img src="${esc(avatarOf(user))}" alt=""><div><b>${esc(user.name)}</b><span>${isAdmin() ? "Admin" : "Signed in with Discord"}</span></div></div>
         <button role="menuitem" data-open-orders><i data-lucide="package"></i>My orders</button>
         <button role="menuitem" data-open-cart><i data-lucide="shopping-cart"></i>My cart</button>
+        <button role="menuitem" data-open-wish><i data-lucide="heart"></i>Wishlist</button>
         ${isAdmin() ? '<button role="menuitem" data-open-admin><i data-lucide="lock"></i>Admin area</button>' : ""}
         <button role="menuitem" data-signout><i data-lucide="log-out"></i>Sign out</button>`;
     } else {
@@ -289,7 +297,10 @@
     if (!t.list.length) return;
     btn.disabled = true;
     try {
-      const items = t.list.map(i => ({ title: i.name + (promo ? ` (code ${promo.code})` : ""), price: X.Promo.price(i.eur), productId: i.kind === "asset" ? i.id : undefined, type: i.kind === "service" ? "service" : "asset" }));
+      const items = t.list.map(i => {
+        const d = X.Cart.deal(i, t.list), tag = d.by === "bundle" ? ` (bundle −${d.pct}%)` : d.by === "promo" ? ` (code ${promo.code})` : "";
+        return { title: i.name + tag, price: X.Cart.priceOf(i, t.list), productId: i.kind === "asset" ? i.id : undefined, type: i.kind === "service" ? "service" : "asset" };
+      });
       const r = await api("/api/order", { method: "POST", body: JSON.stringify({ items, currency: "€", source: PAGE }) });
       X.Cart.clear();
       toast("Order sent · Exiozz will contact you on Discord");
@@ -297,6 +308,15 @@
       return r;
     } catch (e) { toast(e.message); btn.disabled = false; }
   }
+
+  /* Suivi de commande : Reçue → Confirmée → En construction → Livrée */
+  const STEPS = [["Received", "inbox"], ["Confirmed", "circle-check"], ["In progress", "hammer"], ["Delivered", "package-check"]];
+  const stepOf = o => ({ "En attente de contact": 0, "Confirmée": 1, "En construction": 2, "En pause": 2, "Payée": 3 }[o.status] ?? 0);
+  const timeline = o => {
+    if (o.status === "Annulée") return `<div class="o-line off"><i data-lucide="circle-x"></i>This order was cancelled</div>`;
+    const at = stepOf(o), paused = o.status === "En pause", end = at === STEPS.length - 1;
+    return `<ol class="o-steps" style="--at:${at}" aria-label="Order progress: ${esc(stEn(o.status))}">${STEPS.map(([l, ic], k) => `<li class="${k < at || end ? "done" : k === at ? (paused ? "now paused" : "now") : ""}"${k === at ? ' aria-current="step"' : ""}><span class="o-dot"><i data-lucide="${k < at || end ? "check" : k === at && paused ? "pause" : ic}"></i></span><small>${k === at && paused ? "Paused" : l}</small></li>`).join("")}</ol>`;
+  };
 
   /* Mes commandes */
   async function renderOrders() {
@@ -312,6 +332,7 @@
       body.innerHTML = list.length ? list.map(o => `<div class="o-card">
           <div class="o-top"><b>#${esc(String(o.id).slice(-6).toUpperCase())}</b><span class="st ${statusClass(o.status)}">${esc(stEn(o.status))}</span></div>
           <span class="o-date">${fmtWhen(o.timestamp)}</span>
+          ${timeline(o)}
           <ul>${(o.items || []).map(i => `<li><span>${esc(i.title)}</span><span>${X.money(i.price, curOf(o))}</span></li>`).join("")}</ul>
           ${filesHTML(o)}
           <div class="o-tot"><span>Total</span><b>${X.money(o.total || 0, curOf(o))}</b></div></div>`).join("")
@@ -334,7 +355,7 @@
     const body = adminD.querySelector(".drawer-body");
     adminD.querySelector(".drawer-foot").innerHTML = `<a class="btn btn-o wide" href="admin.html"><i data-lucide="folder-cog"></i>Full admin panel · files, asset library, new order</a>`;
     if (!isAdmin()) { body.innerHTML = `<div class="d-empty"><i data-lucide="lock"></i><b>Admin only</b><span>Sign in with the admin Discord account</span></div>`; icons(); return; }
-    const tabs = [["orders", "Orders"], ["promo", "Promo codes"], ["community", "Community"]];
+    const tabs = [["orders", "Orders"], ["avail", "Availability"], ["promo", "Promo codes"], ["community", "Community"]];
     const head = `<div class="a-tabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${k === adminTab}" data-atab="${k}">${l}</button>`).join("")}</div>`;
     if (adminTab === "orders") {
       body.innerHTML = head + `<div id="a-orders"></div>`; const box = $("#a-orders");
@@ -346,7 +367,7 @@
         box.innerHTML = `<div class="a-stats"><div><b>${adminOrders.length}</b><span>Orders</span></div><div><b>${pending}</b><span>To contact</span></div><div><b>${X.money(Math.round(paid * 100) / 100)}</b><span>Paid (€)</span></div></div>` +
           (adminOrders.length ? `<div class="a-table" role="table">${adminOrders.map(o => `<div class="a-row" role="row">
             <div><b>${esc(o.customerName || "?")}</b><span>${fmtWhen(o.timestamp)}</span></div>
-            <div class="a-items">${(o.items || []).map(i => esc(i.title)).join(", ")}</div>
+            <div class="a-items">${(o.items || []).map(i => esc(i.title)).join(", ")}${o.note ? `<span title="${esc(o.note)}">“${esc(o.note)}”</span>` : ""}</div>
             <div class="a-total">${X.money(o.total || 0, curOf(o))}</div>
             <label class="sr" for="st-${esc(o.id)}">Status</label>
             <select class="a-select" id="st-${esc(o.id)}" data-status="${esc(o.id)}">${STATUSES.map(s => `<option value="${s}"${s === o.status ? " selected" : ""}>${stEn(s)}</option>`).join("")}</select>
@@ -354,6 +375,18 @@
             : `<div class="d-empty"><i data-lucide="inbox"></i><b>No orders yet</b><span>They show up here as soon as a client orders</span></div>`);
         icons();
       } catch (e) { errorBox(box, e.message); }
+    } else if (adminTab === "avail") {
+      body.innerHTML = head + `<div id="a-avail"></div>`; const box = $("#a-avail");
+      loading(box);
+      let a = { slots: null, note: "" };
+      try { a = await api("/api/availability"); } catch (e) {}
+      box.innerHTML = `<form class="a-form" id="avail-form">
+          <p class="d-note" style="margin:0 0 16px">Shown on the homepage and the quote simulator, e.g. “2 slots left in ${new Date().toLocaleString("en-US", { month: "long" })}”. Leave empty to hide the number.</p>
+          <label class="a-lbl">Free slots this month<div class="a-step"><button type="button" data-slot="-1" aria-label="One less">−</button><input name="slots" type="number" min="0" max="99" inputmode="numeric" value="${a.slots ?? ""}" placeholder="—"><button type="button" data-slot="1" aria-label="One more">+</button></div></label>
+          <label class="a-lbl">Short note (optional)<input name="note" maxlength="140" value="${esc(a.note || "")}" placeholder="e.g. Back from holidays on the 5th"></label>
+          <button class="btn btn-w wide">Save availability</button>
+          ${a.updatedAt ? `<p class="d-note">Last updated ${fmtWhen(a.updatedAt)}</p>` : ""}
+        </form>`;
     } else if (adminTab === "promo") {
       const codes = Object.entries(X.PROMO.codes);
       body.innerHTML = head + (codes.length ? `<div class="a-list">${codes.map(([code, p]) => `<div class="a-item"><span class="pb-code">${esc(code)}</span><div><b>${esc(p.label)}</b><span>−${p.pct}%${p.until ? " · until " + esc(p.until) : ""}</span></div></div>`).join("")}</div>` : `<div class="d-empty"><i data-lucide="ticket"></i><b>No promo code active</b><span>Add one at the top of promo.js</span></div>`);
@@ -365,6 +398,18 @@
       fetch(API + "/api/reviews").then(r => r.json()).then(l => { const el = $("#a-rev"); if (el) el.textContent = l.length; }).catch(() => {});
     }
   }
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-slot]"); if (!b) return;
+    const inp = b.parentElement.querySelector("input"); inp.value = Math.max(0, Math.min(99, (+inp.value || 0) + +b.dataset.slot));
+  });
+  document.addEventListener("submit", async e => {
+    if (e.target.id !== "avail-form") return;
+    e.preventDefault();
+    const f = new FormData(e.target), btn = e.target.querySelector(".btn"); btn.disabled = true;
+    try { await api("/api/availability", { method: "POST", body: JSON.stringify({ slots: f.get("slots") === "" ? null : +f.get("slots"), note: f.get("note") }) }); toast("Availability saved"); emit("availchange"); }
+    catch (err) { toast(err.message); }
+    btn.disabled = false;
+  });
   document.addEventListener("change", async e => {
     const s = e.target.closest("[data-status]"); if (!s) return;
     s.disabled = true;
@@ -390,8 +435,57 @@
     }
   });
 
+  /* Liste d'envies : gardée dans le navigateur, et avec le compte Discord une fois connecté */
+  const WISH_KEY = "exiozz-wish";
+  const readWish = () => { try { const v = JSON.parse(localStorage.getItem(WISH_KEY) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
+  let wish = readWish();
+  const saveWish = (sync = true) => {
+    try { localStorage.setItem(WISH_KEY, JSON.stringify(wish)); } catch (e) {}
+    emit("wishchange"); paintWish();
+    if (sync && user) api("/api/wishlist", { method: "POST", body: JSON.stringify({ ids: wish }) }).catch(() => {});
+  };
+  const Wish = {
+    ids: () => wish.slice(),
+    has: id => wish.includes(id),
+    toggle(id) { const on = !wish.includes(id); wish = on ? [...wish, id] : wish.filter(x => x !== id); saveWish(); return on; }
+  };
+  // À la connexion : on fusionne la liste du navigateur et celle du compte
+  const pullWish = async () => {
+    if (!user) return;
+    try { const remote = await api("/api/wishlist"); const merged = [...new Set([...(Array.isArray(remote) ? remote : []), ...wish])]; const changed = merged.length !== (remote || []).length; wish = merged; saveWish(changed); } catch (e) {}
+  };
+  const paintWish = () => document.querySelectorAll("[data-wish-count]").forEach(el => { el.textContent = wish.length || ""; el.hidden = !wish.length; });
+  const wishD = makeDrawer("wish-drawer", "Wishlist");
+  const renderWish = () => {
+    const body = wishD.querySelector(".drawer-body"), foot = wishD.querySelector(".drawer-foot");
+    const list = wish.map(id => X.PRODUCTS.find(p => p.id === id)).filter(Boolean);
+    body.innerHTML = list.length ? `<div class="c-items">${list.map((p, k) => `<article class="ci" style="--i:${k}">
+        <div class="ci-img"><img src="${esc(p.cover)}" alt=""></div>
+        <div class="ci-info"><span class="ci-kind">${esc(p.catLabel)}</span><b>${esc(p.name)}</b>${X.priceHTML(p.eur, "eur")}</div>
+        <div class="w-acts"><button class="c-add" data-quick="${esc(p.id)}" aria-label="Add ${esc(p.name)} to cart"${X.Cart.has(p.id) ? " disabled" : ""}><i data-lucide="${X.Cart.has(p.id) ? "check" : "shopping-cart"}"></i></button><button class="ci-rm" data-unwish="${esc(p.id)}" aria-label="Remove ${esc(p.name)} from wishlist"><i data-lucide="x"></i></button></div>
+      </article>`).join("")}</div>`
+      : `<div class="d-empty"><i data-lucide="heart"></i><b>No favourites yet</b><span>Tap the heart on an asset to save it for later</span><a class="btn btn-w" href="shop.html#catalog">Browse the shop</a></div>`;
+    foot.innerHTML = list.length ? `<button class="btn btn-w wide" data-wish-all><i data-lucide="shopping-cart"></i>Add all to cart</button><p class="c-note">${user ? "Saved with your Discord account" : "Saved on this device · sign in to keep it everywhere"}</p>` : "";
+    icons();
+  };
+  document.addEventListener("click", e => {
+    const u = e.target.closest("[data-unwish]"); if (u) { Wish.toggle(u.dataset.unwish); return; }
+    if (e.target.closest("[data-wish-all]")) { wish.forEach(id => X.Cart.add(id)); toast("Added to cart"); open(cartD); return; }
+    const h = e.target.closest("[data-wish]");
+    if (h) {
+      const on = Wish.toggle(h.dataset.wish);
+      if (on && !reduce) h.animate([{ transform: "scale(1)" }, { transform: "scale(1.35)" }, { transform: "scale(1)" }], { duration: 380, easing: "cubic-bezier(.34, 1.56, .64, 1)" });
+      toast(on ? "Saved to your wishlist" : "Removed from your wishlist");
+    }
+    if (e.target.closest("[data-open-wish]")) open(wishD);
+  });
+  document.addEventListener("wishchange", () => { if (openD === wishD) renderWish(); });
+  document.addEventListener("cartchange", () => { if (openD === wishD) renderWish(); });
+  document.addEventListener("authchange", pullWish);
+  paintWish(); pullWish();
+
   const render = d => {
-    if (d === cartD) { renderCart(); icons(); } else if (d === ordersD) renderOrders(); else renderAdmin();
+    if (d === cartD) { renderCart(); icons(); } else if (d === ordersD) renderOrders(); else if (d === wishD) renderWish(); else renderAdmin();
   };
   const refresh = () => { if (openD === cartD) render(cartD); paintCount(); };
   const paintCount = () => document.querySelectorAll("[data-cart-count]").forEach(el => { const n = X.Cart.count(); el.textContent = n || ""; el.hidden = !n; });
@@ -410,6 +504,6 @@
   if (location.hash === "#admin") setTimeout(() => open(adminD), 300);
 
   /* Accès au compte pour la page (avis) */
-  const Account = { get user() { return user; }, isAdmin, signIn, api, API };
-  window.UI = { toast, bricks, openCart: () => open(cartD), Account };
+  const Account = { get user() { return user; }, isAdmin, signIn, signOut, api, API };
+  window.UI = { toast, bricks, icons, esc, openCart: () => open(cartD), openOrders: () => open(ordersD), openWish: () => open(wishD), openAdmin: () => open(adminD), setTheme: from => setTheme(root.dataset.theme === "light" ? "dark" : "light", from), Account, Wish };
 })();

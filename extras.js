@@ -299,6 +299,54 @@
     if (typed === "play") { typed = ""; Game.open(); }
   });
 
+  /* ---------- Quoi de neuf : journal des mises à jour, point rouge s'il y a du nouveau ----------
+     Ajoute une ligne EN HAUT de la liste à chaque nouveauté (id unique, date AAAA-MM-JJ). */
+  const CHANGELOG = [
+    { id: "advent-2026", date: "2026-11-26", tag: "Event", title: "Advent calendar", text: "A gift every day from December 1st to 24th: promo codes, wallpapers, dev tips and challenges.", href: "index.html#advent" },
+    { id: "badge-quiz", date: "2026-11-26", tag: "New", title: "Your avatar on the badge", text: "Type your Roblox username at the bottom of the home page, plus a 3-question quiz to find the right service.", href: "index.html#badge-me" },
+    { id: "quote-sim", date: "2026-11-26", tag: "New", title: "Quote simulator", text: "Get a price range for your project in a few clicks, then send it as a request.", href: "index.html#quote" },
+    { id: "shop-v3", date: "2026-11-26", tag: "Shop", title: "Wishlist, ratings and bundles", text: "Save assets with the heart, read buyer ratings, and get −20% when you take 2 assets or more.", href: "shop.html" },
+    { id: "brick-catch", date: "2026-11-26", tag: "Secret", title: "A hidden mini-game", text: "Type “play” anywhere on the site. Good luck with the bombs." },
+    { id: "site-en", date: "2026-11-25", tag: "Site", title: "Brand new site", text: "New design in English, light and dark theme, and a 3D globe of projects and reviews.", href: "index.html#world" },
+    { id: "hud-pack", date: "2026-11-24", tag: "Shop", title: "HUD & Quests Pack", text: "Compass, working minimap, quest tracker, notifications and health bars.", href: "shop.html?product=hud-quest-pack" },
+    { id: "lava-pack", date: "2026-11-12", tag: "Shop", title: "Lava Mounts Pack", text: "Rigged lava dragon and horse, summoning bell and fire portal.", href: "shop.html?product=lava-mounts-pack" },
+    { id: "forest-pack", date: "2026-11-12", tag: "Shop", title: "Stylized Forest Pack", text: "18 stylized nature assets, ready for Roblox.", href: "shop.html?product=stylized-forest-pack" }
+  ];
+  const SEEN_KEY = "exiozz-news-seen";
+  const seenId = () => { try { return localStorage.getItem(SEEN_KEY); } catch (e) { return null; } };
+  const unseen = () => { const s = seenId(), i = CHANGELOG.findIndex(c => c.id === s); return i < 0 ? CHANGELOG.length : i; };
+  const news = document.createElement("div");
+  news.className = "news"; news.id = "news"; news.hidden = true;
+  news.setAttribute("role", "dialog"); news.setAttribute("aria-label", "What's new");
+  document.body.appendChild(news);
+  const fmtDate = d => new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  let newsBtn = null;
+  const paintNewsBtn = () => { if (!newsBtn) return; const n = unseen(); newsBtn.classList.toggle("has-new", n > 0); newsBtn.setAttribute("aria-label", n ? `What's new: ${n} update${n > 1 ? "s" : ""} since your last visit` : "What's new"); };
+  const openNews = () => {
+    const n = unseen();
+    news.innerHTML = `<div class="news-head"><b>What's new</b><button class="drawer-x" data-news-close aria-label="Close"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+      <ol class="news-list">${CHANGELOG.map((c, i) => `<li class="${i < n ? "fresh" : ""}" style="--i:${i}">${c.href ? `<a href="${c.href}" data-news-go>` : "<div>"}
+        <span class="news-meta"><span class="news-tag">${esc(c.tag)}</span>${fmtDate(c.date)}${i < n ? '<span class="news-new">New</span>' : ""}</span>
+        <b>${esc(c.title)}</b><span>${esc(c.text)}</span>${c.href ? "</a>" : "</div>"}</li>`).join("")}</ol>`;
+    news.hidden = false; requestAnimationFrame(() => news.classList.add("open"));
+    try { localStorage.setItem(SEEN_KEY, CHANGELOG[0].id); } catch (e) {}
+    paintNewsBtn();
+  };
+  const closeNews = () => { news.classList.remove("open"); setTimeout(() => { if (!news.classList.contains("open")) news.hidden = true; }, 200); };
+  if (tools) {
+    newsBtn = document.createElement("button");
+    newsBtn.className = "icon-btn news-btn"; newsBtn.dataset.openNews = "";
+    newsBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="news-dot" aria-hidden="true"></span>`;
+    tools.insertBefore(newsBtn, tools.querySelector("#theme-btn"));
+    paintNewsBtn();
+  }
+  document.addEventListener("click", e => {
+    if (e.target.closest("[data-open-news]")) { e.stopPropagation(); news.classList.contains("open") ? closeNews() : openNews(); return; }
+    if (e.target.closest("[data-news-close]") || e.target.closest("[data-news-go]") || (!news.hidden && !e.target.closest("#news"))) closeNews();
+  });
+  addEventListener("keydown", e => { if (e.key === "Escape" && !news.hidden) closeNews(); });
+  providers.push(() => [{ g: "Actions", label: "What's new", hint: CHANGELOG[0].title, icon: "bell", k: "news updates changelog", run: openNews, top: true }]);
+
   window.UI.palette = { add: fn => providers.push(fn), open: openPal };
   window.UI.game = Game;
   window.UI.copyDiscord = copyDiscord;

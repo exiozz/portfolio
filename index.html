@@ -25,7 +25,7 @@
   <div class="nav-in" id="nav-in">
     <a href="#home" class="brand"><b>exiozz</b>.dev</a>
     <nav class="links" aria-label="Sections">
-      <a href="#home" class="on">Home</a><a href="#about">About</a><a href="#portfolio">Portfolio</a><a href="#quote">Quote</a><a href="#world">World</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
+      <a href="#home" class="on">Home</a><a href="#about">About</a><a href="#portfolio">Portfolio</a><a href="#making">Making</a><a href="#quote">Quote</a><a href="#world">World</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
     </nav>
     <div class="nav-tools">
       <button class="icon-btn" id="theme-btn" aria-label="Switch theme"></button>
@@ -100,10 +100,24 @@
       </a>
     </div>
     <div class="stats">
-      <a href="#portfolio" class="stat rv" data-tab="projects"><div class="stat-top"><span class="stat-ic"><i data-lucide="code-xml"></i></span><b>22+</b></div><div class="stat-bot"><span>Projects delivered</span><i data-lucide="arrow-up-right"></i></div></a>
-      <a href="#portfolio" class="stat rv" data-tab="stack"><div class="stat-top"><span class="stat-ic"><i data-lucide="award"></i></span><b>3+</b></div><div class="stat-bot"><span>Years of experience</span><i data-lucide="arrow-up-right"></i></div></a>
-      <a href="#contact" class="stat rv"><div class="stat-top"><span class="stat-ic"><i data-lucide="star"></i></span><b>5.0</b></div><div class="stat-bot"><span>10 client reviews</span><i data-lucide="arrow-up-right"></i></div></a>
+      <a href="#portfolio" class="stat rv" data-tab="projects"><div class="stat-top"><span class="stat-ic"><i data-lucide="code-xml"></i></span><b data-count="22" data-suffix="+">22+</b></div><div class="stat-bot"><span>Projects delivered</span><i data-lucide="arrow-up-right"></i></div></a>
+      <a href="#portfolio" class="stat rv" data-tab="stack"><div class="stat-top"><span class="stat-ic"><i data-lucide="award"></i></span><b data-count="3" data-suffix="+">3+</b></div><div class="stat-bot"><span>Years of experience</span><i data-lucide="arrow-up-right"></i></div></a>
+      <a href="#contact" class="stat rv"><div class="stat-top"><span class="stat-ic"><i data-lucide="star"></i></span><b data-count="5" data-dec="1" id="stat-avg">5.0</b></div><div class="stat-bot"><span id="stat-rev">10 client reviews</span><i data-lucide="arrow-up-right"></i></div></a>
     </div>
+  </div>
+</section>
+
+<section class="sec adv" id="advent" hidden>
+  <div class="wrap">
+    <div class="adv-top">
+      <div>
+        <div class="kicker rv">Advent calendar</div>
+        <h2 class="title rv" style="margin-top:16px">A gift<br>every day</h2>
+        <p class="subtitle rv">From December 1st to 24th, a new box opens at midnight: promo codes, wallpapers, Roblox dev tips and challenges. Come back every day.</p>
+      </div>
+      <div class="adv-xmas rv"><span class="kicker">Christmas in</span><b data-xmas>—</b></div>
+    </div>
+    <div class="adv-grid rv" data-advent-grid></div>
   </div>
 </section>
 
@@ -168,12 +182,28 @@
   </div>
 </section>
 
+<section class="sec" id="making">
+  <div class="wrap">
+    <div class="mk-top">
+      <div>
+        <div class="kicker rv">Behind the scenes</div>
+        <h2 class="title rv" style="margin-top:16px">From pieces<br>to a scene</h2>
+        <p class="subtitle rv">How a pack is made, step by step. Drag the slider to compare the separate assets with the finished scene.</p>
+      </div>
+      <div class="faq-filters rv" role="tablist" aria-label="Pack" id="mk-packs" style="margin:0"></div>
+    </div>
+    <div class="cmp mk-cmp rv" id="mk-cmp"></div>
+    <ol class="mk-steps" id="mk-steps"></ol>
+  </div>
+</section>
+
 <section class="sec" id="quote">
   <div class="wrap">
     <div class="center">
       <div class="kicker rv">Quote simulator</div>
       <h2 class="title rv" style="margin-top:16px">How much for<br>your project?</h2>
       <p class="subtitle rv">Pick what you need and get a price range right away. The final price is confirmed together.</p>
+      <button class="btn btn-o rv qz-open" type="button" data-quiz><i data-lucide="sparkles"></i>Not sure? Take the 3-question quiz</button>
     </div>
     <div class="qs rv" id="qs">
       <div class="qs-form">
@@ -297,6 +327,21 @@
 </section>
 </main>
 
+<section class="badge-me" id="badge-me" aria-labelledby="bm-title">
+  <div class="wrap">
+    <div class="bm-box">
+      <img class="bm-av" id="bm-av" src="img/avatar-bust.png" alt="">
+      <div class="bm-txt"><b id="bm-title">Put your avatar on the badge</b><span>Type your Roblox username and you're hanging at the top of the page. Share the link with your friends.</span></div>
+      <form class="bm-form" id="bm-form" novalidate>
+        <label class="sr" for="bm-in">Roblox username</label>
+        <input id="bm-in" name="u" placeholder="Roblox username" autocomplete="off" spellcheck="false" maxlength="20">
+        <button class="btn btn-w" id="bm-go"><i data-lucide="user-round"></i>Try it</button>
+      </form>
+      <div class="bm-acts" id="bm-acts" hidden><button class="btn btn-o" type="button" id="bm-share"><i data-lucide="link"></i>Copy link</button><button class="btn btn-o" type="button" id="bm-reset"><i data-lucide="rotate-ccw"></i>Reset</button></div>
+    </div>
+  </div>
+</section>
+
 <footer>
   <nav aria-label="Footer"><a href="shop.html">Shop</a><a href="https://exiozz.github.io/portfolio/mentions-legales.html">Legal notice</a><a href="https://exiozz.github.io/portfolio/cgu.html">Terms of use</a><a href="https://exiozz.github.io/portfolio/cgv.html">Terms of sale</a><a href="https://exiozz.github.io/portfolio/confidentialite.html">Privacy</a></nav>
   © 2026 Exiozz — All rights reserved.
@@ -307,8 +352,10 @@
   <div class="modal-in" id="modal-in"></div>
 </div>
 <div class="toast" id="toast" role="status"></div>
+<aside class="act" id="act" hidden aria-live="polite"></aside>
 
 <script src="promo.js"></script>
+<script src="advent.js"></script>
 <script src="ui.js"></script>
 <script src="extras.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
@@ -357,6 +404,8 @@
   const place = () => { anchor = { x: lan.clientWidth / 2, y: -260 }; pos = { x: anchor.x + 90, y: anchor.y + L + 20 }; vel = { x: 0, y: 0 }; };
   place();
   addEventListener("resize", place);
+  // Petit coup sur le badge (quand un visiteur y met son avatar)
+  const kickBadge = () => { if (reduce) return; vel.x += (Math.random() > .5 ? 1 : -1) * (700 + Math.random() * 300); vel.y -= 300; };
   const local = e => { const r = lan.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
   badge.addEventListener("pointerdown", e => {
     e.preventDefault();
@@ -741,6 +790,11 @@
       serverReviews = (Array.isArray(d) ? d : []).map(x => ({ n: x.name || "?", t: x.text || "", rating: +x.rating || 0, avatar: x.avatar || "", discordId: x.discordId, c: x.country || null, at: x.timestamp }));
     } catch (e) { /* serveur injoignable : on garde la liste vide */ }
     renderReviews(); if (worldMode === "reviews") renderWorld();
+    if (serverReviews.length) {
+      const avg = serverReviews.reduce((s, r) => s + r.rating, 0) / serverReviews.length;
+      $("#stat-avg").dataset.count = avg.toFixed(1); $("#stat-avg").textContent = avg.toFixed(1);
+      $("#stat-rev").textContent = `${serverReviews.length} client review${serverReviews.length === 1 ? "" : "s"}`;
+    }
   };
   // Formulaire : visible une fois connecté avec Discord
   let rating = 5;
@@ -942,6 +996,228 @@
     { g: "Go to", label: "Quote simulator", hint: "Get a price range for your project", icon: "calculator", k: "price estimate devis cost", run: () => $("#quote").scrollIntoView({ behavior: "smooth" }), top: true },
     ...Object.entries(plans).flatMap(([c, list]) => list.map(([n, d, eur], i) => ({ g: "Services", label: n, hint: `${cats.find(x => x[0] === c)[1]} · from ${X.money(eur)}`, icon: "receipt", k: d + " price pricing service", run: () => { qs.cat = c; qs.svc = i; renderQuote(); $("#quote").scrollIntoView({ behavior: "smooth" }); } })))
   ]);
+
+  /* Compteurs : les chiffres défilent quand on arrive dessus */
+  const countUp = el => {
+    const end = parseFloat(el.dataset.count), dec = +(el.dataset.dec || 0), suf = el.dataset.suffix || "";
+    if (reduce || !isFinite(end)) return;
+    const t0 = performance.now(), dur = 1400;
+    const tick = now => { const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 4); el.textContent = (end * e).toFixed(dec) + (k === 1 ? suf : ""); if (k < 1) requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+  };
+  const cIO = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { cIO.unobserve(e.target); countUp(e.target); } }), { threshold: .6 });
+  $$("[data-count]").forEach(el => cIO.observe(el));
+
+  /* Activité en direct : vraies commandes et vrais avis des 30 derniers jours, sans aucun nom */
+  const ago = ts => { const m = Math.round((Date.now() - ts) / 6e4); return m < 2 ? "just now" : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} day${Math.round(m / 1440) > 1 ? "s" : ""} ago`; };
+  const actText = ev => {
+    const prod = ev.productId && X.PRODUCTS.find(p => p.id === ev.productId), c = ev.country && countryOf(ev.country);
+    if (ev.kind === "order") return { icon: "shopping-bag", html: `Someone ordered <b>${esc(ev.title)}</b>${ev.more > 0 ? ` + ${ev.more} more` : ""}`, href: "shop.html" };
+    if (ev.kind === "quote") return { icon: "calculator", html: `Someone just requested a <b>quote</b>`, href: "#quote" };
+    if (ev.kind === "review") return { icon: "star", html: `New <b>${"★".repeat(ev.rating)}</b> review${c ? ` from <b>${esc(c[1])}</b>` : ""}`, href: "#contact" };
+    if (ev.kind === "rating" && prod) return { icon: "badge-check", html: `<b>${esc(prod.name)}</b> got a ${ev.rating}★ buyer rating`, href: "shop.html?product=" + prod.id };
+    return null;
+  };
+  (async () => {
+    let stop = false; try { stop = sessionStorage.getItem("exiozz-act-off") === "1"; } catch (e) {}
+    if (stop) return;
+    let events = [];
+    try { const r = await fetch(UI.Account.API + "/api/activity"); if (r.ok) events = (await r.json()).map(ev => ({ ev, t: actText(ev) })).filter(x => x.t); } catch (e) {}
+    if (!events.length) return;
+    const box = $("#act"); let i = 0, shown = 0, timer = null;
+    const hide = () => { box.classList.remove("open"); setTimeout(() => { if (!box.classList.contains("open")) box.hidden = true; }, 400); };
+    const show = () => {
+      if (document.hidden || shown >= 6 || document.querySelector(".drawer.open, .modal.open, .cmdk.open, .game.open")) { timer = setTimeout(show, 8000); return; }
+      const { ev, t } = events[i++ % events.length]; shown++;
+      box.innerHTML = `<a class="act-in" href="${t.href}"><span class="act-ic"><i data-lucide="${t.icon}"></i></span><span class="act-t"><span>${t.html}</span><small><span class="live">${ago(ev.ts)}</span></small></span></a><button class="act-x" aria-label="Hide live activity"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>`;
+      icons(); box.hidden = false; requestAnimationFrame(() => box.classList.add("open"));
+      setTimeout(hide, 6000);
+      if (shown < Math.min(6, events.length * 2)) timer = setTimeout(show, 16000);
+    };
+    box.addEventListener("click", e => { if (e.target.closest(".act-x")) { clearTimeout(timer); hide(); try { sessionStorage.setItem("exiozz-act-off", "1"); } catch (err) {} } });
+    timer = setTimeout(show, 9000);
+  })();
+
+  /* Calendrier de l'Avent */
+  if (window.Advent) {
+    const advEl = $("#advent");
+    Advent.mount(advEl, { onOpen: (n, r, d) => {
+      const codeOk = r.type === "code" && d.today;
+      const body = r.type === "code"
+        ? `<div class="adv-code"><span class="pb-code">${r.code}</span><button class="btn btn-o" data-adv-copy="${r.code}"><i data-lucide="copy"></i>Copy</button></div>
+           ${codeOk ? `<button class="btn btn-w wide" data-promo-now="${r.code}"><i data-lucide="ticket-percent"></i>Apply it now</button>` : `<p class="d-note">This code only works on December ${n}${d.today ? "" : " — " + (new Date() < new Date(d.iso + "T00:00:00") ? "come back that day" : "it has expired")}.</p>`}`
+        : r.type === "wallpaper" ? `<img class="adv-wall" src="${r.src}" alt="${esc(r.title)}"><a class="btn btn-w wide" href="${r.src}" download><i data-lucide="download"></i>Download the wallpaper</a>`
+        : r.type === "game" ? `<button class="btn btn-w wide" data-adv-game><i data-lucide="gamepad-2"></i>Play Brick Catch</button><p class="d-note">Your best so far: ${(() => { try { return +localStorage.getItem("exiozz-brick-best") || 0; } catch (e) { return 0; } })()} points.</p>`
+        : `<div class="adv-tip"><i data-lucide="code-xml"></i><span>Roblox dev tip</span></div>`;
+      $("#modal-in").className = "modal-in solo adv-modal";
+      $("#modal-in").innerHTML = `<div class="adv-gift"><span class="kicker">Day ${n} · December ${n}</span><h3>${esc(r.title)}</h3><p>${esc(r.text)}</p>${body}</div>`;
+      $("#modal").classList.add("open"); icons();
+      if (!reduce) confetti();
+    } });
+    if (Advent.inSeason) {
+      advEl.hidden = false;
+      $$(".rv", advEl).forEach(el => io.observe(el));
+      const nav = $(".links"), a = document.createElement("a"); a.href = "#advent"; a.textContent = "Advent"; a.className = "nav-adv";
+      nav.insertBefore(a, nav.querySelector('a[href="#portfolio"]')); links.push(a); secIO.observe(advEl);
+      a.addEventListener("click", () => $("#nav-in").classList.remove("open"));
+      UI.palette.add(() => [{ g: "Go to", label: "Advent calendar", hint: "A gift every day until Christmas", icon: "gift", k: "christmas noel gift", run: () => advEl.scrollIntoView({ behavior: "smooth" }), top: true }]);
+    }
+  }
+  document.addEventListener("click", async e => {
+    const c = e.target.closest("[data-adv-copy]"); if (c) { try { await navigator.clipboard.writeText(c.dataset.advCopy); toast("Code copied"); } catch (err) { toast(c.dataset.advCopy); } }
+    const pn = e.target.closest("[data-promo-now]"); if (pn) { const r = X.Promo.apply(pn.dataset.promoNow); toast(r.ok ? `Code ${r.code} applied · −${r.pct}%` : r.msg); if (r.ok) closeModal(); }
+    if (e.target.closest("[data-adv-game]")) { closeModal(); UI.game.open(); }
+  });
+  // Petits confettis quand on ouvre une case
+  function confetti() {
+    const layer = document.createElement("div"); layer.className = "confetti"; layer.setAttribute("aria-hidden", "true");
+    const colors = ["#ff5a1f", "#f5c542", "#3fcf74", "#5b9df5", "#f2f2f2", "#ff5d7a"];
+    for (let i = 0; i < 70; i++) { const p = document.createElement("i"); p.style.cssText = `left:${50 + (Math.random() - .5) * 30}%;background:${colors[i % colors.length]};--dx:${(Math.random() - .5) * 900}px;--dy:${-200 - Math.random() * 500}px;--r:${Math.random() * 720}deg;animation-delay:${Math.random() * .15}s`; layer.appendChild(p); }
+    document.body.appendChild(layer); setTimeout(() => layer.remove(), 2200);
+  }
+
+  /* Coulisses : avant / après et étapes de fabrication d'un pack */
+  const MAKING = [
+    { id: "stylized-forest-pack", name: "Stylized Forest Pack", before: "assets/forest-pack/planche.jpg", after: "assets/forest-pack/hero.jpg", labels: ["18 separate assets", "The finished scene"],
+      steps: [
+        ["One model at a time", "Each tree, rock and mushroom is modeled and painted on its own in Blender, in the same stylized look.", "img/forest-01.webp"],
+        ["The full set", "18 assets at the same scale, checked side by side so nothing looks out of place.", "assets/forest-pack/planche.jpg"],
+        ["Assembled together", "Everything goes into one scene to see how it reads together, like it would in a game.", "assets/forest-pack/hero.jpg"],
+        ["Ready for Roblox", "Exported as Roblox-ready FBX with baked Color and Normal maps, plus a presentation video.", "assets/forest-pack/presentation-poster.jpg", "assets/forest-pack/presentation.mp4"]] },
+    { id: "lava-mounts-pack", name: "Lava Mounts Pack", before: "assets/lava-mounts-pack/planche.jpg", after: "assets/lava-mounts-pack/hero.jpg", labels: ["The 4 models", "In a scene"],
+      steps: [
+        ["The dragon", "Modeled and textured with glowing lava cracks running through the scales.", "img/dragon-tete.webp"],
+        ["The whole pack", "Dragon, horse with saddle and harness, summoning bell and fire portal, in one consistent style.", "assets/lava-mounts-pack/planche.jpg"],
+        ["Rigged and posed", "The mounts are rigged so they can be animated and ridden in game.", "img/dragon-profil.webp"],
+        ["Ready for Roblox", "Exported as FBX with PBR textures, plus a presentation video.", "assets/lava-mounts-pack/presentation-poster.jpg", "assets/lava-mounts-pack/presentation.mp4"]] }
+  ];
+  let mk = 0;
+  const renderMaking = () => {
+    const m = MAKING[mk];
+    $("#mk-packs").innerHTML = MAKING.map((x, i) => `<button role="tab" aria-pressed="${i === mk}" data-mk="${i}">${x.name.replace(" Pack", "")}</button>`).join("");
+    $("#mk-cmp").style.setProperty("--pos", "50%");
+    $("#mk-cmp").innerHTML = `<img src="${m.after}" alt="${m.labels[1]}" loading="lazy"><img class="cmp-before" src="${m.before}" alt="${m.labels[0]}" loading="lazy"><span class="cmp-line"></span><span class="cmp-lbl" style="left:12px">${m.labels[0]}</span><span class="cmp-lbl" style="right:12px">${m.labels[1]}</span><input type="range" min="0" max="100" value="50" aria-label="Compare ${m.labels[0].toLowerCase()} with ${m.labels[1].toLowerCase()}">`;
+    $("#mk-steps").innerHTML = m.steps.map(([t, d, img, vid], i) => `<li class="mk-step" style="--i:${i}"><span class="mk-n">${String(i + 1).padStart(2, "0")}</span>
+      <div class="mk-img">${vid ? `<button class="mk-play" data-mk-video="${vid}" data-poster="${img}" aria-label="Play the presentation video"><img src="${img}" alt="" loading="lazy"><span><i data-lucide="play"></i></span></button>` : `<img src="${img}" alt="${esc(t)}" loading="lazy">`}</div>
+      <b>${esc(t)}</b><p>${esc(d)}</p></li>`).join("") + `<li class="mk-step mk-end"><span class="mk-n">→</span><div class="mk-cta"><b>Get the pack</b><p>${esc(m.name)}, ready to drop in your game.</p><a class="btn btn-w" href="shop.html?product=${m.id}">View in shop <i data-lucide="arrow-up-right"></i></a></div></li>`;
+    icons(); mkIO();
+  };
+  // L'étape apparaît et la ligne se remplit au scroll
+  const mkIO = () => { const o = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); o.unobserve(e.target); } }), { threshold: .3 }); $$(".mk-step").forEach(el => o.observe(el)); };
+  $("#mk-packs").addEventListener("click", e => { const b = e.target.closest("[data-mk]"); if (!b || +b.dataset.mk === mk) return; mk = +b.dataset.mk; renderMaking(); });
+  $("#mk-cmp").addEventListener("input", e => { $("#mk-cmp").style.setProperty("--pos", e.target.value + "%"); });
+  // Petit indice : le curseur glisse tout seul la première fois qu'on voit le bloc
+  new IntersectionObserver((es, o) => { if (!es[0].isIntersecting || reduce) return; o.disconnect(); const c = $("#mk-cmp"), t0 = performance.now();
+    const tick = now => { const k = Math.min(1, (now - t0) / 1600), v = 50 + Math.sin(k * Math.PI * 2) * 22; c.style.setProperty("--pos", v + "%"); const r = c.querySelector("input"); if (r) r.value = v; if (k < 1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }, { threshold: .6 }).observe($("#mk-cmp"));
+  document.addEventListener("click", e => {
+    const v = e.target.closest("[data-mk-video]"); if (!v) return;
+    $("#modal-in").className = "modal-in solo";
+    $("#modal-in").innerHTML = `<video class="lb-img" src="${v.dataset.mkVideo}" poster="${v.dataset.poster}" controls autoplay playsinline></video>`;
+    $("#modal").classList.add("open");
+  });
+  renderMaking();
+  // La vidéo s'arrête quand on ferme la fenêtre
+  $("#modal-close").addEventListener("click", () => $$("#modal video").forEach(x => x.pause()));
+  $("#modal").addEventListener("click", e => { if (e.target.id === "modal") $$("#modal video").forEach(x => x.pause()); });
+
+  /* Quiz : 3 questions → le bon service, pré-rempli dans le simulateur */
+  const QUIZ = [
+    ["What are you working on?", [["roblox", "A Roblox game", "gamepad-2"], ["web", "A website", "globe"], ["discord", "A Discord server", "message-circle"], ["gfx", "Visuals & branding", "palette"], ["3d", "3D models", "box"]]],
+    ["Where are you at?", [["idea", "Just an idea", "lightbulb"], ["started", "Already started", "hammer"], ["live", "It's live, needs work", "rocket"]]],
+    ["What matters most?", [["speed", "Getting it fast", "zap"], ["budget", "Keeping the budget low", "piggy-bank"], ["quality", "The best quality", "gem"]]]
+  ];
+  const quizPick = (what, stage) => ({
+    roblox: { idea: [1, "A full game, from concept to release"], started: [0, "A custom system to plug into what you have"], live: [2, "Maintenance: bugs, performance and new features"] },
+    web: { idea: [0, "A showcase site to get online quickly"], started: [1, "A full site with animations and content"], live: [2, "A backend: accounts, database, admin"] },
+    discord: { idea: [1, "A full server setup: channels, roles, bots"], started: [0, "A custom bot for your server"], live: [0, "A custom bot to level up your server"] },
+    gfx: { idea: [0, "A profile picture to start your brand"], started: [1, "A banner for your channel or group"], live: [2, "A thumbnail that gets more clicks"] },
+    "3d": { idea: [0, "A custom 3D model"], started: [0, "A custom 3D model to complete your set"], live: [0, "A custom 3D model for your live game"] }
+  }[what][stage]);
+  let qa = [];
+  const renderQuiz = () => {
+    const step = qa.length;
+    if (step < QUIZ.length) {
+      const [q, opts] = QUIZ[step];
+      $("#modal-in").innerHTML = `<div class="qz"><div class="qz-bar" aria-hidden="true">${QUIZ.map((_, i) => `<i class="${i <= step ? "on" : ""}"></i>`).join("")}</div>
+        <span class="kicker">Question ${step + 1} of ${QUIZ.length}</span><h3>${q}</h3>
+        <div class="qz-opts">${opts.map(([k, l, ic]) => `<button class="qz-opt" data-qa="${k}"><span class="qz-ic"><i data-lucide="${ic}"></i></span>${l}<i class="qz-go" data-lucide="arrow-right"></i></button>`).join("")}</div>
+        ${step ? `<button class="qz-back" data-qa-back><i data-lucide="arrow-left"></i>Back</button>` : ""}</div>`;
+    } else {
+      const [what, stage, prio] = qa, [svc, why] = quizPick(what, stage), plan = plans[what][svc];
+      const size = prio === "quality" ? "large" : prio === "speed" || prio === "budget" ? "small" : "medium";
+      const time = prio === "speed" ? "fast" : prio === "budget" ? "flex" : "std";
+      $("#modal-in").innerHTML = `<div class="qz qz-res"><div class="qz-bar" aria-hidden="true">${QUIZ.map(() => `<i class="on"></i>`).join("")}</div>
+        <span class="kicker">Your match</span><h3>${plan[0]}</h3><p>${why}. ${plan[1]}</p>
+        <div class="qz-tags"><span class="tag">${cats.find(c => c[0] === what)[1]}</span><span class="tag">${SIZES.find(x => x[0] === size)[1]} size</span><span class="tag">${TIMES.find(x => x[0] === time)[1]} timeline</span>${prio === "quality" ? '<span class="tag">UI & visual polish</span>' : ""}<span class="tag">from ${X.money(plan[2])}</span></div>
+        <div class="btns"><button class="btn btn-w" data-qa-use='${JSON.stringify({ what, svc, size, time, polish: prio === "quality" })}'><i data-lucide="calculator"></i>See my estimate</button><button class="btn btn-o" data-qa-redo><i data-lucide="rotate-ccw"></i>Start over</button></div>
+        ${what === "3d" ? `<p class="d-note">Looking for something ready-made? <a href="shop.html" style="text-decoration:underline">Browse the 3D packs in the shop</a>.</p>` : ""}</div>`;
+    }
+    icons();
+    const f = $("#modal-in .qz-opt, #modal-in [data-qa-use]"); f && f.focus({ preventScroll: true });
+  };
+  document.addEventListener("click", e => {
+    if (e.target.closest("[data-quiz]")) { qa = []; $("#modal-in").className = "modal-in solo qz-modal"; renderQuiz(); $("#modal").classList.add("open"); return; }
+    const o = e.target.closest("[data-qa]"); if (o) { qa.push(o.dataset.qa); renderQuiz(); return; }
+    if (e.target.closest("[data-qa-back]")) { qa.pop(); renderQuiz(); return; }
+    if (e.target.closest("[data-qa-redo]")) { qa = []; renderQuiz(); return; }
+    const u = e.target.closest("[data-qa-use]");
+    if (u) {
+      const r = JSON.parse(u.dataset.qaUse);
+      qs.cat = r.what; qs.svc = r.svc; qs.size = r.size; qs.time = r.time; qs.extras = new Set(r.polish ? ["polish"] : []);
+      closeModal(); renderQuote();
+      setTimeout(() => { $("#quote .qs").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }); $(".qs-res").animate([{ boxShadow: "0 0 0 0 rgba(255,90,31,.6)" }, { boxShadow: "0 0 0 14px rgba(255,90,31,0)" }], { duration: 1200, delay: 500 }); }, 150);
+    }
+  });
+  UI.palette.add(() => [{ g: "Actions", label: "Take the service quiz", hint: "3 questions to find what you need", icon: "sparkles", k: "quiz help choose", run: () => $("[data-quiz]").click() }]);
+
+  /* Badge perso : l'avatar Roblox du visiteur prend la place du mien */
+  const BADGE_KEY = "exiozz-badge";
+  const badgeImg = $("#badge .badge-photo img"), badgeName = $("#badge .badge-name"), badgeRole = $("#badge .badge-role");
+  const DEFAULT_BADGE = { img: badgeImg.getAttribute("src"), name: badgeName.textContent, role: badgeRole.innerHTML };
+  const fetchAvatar = async u => {
+    try { const r = await fetch(`${UI.Account.API}/api/roblox-avatar?u=${encodeURIComponent(u)}`); const d = await r.json().catch(() => ({})); if (r.ok) return d; if (r.status === 404 || r.status === 400) throw new Error(d.error ? "No Roblox player with this username" : "Not found"); } catch (e) { if (/Roblox player|Not found/.test(e.message)) throw e; }
+    // Repli : miroir public de l'API Roblox
+    const ur = await fetch("https://users.roproxy.com/v1/usernames/users", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ usernames: [u], excludeBannedUsers: true }) });
+    const user = ur.ok && ((await ur.json()).data || [])[0]; if (!user) throw new Error("No Roblox player with this username");
+    const t = ((await (await fetch(`https://thumbnails.roproxy.com/v1/users/avatar?userIds=${user.id}&size=420x420&format=Png&isCircular=false`)).json()).data || [])[0];
+    if (!t || !t.imageUrl) throw new Error("Avatar unavailable right now, try again");
+    return { id: user.id, name: user.name, displayName: user.displayName || user.name, img: t.imageUrl };
+  };
+  const setBadge = (d, kick) => {
+    if (d) { badgeImg.src = d.img; badgeName.textContent = d.displayName; badgeRole.textContent = "@" + d.name; $("#bm-av").src = d.img; $("#bm-in").value = d.name; }
+    else { badgeImg.src = DEFAULT_BADGE.img; badgeName.textContent = DEFAULT_BADGE.name; badgeRole.innerHTML = DEFAULT_BADGE.role; $("#bm-av").src = "img/avatar-bust.png"; $("#bm-in").value = ""; }
+    $("#badge").classList.toggle("visitor", !!d); $("#bm-acts").hidden = !d;
+    if (kick) kickBadge();
+  };
+  $("#bm-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const u = $("#bm-in").value.trim();
+    if (!/^[A-Za-z0-9_]{3,20}$/.test(u)) { toast("A Roblox username has 3 to 20 letters, numbers or _"); $("#bm-in").focus(); return; }
+    const btn = $("#bm-go"); btn.disabled = true; btn.classList.add("loading");
+    try {
+      const d = await fetchAvatar(u);
+      try { localStorage.setItem(BADGE_KEY, JSON.stringify(d)); } catch (err) {}
+      setBadge(d);
+      toast(`Looking good, ${d.displayName}!`);
+      $("#home").scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+      setTimeout(kickBadge, reduce ? 0 : 700);
+    } catch (err) { toast(err.message || "Couldn't load this avatar"); }
+    btn.disabled = false; btn.classList.remove("loading");
+  });
+  $("#bm-reset").addEventListener("click", () => { try { localStorage.removeItem(BADGE_KEY); } catch (e) {} setBadge(null, true); toast("Badge reset"); });
+  $("#bm-share").addEventListener("click", async () => {
+    const d = JSON.parse(localStorage.getItem(BADGE_KEY) || "null"); if (!d) return;
+    const url = `${location.origin}${location.pathname}?badge=${encodeURIComponent(d.name)}`;
+    try { await navigator.clipboard.writeText(url); toast("Link copied · your friends will see your avatar on the badge"); } catch (e) { toast(url); }
+  });
+  // Lien partagé (?badge=pseudo) en priorité, sinon le badge enregistré
+  {
+    const shared = new URLSearchParams(location.search).get("badge");
+    let saved = null; try { saved = JSON.parse(localStorage.getItem(BADGE_KEY) || "null"); } catch (e) {}
+    if (shared && /^[A-Za-z0-9_]{3,20}$/.test(shared)) fetchAvatar(shared).then(d => { setBadge(d); $("#bm-acts").hidden = true; toast(`${d.displayName} put their avatar on the badge · try yours at the bottom of the page`); }).catch(() => {});
+    else if (saved && saved.img) setBadge(saved);
+  }
+  UI.palette.add(() => [{ g: "Fun", label: "Put my avatar on the badge", hint: "Type your Roblox username", icon: "user-round", k: "roblox avatar badge username", run: () => { $("#badge-me").scrollIntoView({ behavior: "smooth" }); setTimeout(() => $("#bm-in").focus(), 500); } }]);
 
   icons();
 })();

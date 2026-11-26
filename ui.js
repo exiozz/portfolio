@@ -581,6 +581,84 @@
   }
   /* Espace admin (réservé à ton compte Discord : le serveur le vérifie à chaque appel) */
   let adminTab = "orders", adminOrders = null, adminQuery = "";
+  /* Nouvelle commande créée par toi pour un client (ex. demande reçue en MP) :
+     liée à son ID Discord, il la retrouve dans « My orders » dès qu'il se connecte */
+  let newOrder = null; // { discordId, customerName, items: [{ title, price, productId }], currency, status, note, notify }
+  const syncNewOrder = () => {
+    const f = $("#no-form"); if (!f || !newOrder) return;
+    const v = n => f.elements.namedItem(n);
+    Object.assign(newOrder, { discordId: v("did").value.replace(/\D/g, ""), customerName: v("cname").value.trim(), currency: v("cur").value, status: v("nstatus").value, note: v("nnote").value, notify: v("notify").checked });
+    $$("#no-form [data-no-row]").forEach(r => { const it = newOrder.items[+r.dataset.noRow]; if (it) { it.title = r.querySelector("[data-f=t]").value; it.price = r.querySelector("[data-f=p]").value; } });
+  };
+  function renderNewOrder() {
+    const box = $("#a-orders"); if (!box) return;
+    const o = newOrder, total = o.items.reduce((sum, it) => sum + (+it.price || 0), 0);
+    const shop = X.Catalog.all().filter(p => !p.hidden);
+    box.innerHTML = `<form class="a-form a-prod-form" id="no-form" novalidate>
+      <button type="button" class="a-back" data-no-back><i data-lucide="arrow-left"></i>All orders</button>
+      <b class="a-form-t">New order for a client</b>
+      <p class="d-note" style="margin:0">The order is linked to the client's Discord ID: they see it in “My orders” as soon as they sign in on the site, even if they've never signed in before.</p>
+      <div class="a-grid2">
+        <label class="a-lbl">Client's Discord ID <input name="did" inputmode="numeric" maxlength="20" value="${esc(o.discordId || "")}" placeholder="e.g. 1227673054105178274" required>
+          <span class="a-hint">Discord → Settings → Advanced → Developer mode, then right-click the person → Copy User ID.</span></label>
+        <label class="a-lbl">Name shown <input name="cname" maxlength="80" value="${esc(o.customerName || "")}" placeholder="optional · their Discord name by default"></label>
+      </div>
+      <div class="a-lbl">Items</div>
+      <div class="no-items">${o.items.map((it, i) => `<div class="no-row" data-no-row="${i}">
+          <input data-f="t" maxlength="200" value="${esc(it.title || "")}" placeholder="What you'll deliver, e.g. Custom inventory system" aria-label="Item ${i + 1}">
+          <input data-f="p" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(it.price ?? "")}" placeholder="Price" aria-label="Price of item ${i + 1}">
+          <button type="button" class="c-rm" data-no-del="${i}" aria-label="Remove item"${o.items.length > 1 ? "" : " disabled"}><i data-lucide="x"></i></button></div>`).join("")}
+      </div>
+      <div class="no-add">
+        <button type="button" class="btn btn-o" data-no-add><i data-lucide="plus"></i>Custom item</button>
+        <select class="a-select" data-no-shop aria-label="Add an asset from the shop"><option value="">+ Asset from the shop…</option>${shop.map(p => `<option value="${esc(p.id)}">${esc(p.name)} · ${X.money(p.eur)}</option>`).join("")}</select>
+      </div>
+      <div class="a-grid3">
+        <label class="a-lbl">Currency <select name="cur" class="a-select"><option value="€"${o.currency !== "R$" ? " selected" : ""}>Euros (€)</option><option value="R$"${o.currency === "R$" ? " selected" : ""}>Robux (R$)</option></select></label>
+        <label class="a-lbl">Status <select name="nstatus" class="a-select">${STATUSES.map(st => `<option value="${st}"${st === o.status ? " selected" : ""}>${stEn(st)}</option>`).join("")}</select></label>
+        <div class="a-lbl">Total <b class="no-total" id="no-total">${o.currency === "R$" ? "R$ " + Math.round(total) : X.money(Math.round(total * 100) / 100)}</b></div>
+      </div>
+      <label class="a-lbl">Note <span class="a-hint">optional · visible to the client</span><textarea name="nnote" rows="2" maxlength="1000" placeholder="e.g. Delivery in 3 days, 2 revisions included">${esc(o.note || "")}</textarea></label>
+      <label class="a-check"><input type="checkbox" name="notify"${o.notify ? " checked" : ""}> Send the client a Discord DM about this order</label>
+      <button class="btn btn-w wide"><i data-lucide="check"></i>Create the order</button>
+    </form>`;
+    icons();
+  }
+  const paintNoTotal = () => { syncNewOrder(); const t = newOrder.items.reduce((sum, it) => sum + (+it.price || 0), 0), el = $("#no-total"); if (el) el.textContent = newOrder.currency === "R$" ? "R$ " + Math.round(t) : X.money(Math.round(t * 100) / 100); };
+  document.addEventListener("input", e => { if (newOrder && e.target.closest("#no-form")) paintNoTotal(); });
+  document.addEventListener("change", e => {
+    if (!newOrder) return;
+    if (e.target.name === "cur") { paintNoTotal(); return; }
+    const sh = e.target.closest("[data-no-shop]"); if (!sh || !sh.value) return;
+    syncNewOrder();
+    const p = X.Catalog.all().find(x => x.id === sh.value);
+    if (p) {
+      const it = { title: p.name, price: newOrder.currency === "R$" ? (p.rbx || Math.round(p.eur * 80)) : p.eur, productId: p.id };
+      const empty = newOrder.items.findIndex(x => !String(x.title || "").trim() && !String(x.price || "").trim());
+      if (empty >= 0) newOrder.items[empty] = it; else newOrder.items.push(it);
+    }
+    renderNewOrder();
+  });
+  document.addEventListener("click", e => {
+    if (e.target.closest("[data-new-order]")) { newOrder = { discordId: "", customerName: "", items: [{ title: "", price: "" }], currency: "€", status: "Confirmée", note: "", notify: true }; renderAdmin(); return; }
+    if (!newOrder) return;
+    if (e.target.closest("[data-no-back]")) { newOrder = null; renderAdmin(); return; }
+    if (e.target.closest("[data-no-add]")) { syncNewOrder(); newOrder.items.push({ title: "", price: "" }); renderNewOrder(); $$("#no-form [data-f=t]").pop().focus(); return; }
+    const d = e.target.closest("[data-no-del]"); if (d) { syncNewOrder(); newOrder.items.splice(+d.dataset.noDel, 1); renderNewOrder(); }
+  });
+  document.addEventListener("submit", async e => {
+    if (e.target.id !== "no-form") return;
+    e.preventDefault(); syncNewOrder();
+    const o = newOrder, items = o.items.filter(it => String(it.title || "").trim()).map(it => ({ title: it.title.trim(), price: Math.max(0, +it.price || 0), productId: it.productId }));
+    if (!/^\d{17,20}$/.test(o.discordId)) { toast("Discord ID: 17 to 20 digits"); e.target.elements.namedItem("did").focus(); return; }
+    if (!items.length) { toast("Add at least one item"); return; }
+    const btn = e.target.querySelector(".btn.wide"); btn.disabled = true;
+    try {
+      const r = await api("/api/admin/orders", { method: "POST", body: JSON.stringify({ discordId: o.discordId, customerName: o.customerName, items, currency: o.currency, status: o.status, note: o.note, notify: o.notify }) });
+      toast(`Order #${String(r.id).slice(-6).toUpperCase()} created${o.notify ? " · client notified on Discord" : ""}`);
+      newOrder = null; adminQuery = ""; renderAdmin();
+    } catch (err) { toast(err.message); btn.disabled = false; }
+  });
   // Recherche : n° de commande (#XYZ789 ou id complet), ID Discord, nom ou @pseudo
   const matchOrder = (o, q) => {
     const t = q.trim().toLowerCase().replace(/^[#@]/, ""); if (!t) return true;
@@ -604,6 +682,9 @@
     if (!isAdmin()) { body.innerHTML = `<div class="d-empty"><i data-lucide="lock"></i><b>Admin only</b><span>Sign in with the admin Discord account</span></div>`; icons(); return; }
     const tabs = [["orders", "Orders"], ["shop", "Shop"], ["prices", "Prices"], ["projects", "Projects"], ["photos", "Photos"], ["people", "People"], ["community", "Community"], ["promo", "Promo codes"], ["avail", "Availability"], ["shots", "Showcase"]];
     const head = `<div class="a-tabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${k === adminTab}" data-atab="${k}">${l}</button>`).join("")}</div>`;
+    if (adminTab === "orders" && newOrder) {
+      body.innerHTML = head + `<div id="a-orders"></div>`; renderNewOrder(); return;
+    }
     if (adminTab === "orders") {
       body.innerHTML = head + `<div id="a-orders"></div>`; const box = $("#a-orders");
       loading(box);
@@ -612,8 +693,8 @@
         const pending = adminOrders.filter(o => o.status === "En attente de contact").length;
         const paid = adminOrders.filter(o => o.status === "Payée").reduce((s, o) => s + (o.currency === "R$" ? 0 : o.total || 0), 0);
         box.innerHTML = `<div class="a-stats"><div><b>${adminOrders.length}</b><span>Orders</span></div><div><b>${pending}</b><span>To contact</span></div><div><b>${X.money(Math.round(paid * 100) / 100)}</b><span>Paid (€)</span></div></div>` +
-          (adminOrders.length ? `<div class="a-searchrow"><label class="a-search"><i data-lucide="search"></i><span class="sr">Search orders</span><input type="search" id="a-osearch" placeholder="Order #, Discord ID, name or @username" value="${esc(adminQuery)}" autocomplete="off" spellcheck="false" enterkeyhint="search"></label><span class="a-ocount" id="a-ocount" aria-live="polite"></span></div><div class="a-table" id="a-olist"></div>`
-            : `<div class="d-empty"><i data-lucide="inbox"></i><b>No orders yet</b><span>They show up here as soon as a client orders</span></div>`);
+          (adminOrders.length ? `<div class="a-searchrow"><label class="a-search"><i data-lucide="search"></i><span class="sr">Search orders</span><input type="search" id="a-osearch" placeholder="Order #, Discord ID, name or @username" value="${esc(adminQuery)}" autocomplete="off" spellcheck="false" enterkeyhint="search"></label><span class="a-ocount" id="a-ocount" aria-live="polite"></span><button class="btn btn-w a-newo" data-new-order><i data-lucide="plus"></i>New order</button></div><div class="a-table" id="a-olist"></div>`
+            : `<div class="d-empty"><i data-lucide="inbox"></i><b>No orders yet</b><span>They show up here as soon as a client orders</span><button class="btn btn-w" data-new-order><i data-lucide="plus"></i>New order</button></div>`);
         icons();
         paintOrderList();
       } catch (e) { errorBox(box, e.message); }
@@ -1114,7 +1195,7 @@
     renderAdmin();
   });
   document.addEventListener("click", async e => {
-    const at = e.target.closest("[data-atab]"); if (at) { adminTab = at.dataset.atab; renderAdmin(); return; }
+    const at = e.target.closest("[data-atab]"); if (at) { adminTab = at.dataset.atab; newOrder = null; renderAdmin(); return; }
     const ac = e.target.closest("[data-acopy]");
     if (ac) { try { await navigator.clipboard.writeText(ac.dataset.acopy); toast(`${ac.dataset.label} copied`); } catch (err) { toast(ac.dataset.acopy); } return; }
     const ash = e.target.closest("[data-ashot]");

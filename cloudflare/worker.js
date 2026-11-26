@@ -341,9 +341,11 @@ async function route(request, env, ctx) {
     const user = await auth(env, request); adminOnly(user);
     const b = await readJson(request);
     const discordId = String(b.discordId || '').trim();
-    const customerName = clampStr(b.customerName, 80).trim();
     if (!/^\d{17,20}$/.test(discordId)) throw new HttpError(400, 'ID Discord invalide (17 à 20 chiffres).');
-    if (!customerName) throw new HttpError(400, 'Nom du client manquant.');
+    const prof = await discordUser(env, discordId);
+    // nom facultatif : sinon le nom Discord du compte (via le bot)
+    const customerName = clampStr(b.customerName, 80).trim() || (prof ? prof.name : '');
+    if (!customerName) throw new HttpError(400, 'Nom du client manquant (le bot n\'a pas trouvé ce compte Discord).');
     const items = (Array.isArray(b.items) ? b.items : []).slice(0, 30).map((it) => ({
       title: clampStr(it.title, 200).trim(),
       price: Math.max(0, +it.price || 0),
@@ -352,7 +354,6 @@ async function route(request, env, ctx) {
     })).filter((it) => it.title);
     if (!items.length) throw new HttpError(400, 'Ajoute au moins un article.');
     const status = ORDER_STATUSES.includes(b.status) ? b.status : 'Confirmée';
-    const prof = await discordUser(env, discordId);
     const order = {
       id: newId(), customerName, discordId, discordUsername: prof ? prof.username : undefined, avatar: prof ? prof.avatar || undefined : undefined, items,
       total: items.reduce((s, it) => s + it.price, 0),

@@ -938,9 +938,9 @@
     $("#review-count").textContent = `${real.length} review${real.length === 1 ? "" : "s"}`;
     $("#review-avg").textContent = real.length ? avg.toFixed(1) : "—";
     $("#comments").innerHTML = list.map(r => {
-      const c = r.c && countryOf(r.c), mine = Acc.user && r.discordId === Acc.user.id, canDel = r.discordId && (mine || Acc.isAdmin());
+      const c = r.c && countryOf(r.c);
       const av = r.avatar ? `<img class="av" src="${esc(r.avatar)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'av',textContent:'${esc(r.n.slice(0, 1).toUpperCase())}'}))">` : `<span class="av">${esc(r.n.replace(/[^a-z0-9]/gi, "").slice(0, 1).toUpperCase() || "?")}</span>`;
-      return `<div class="cmt${r.pin ? " pin" : ""}">${av}<div><b>${esc(r.n)}</b>${r.pin ? '<span class="pinned"><i data-lucide="pin" style="width:10px;height:10px"></i>Pinned</span>' : ""}${c ? `<span class="cmt-c"><i data-lucide="map-pin"></i>${c[1]}</span>` : ""}${r.rating ? starRow(r.rating) : ""}<p>${esc(r.t)}</p></div><div class="cmt-acts">${r.pin ? "" : likeBtn(r)}${canDel ? `<button class="like" data-rdel="${esc(r.discordId)}" aria-label="Delete this review"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>` : ""}</div></div>`;
+      return `<div class="cmt${r.pin ? " pin" : ""}">${av}<div><b>${esc(r.n)}</b>${r.pin ? '<span class="pinned"><i data-lucide="pin" style="width:10px;height:10px"></i>Pinned</span>' : ""}${c ? `<span class="cmt-c"><i data-lucide="map-pin"></i>${c[1]}</span>` : ""}${r.rating ? starRow(r.rating) : ""}<p>${esc(r.t)}</p></div><div class="cmt-acts">${r.pin ? "" : likeBtn(r)}</div></div>`;
     }).join("");
     icons();
   };
@@ -959,9 +959,15 @@
   };
   // Formulaire : visible une fois connecté avec Discord
   let rating = 5;
-  const paintStars = () => { $("#stars-pick").innerHTML = [1, 2, 3, 4, 5].map(v => `<button type="button" role="radio" aria-checked="${v === rating}" aria-label="${v} star${v > 1 ? "s" : ""}" data-star="${v}" class="${v <= rating ? "on" : ""}">★</button>`).join(""); };
+  const STAR_WORDS = ["", "Bad", "Okay", "Good", "Great", "Excellent"];
+  const paintStars = () => { $("#stars-pick").innerHTML = `<span class="sp-stars">${[1, 2, 3, 4, 5].map(v => `<button type="button" role="radio" aria-checked="${v === rating}" aria-label="${v} star${v > 1 ? "s" : ""}" data-star="${v}" class="${v <= rating ? "on" : ""}">★</button>`).join("")}</span><span class="sp-lbl" id="sp-lbl">${rating}/5 · ${STAR_WORDS[rating]}</span>`; };
   paintStars();
-  $("#stars-pick").addEventListener("click", e => { const b = e.target.closest("[data-star]"); if (b) { rating = +b.dataset.star; paintStars(); } });
+  $("#stars-pick").addEventListener("click", e => { const b = e.target.closest("[data-star]"); if (b) { rating = +b.dataset.star; paintStars(); const n = $(`#stars-pick [data-star="${rating}"]`); n && n.focus({ preventScroll: true }); n && n.animate && n.animate([{ transform: "scale(1)" }, { transform: "scale(1.35)" }, { transform: "scale(1)" }], { duration: 320, easing: "cubic-bezier(.34, 1.56, .64, 1)" }); } });
+  // aperçu au survol : les étoiles jusqu'à celle survolée s'allument
+  $("#stars-pick").addEventListener("mouseover", e => { const b = e.target.closest("[data-star]"); if (!b) return; const v = +b.dataset.star; $$("#stars-pick [data-star]").forEach(x => x.classList.toggle("hov", +x.dataset.star <= v)); $("#stars-pick").classList.add("hovering"); $("#sp-lbl").textContent = `${v}/5 · ${STAR_WORDS[v]}`; });
+  $("#stars-pick").addEventListener("mouseleave", () => { $("#stars-pick").classList.remove("hovering"); $$("#stars-pick [data-star]").forEach(x => x.classList.remove("hov")); const l = $("#sp-lbl"); if (l) l.textContent = `${rating}/5 · ${STAR_WORDS[rating]}`; });
+  // clavier : flèches gauche / droite
+  $("#stars-pick").addEventListener("keydown", e => { if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return; e.preventDefault(); rating = Math.min(5, Math.max(1, rating + (e.key === "ArrowRight" ? 1 : -1))); paintStars(); $(`#stars-pick [data-star="${rating}"]`).focus(); });
   const paintForm = () => { $("#comment-form").hidden = !Acc.user; $("#review-signin").hidden = !!Acc.user; };
   paintForm();
   document.addEventListener("authchange", () => { paintForm(); loadReviews(); });
@@ -1008,9 +1014,6 @@
       paintLike(r, false);
       return;
     }
-    const b = e.target.closest("[data-rdel]"); if (!b) return;
-    if (!confirm("Delete this review?")) return;
-    try { await Acc.api(`/api/reviews/${encodeURIComponent(b.dataset.rdel)}`, { method: "DELETE" }); toast("Review deleted"); await loadReviews(); } catch (err) { toast(err.message); }
   });
 
   // Petits cœurs qui s'envolent du bouton (le calque est retiré après l'animation)

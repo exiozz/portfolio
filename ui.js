@@ -415,6 +415,8 @@
   const dayKey = ts => new Date(ts).toDateString();
   const dayLbl = ts => { const d = new Date(ts), n = new Date(); const y = new Date(n - 864e5); return d.toDateString() === n.toDateString() ? "Today" : d.toDateString() === y.toDateString() ? "Yesterday" : d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }); };
   const hhmm = ts => new Date(ts).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  const TICK1 = '<svg viewBox="0 0 16 12" aria-hidden="true"><path d="M1.5 6.5 5 10l7-8"/></svg>';
+  const TICK2 = '<svg viewBox="0 0 20 12" aria-hidden="true"><path d="M1.5 6.5 5 10l7-8M8.5 9.2 9.3 10l7-8"/></svg>';
   const linkify = t => esc(t).replace(/https?:\/\/[^\s<]+/g, u => `<a href="${u}" target="_blank" rel="noopener nofollow">${u}</a>`);
   function paintMsgs(data) {
     const list = chatD.querySelector(".ch-list"); if (!list) return;
@@ -426,8 +428,13 @@
       if (dayKey(m.ts) !== prevDay) { html += `<div class="ch-day">${dayLbl(m.ts)}</div>`; prevDay = dayKey(m.ts); prevFrom = ""; }
       const mine = m.from === me, next = data.messages[i + 1];
       const tail = !next || next.from !== m.from || dayKey(next.ts) !== dayKey(m.ts);
-      const seen = mine && tail && !next && data.seenUntil >= m.ts;
-      html += `<div class="ch-msg ${mine ? "me" : "them"}${prevFrom === m.from ? " cont" : ""}${tail ? " tail" : ""}"><p>${linkify(m.text)}</p>${tail ? `<span>${hhmm(m.ts)}${seen ? " · Seen" : ""}</span>` : ""}</div>`;
+      // Accusé de lecture sur ton dernier message : « Sent ✓ » puis « Seen ✓✓ · heure » dès que l'autre ouvre la conversation
+      const lastMine = mine && !next;
+      const seen = lastMine && data.seenUntil >= m.ts;
+      const receipt = lastMine ? (seen
+        ? `<em class="rc seen" title="Read ${new Date(data.seenUntil).toLocaleString("en-US")}">${TICK2}Seen${dayKey(data.seenUntil) === dayKey(Date.now()) ? " " + hhmm(data.seenUntil) : " " + dayLbl(data.seenUntil).toLowerCase()}</em>`
+        : `<em class="rc">${TICK1}Sent</em>`) : "";
+      html += `<div class="ch-msg ${mine ? "me" : "them"}${prevFrom === m.from ? " cont" : ""}${tail || lastMine ? " tail" : ""}"><p>${linkify(m.text)}</p>${tail || lastMine ? `<span>${hhmm(m.ts)}${receipt}</span>` : ""}</div>`;
       prevFrom = m.from;
     });
     list.innerHTML = html; icons();
@@ -468,7 +475,7 @@
     // affichage immédiat, confirmé par le serveur juste après
     const list = chatD.querySelector(".ch-list");
     list.querySelector(".ch-empty")?.remove();
-    list.insertAdjacentHTML("beforeend", `<div class="ch-msg me tail pending"><p>${linkify(text)}</p><span>Sending…</span></div>`);
+    list.insertAdjacentHTML("beforeend", `<div class="ch-msg me tail pending"><p>${linkify(text)}</p><span><em class="rc">Sending…</em></span></div>`);
     list.scrollTop = list.scrollHeight;
     try { const r = await api(`/api/orders/${encodeURIComponent(chat.id)}/messages`, { method: "POST", body: JSON.stringify({ text }) }); chat.painted = true; paintMsgs({ messages: r.messages, seenUntil: chat.seen || 0 }); list.scrollTop = list.scrollHeight; }
     catch (e) { list.querySelector(".pending")?.remove(); ta.value = text; toast(e.message); }
@@ -503,7 +510,7 @@
         return `<button class="ib-row${o.unread ? " unread" : ""}" data-inbox-chat="${esc(o.id)}">${av}
           <span class="ib-main"><span class="ib-top"><b>${title}</b>${l ? `<time>${shortAgo(l.ts)}</time>` : ""}</span>
           <span class="ib-sub">${sub}</span>
-          <span class="ib-last">${l ? `${mine ? "You: " : ""}${esc(l.text)}` : "No messages yet · tap to write"}</span></span>
+          <span class="ib-last">${l && mine ? (((o.chat || {})[isAdmin() ? "readC" : "readA"] || 0) >= l.ts ? `<i class="ib-rc seen" title="Seen">${TICK2}</i>` : `<i class="ib-rc" title="Sent">${TICK1}</i>`) : ""}${l ? `${mine ? "You: " : ""}${esc(l.text)}` : "No messages yet · tap to write"}</span></span>
           ${o.unread ? '<i class="ib-dot" aria-label="Unread"></i>' : ""}</button>`;
       };
       body.innerHTML = withMsg.length || rest.length

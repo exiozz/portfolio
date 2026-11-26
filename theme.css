@@ -1463,3 +1463,15 @@ html[data-theme="light"] .btn-w::after, html[data-theme="light"] .nav-shop::afte
 .nm-txt b em { font-style: normal; font: 400 11px/1 var(--mono); color: var(--ink-4); }
 .nm-txt > span:last-child { font-size: 13px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .news-list li.nm > button { background: rgba(255, 90, 31, .06); }
+
+/* ===== Accusés de lecture ===== */
+.ch-msg > span { display: inline-flex; align-items: center; gap: 6px; }
+.rc { display: inline-flex; align-items: center; gap: 3px; font-style: normal; color: var(--ink-4); }
+.rc::before { content: "·"; margin-right: 3px; color: var(--ink-4); }
+.rc svg { width: 14px; height: 10px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.rc.seen { color: var(--accent); font-weight: 500; animation: rc-in .35s cubic-bezier(.34, 1.56, .64, 1); }
+.rc.seen svg { width: 17px; }
+@keyframes rc-in { from { opacity: 0; transform: scale(.7); } }
+.ib-rc { display: inline-flex; vertical-align: -1px; margin-right: 5px; color: var(--ink-4); }
+.ib-rc svg { width: 15px; height: 10px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ib-rc.seen { color: var(--accent); }

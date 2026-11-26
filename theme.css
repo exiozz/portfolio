@@ -186,7 +186,7 @@ section { position: relative; }
 .stat { position: relative; display: flex; flex-direction: column; gap: 18px; padding: 22px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); transition: border-color .2s var(--ease), background-color .2s var(--ease); }
 .stat:hover { border-color: var(--line-2); background: var(--card-2); }
 .stat-top { display: flex; justify-content: space-between; align-items: center; }
-.stat-ic { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--fill-2); }
+.stat-ic { flex-shrink: 0; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--fill-2); }
 .stat b { font: 700 28px/1 var(--display); letter-spacing: -.02em; }
 .stat-bot { display: flex; justify-content: space-between; align-items: flex-end; font: 400 11px/1 var(--mono); letter-spacing: .18em; color: var(--ink-3); text-transform: uppercase; }
 

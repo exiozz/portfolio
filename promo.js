@@ -26,17 +26,17 @@
      compare: { before, after, labels: ["Before", "After"] } → curseur avant / après */
 
   const PRODUCTS = [
-    { id: "modern-school-ui", name: "UI Kit — Dark Modern", cat: "ui", catLabel: "UI Kits", eur: 5, rbx: 400, badge: "Best-seller", rank: 1, added: 1,
+    { id: "modern-school-ui", name: "UI Kit — Dark Modern", cat: "ui", catLabel: "UI Kits", eur: 3, rbx: 250, badge: "Best-seller", rank: 1, added: 1,
       desc: "A sleek dark interface kit: menus, HUD, inventory, shop, notifications.", tags: ["UI", "Roblox"],
       cover: "img/ui-dark-modern.webp", gallery: [["img/ui-dark-modern.webp", "UI Kit — Dark Modern"]] },
-    { id: "hud-quest-pack", name: "HUD & Quests Pack", cat: "ui", catLabel: "UI Kits", eur: 8, rbx: 600, badge: "New", rank: 2, added: 2,
+    { id: "hud-quest-pack", name: "HUD & Quests Pack", cat: "ui", catLabel: "UI Kits", eur: 5, rbx: 400, badge: "New", rank: 2, added: 2,
       desc: "Adventure game UI pack: compass, working minimap, quest tracker, notifications and health bars.", tags: ["UI", "Quests", "Minimap"],
       cover: "img/hud.webp", gallery: [["img/hud.webp", "HUD & Quests — in game"]] },
-    { id: "lava-mounts-pack", name: "Lava Mounts Pack", cat: "models", catLabel: "3D Models", eur: 25, rbx: 2000, badge: "New", rank: 3, added: 4,
+    { id: "lava-mounts-pack", name: "Lava Mounts Pack", cat: "models", catLabel: "3D Models", eur: 12, rbx: 950, badge: "New", rank: 3, added: 4,
       desc: "Rigged lava dragon and horse, summoning bell and fire portal — ready for Roblox.", tags: ["Mounts", "Rigged", "FBX"],
       cover: "img/lava-cover.jpg", video: { src: "assets/lava-mounts-pack/presentation.mp4", poster: "assets/lava-mounts-pack/presentation-poster.jpg" },
       gallery: [["img/dragon.webp", "Lava dragon"], ["img/dragon-profil.webp", "Lava dragon — side"], ["img/dragon-tete.webp", "Lava dragon — head"], ["img/cheval.webp", "Lava horse"], ["img/cheval-profil.webp", "Lava horse — side"], ["img/portail.webp", "Fire portal"], ["img/cloche.webp", "Summoning bell"]] },
-    { id: "stylized-forest-pack", name: "Stylized Forest Pack", cat: "models", catLabel: "3D Models", eur: 15, rbx: 1200, badge: "New", rank: 4, added: 3,
+    { id: "stylized-forest-pack", name: "Stylized Forest Pack", cat: "models", catLabel: "3D Models", eur: 8, rbx: 650, badge: "New", rank: 4, added: 3,
       desc: "18 stylized nature assets: trees, bushes, rocks, mushrooms, flowers… ready for Roblox.", tags: ["Low Poly", "Nature", "FBX"],
       cover: "img/forest.jpg", video: { src: "assets/forest-pack/presentation.mp4", poster: "assets/forest-pack/presentation-poster.jpg" },
       gallery: [["img/forest.jpg", "Forest Pack — full scene"]].concat(["Oak", "Oak — variant", "Autumn tree", "Birch", "Pine", "Pine — variant", "Bush", "Berry bush", "Stump", "Log", "Large rock", "Medium rock", "Small rock", "Red mushroom", "Brown mushrooms", "Flowers", "Grass", "Fern"].map((n, i) => [`img/forest-${String(i + 1).padStart(2, "0")}.webp`, n])) }

@@ -27,7 +27,7 @@
 <meta name="twitter:description" content="Exiozz is a Roblox developer: custom games and systems in Lua, 3D models, UI kits, GFX, Discord bots and websites. Get a quote in a few clicks.">
 <meta name="twitter:image" content="https://exiozz.github.io/portfolio/img/og-home.jpg">
 <link rel="sitemap" type="application/xml" href="sitemap.xml">
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Person", "@id": "https://exiozz.github.io/portfolio/#exiozz", "name": "Exiozz", "jobTitle": "Roblox Developer", "url": "https://exiozz.github.io/portfolio/", "image": "https://exiozz.github.io/portfolio/img/avatar-bust.png", "description": "Roblox developer: custom games and systems in Lua, 3D models, UI, GFX, Discord bots and websites.", "knowsAbout": ["Roblox", "Luau", "Lua", "Roblox Studio", "Game development", "Blender", "UI design", "JavaScript", "Discord bots", "Web development"], "sameAs": ["https://www.roblox.com/users/1675753236/profile", "https://discord.gg/rGcdngHsCe"]}, {"@type": "WebSite", "@id": "https://exiozz.github.io/portfolio/#site", "url": "https://exiozz.github.io/portfolio/", "name": "Exiozz — Roblox Developer", "publisher": {"@id": "https://exiozz.github.io/portfolio/#exiozz"}, "inLanguage": "en"}, {"@type": "ProfessionalService", "name": "Exiozz — Roblox development", "url": "https://exiozz.github.io/portfolio/", "image": "https://exiozz.github.io/portfolio/img/og-home.jpg", "provider": {"@id": "https://exiozz.github.io/portfolio/#exiozz"}, "areaServed": "Worldwide", "priceRange": "€5 – €150+", "serviceType": ["Roblox game development", "Roblox scripting", "Roblox builds", "3D modeling", "UI/UX design", "GFX", "Discord bots", "Websites"]}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Person", "@id": "https://exiozz.github.io/portfolio/#exiozz", "name": "Exiozz", "jobTitle": "Roblox Developer", "url": "https://exiozz.github.io/portfolio/", "image": "https://exiozz.github.io/portfolio/img/avatar-bust.png", "description": "Roblox developer: custom games and systems in Lua, 3D models, UI, GFX, Discord bots and websites.", "knowsAbout": ["Roblox", "Luau", "Lua", "Roblox Studio", "Game development", "Blender", "UI design", "JavaScript", "Discord bots", "Web development"], "sameAs": ["https://www.roblox.com/users/1675753236/profile", "https://discord.gg/rGcdngHsCe"]}, {"@type": "WebSite", "@id": "https://exiozz.github.io/portfolio/#site", "url": "https://exiozz.github.io/portfolio/", "name": "Exiozz — Roblox Developer", "publisher": {"@id": "https://exiozz.github.io/portfolio/#exiozz"}, "inLanguage": "en"}, {"@type": "ProfessionalService", "name": "Exiozz — Roblox development", "url": "https://exiozz.github.io/portfolio/", "image": "https://exiozz.github.io/portfolio/img/og-home.jpg", "provider": {"@id": "https://exiozz.github.io/portfolio/#exiozz"}, "areaServed": "Worldwide", "priceRange": "€3 – €80+", "serviceType": ["Roblox game development", "Roblox scripting", "Roblox builds", "3D modeling", "UI/UX design", "GFX", "Discord bots", "Websites"]}]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -734,14 +734,14 @@
   /* Tarifs (prix suivis par le code promo) */
   const cats = [["roblox", "Roblox"], ["script", "Script"], ["build", "Build"], ["web", "Web"], ["uiux", "UI/UX"], ["gfx", "GFX"], ["discord", "Discord"], ["3d", "3D"]];
   const plans = {
-    roblox: [["Custom system", "A specific system built into your game: inventory, combat, economy, quests, anti-exploit…", 25, "depending on complexity", ["1 complete system", "Testing & fixes included", "7-day support"]], ["Full game", "A Roblox game from A to Z: concept, mechanics, scripts, UI and publishing.", 150, "depending on scope", ["Concept & game design", "Build & UI included", "Support until release"]], ["Maintenance & Support", "Bugs, performance, new features on an existing project.", 15, "depending on workload", ["Diagnosis included", "Detailed report", "Billed per task"]]],
-    script: [["Custom script", "A specific script or system, on Roblox or elsewhere.", 15, "depending on complexity", ["Commented & organized", "Testing included", "7-day support"]], ["Automation", "A repetitive task automated: data, internal tool…", 12, "depending on workload", ["Needs analysis", "Ready to use", "Documentation included"]], ["Debug & Optimization", "Bugs and performance on an existing script or project.", 10, "depending on workload", ["Diagnosis included", "Quick fixes", "Detailed report"]]],
-    build: [["Custom build", "An environment, a map or a detailed structure.", 20, "depending on size", ["Mapping / terrain", "Props & details", "Optimization included"]], ["Lighting & VFX", "Lighting atmosphere and visual effects for an environment.", 15, "depending on scope", ["Ambient lighting", "Visual effects", "Revisions included"]], ["Build optimization", "A heavy or messy environment, made smooth.", 15, "depending on workload", ["Diagnosis included", "Quick fixes", "Detailed report"]]],
-    web: [["Showcase website", "A simple, elegant site to present your activity.", 20, "1-3 pages", ["Responsive", "SEO optimized", "Clean code"]], ["Full website", "Multi-page with animations and dynamic content.", 50, "4-8 pages", ["CSS/JS animations", "Contact form", "Performance optimized"]], ["Website with backend", "Database, authentication, API, admin dashboard.", 80, "depending on complexity", ["Database", "Authentication", "Custom API"]]],
-    uiux: [["Wireframe / Mockup", "The structure of an interface before development.", 10, "per screen count", ["Clear wireframes", "Content structure", "1 revision"]], ["UI Design", "A complete interface: screens, components, consistency.", 25, "per screen count", ["High fidelity", "Reusable components", "Source files"]], ["Interactive prototype", "A clickable prototype to validate a user flow.", 20, "depending on flow", ["Clickable flow", "Fast iterations", "Feedback included"]]],
-    gfx: [["Profile picture (PFP)", "A polished profile picture for you, your channel or your group.", 5, "per PFP", ["Square HD format", "2 revisions", "Fast delivery"]], ["Banner", "YouTube, Discord or Roblox group, at the right size.", 8, "per banner", ["Right dimensions", "2 revisions", "Source on request"]], ["Thumbnail", "An eye-catching thumbnail for your game or video.", 12, "per thumbnail", ["Original composition", "Built for clicks", "2 revisions"]]],
-    discord: [["Custom Discord bot", "Moderation, economy, levels, custom commands…", 10, "depending on features", ["Source code included", "Hosting help", "7-day support"]], ["Server setup", "Channels, roles, permissions and a consistent design.", 15, "depending on size", ["Channel structure", "Roles & permissions", "Basic bots configured"]]],
-    "3d": [["3D model", "A prop, object or character, textured and ready to use.", 15, "depending on complexity", ["Modeling & texturing", "Export in your format", "2 revisions"]]]
+    roblox: [["Custom system", "A specific system built into your game: inventory, combat, economy, quests, anti-exploit…", 15, "depending on complexity", ["1 complete system", "Testing & fixes included", "7-day support"]], ["Full game", "A Roblox game from A to Z: concept, mechanics, scripts, UI and publishing.", 80, "depending on scope", ["Concept & game design", "Build & UI included", "Support until release"]], ["Maintenance & Support", "Bugs, performance, new features on an existing project.", 8, "depending on workload", ["Diagnosis included", "Detailed report", "Billed per task"]]],
+    script: [["Custom script", "A specific script or system, on Roblox or elsewhere.", 8, "depending on complexity", ["Commented & organized", "Testing included", "7-day support"]], ["Automation", "A repetitive task automated: data, internal tool…", 8, "depending on workload", ["Needs analysis", "Ready to use", "Documentation included"]], ["Debug & Optimization", "Bugs and performance on an existing script or project.", 5, "depending on workload", ["Diagnosis included", "Quick fixes", "Detailed report"]]],
+    build: [["Custom build", "An environment, a map or a detailed structure.", 12, "depending on size", ["Mapping / terrain", "Props & details", "Optimization included"]], ["Lighting & VFX", "Lighting atmosphere and visual effects for an environment.", 8, "depending on scope", ["Ambient lighting", "Visual effects", "Revisions included"]], ["Build optimization", "A heavy or messy environment, made smooth.", 8, "depending on workload", ["Diagnosis included", "Quick fixes", "Detailed report"]]],
+    web: [["Showcase website", "A simple, elegant site to present your activity.", 20, "1-3 pages", ["Responsive", "SEO optimized", "Clean code"]], ["Full website", "Multi-page with animations and dynamic content.", 40, "4-8 pages", ["CSS/JS animations", "Contact form", "Performance optimized"]], ["Website with backend", "Database, authentication, API, admin dashboard.", 60, "depending on complexity", ["Database", "Authentication", "Custom API"]]],
+    uiux: [["Wireframe / Mockup", "The structure of an interface before development.", 5, "per screen count", ["Clear wireframes", "Content structure", "1 revision"]], ["UI Design", "A complete interface: screens, components, consistency.", 12, "per screen count", ["High fidelity", "Reusable components", "Source files"]], ["Interactive prototype", "A clickable prototype to validate a user flow.", 10, "depending on flow", ["Clickable flow", "Fast iterations", "Feedback included"]]],
+    gfx: [["Profile picture (PFP)", "A polished profile picture for you, your channel or your group.", 3, "per PFP", ["Square HD format", "2 revisions", "Fast delivery"]], ["Banner", "YouTube, Discord or Roblox group, at the right size.", 5, "per banner", ["Right dimensions", "2 revisions", "Source on request"]], ["Thumbnail", "An eye-catching thumbnail for your game or video.", 8, "per thumbnail", ["Original composition", "Built for clicks", "2 revisions"]]],
+    discord: [["Custom Discord bot", "Moderation, economy, levels, custom commands…", 8, "depending on features", ["Source code included", "Hosting help", "7-day support"]], ["Server setup", "Channels, roles, permissions and a consistent design.", 8, "depending on size", ["Channel structure", "Roles & permissions", "Basic bots configured"]]],
+    "3d": [["3D model", "A prop, object or character, textured and ready to use.", 8, "depending on complexity", ["Modeling & texturing", "Export in your format", "2 revisions"]]]
   };
   let cat = "roblox", cur = "eur";
   $("#cats").innerHTML = cats.map(([id, l]) => `<button aria-pressed="${id === cat}" data-cat="${id}">${l}</button>`).join("");
@@ -1085,19 +1085,19 @@
 
   /* Simulateur de devis : plusieurs services, chacun avec sa taille et sa quantité, puis plateformes,
      options, délai, budget et contact. Les choix restent enregistrés sur l'appareil. */
-  const SIZES = [["small", "Small", "A simple version", 1], ["medium", "Medium", "The usual scope", 1.8], ["large", "Large", "Big and detailed", 3]];
-  const TIMES = [["flex", "Flexible", "No rush · −10%", .9, 1.4], ["std", "Standard", "Usual timeline", 1, 1], ["fast", "Fast", "+30%", 1.3, .7], ["rush", "Rush", "ASAP · +60%", 1.6, .5]];
-  const PLATFORMS = [["pc", "PC", "Included", 0, "monitor"], ["mobile", "Mobile", "+15%", 15, "smartphone"], ["console", "Console", "+20%", 20, "gamepad-2"], ["vr", "VR", "+25%", 25, "glasses"]];
+  const SIZES = [["small", "Small", "A simple version", 1], ["medium", "Medium", "The usual scope", 1.4], ["large", "Large", "Big and detailed", 2]];
+  const TIMES = [["flex", "Flexible", "No rush · −10%", .9, 1.4], ["std", "Standard", "Usual timeline", 1, 1], ["fast", "Fast", "+20%", 1.2, .7], ["rush", "Rush", "ASAP · +40%", 1.4, .5]];
+  const PLATFORMS = [["pc", "PC", "Included", 0, "monitor"], ["mobile", "Mobile", "+10%", 10, "smartphone"], ["console", "Console", "+15%", 15, "gamepad-2"], ["vr", "VR", "+20%", 20, "glasses"]];
   const PLAT_CATS = ["roblox", "script", "build", "uiux"];
   const EXTRAS = [
-    ["polish", "UI & visual polish", "+25%", { pct: 25 }, "Extra care on visuals, animations and feel"],
-    ["rev", "Extra revisions", "+15%", { pct: 15 }, "More rounds of changes"],
-    ["priority", "Priority updates", "+10%", { pct: 10 }, "Daily progress updates on Discord"],
+    ["polish", "UI & visual polish", "+15%", { pct: 15 }, "Extra care on visuals, animations and feel"],
+    ["rev", "Extra revisions", "+10%", { pct: 10 }, "More rounds of changes"],
+    ["priority", "Priority updates", "+5%", { pct: 5 }, "Daily progress updates on Discord"],
     ["private", "Private / NDA", "+10%", { pct: 10 }, "Kept confidential, not shown in my portfolio"],
-    ["lang", "Multi-language", "+15%", { pct: 15 }, "Texts ready for several languages"],
-    ["support", "30-day support", "+€10", { add: 10 }, "Fixes and questions after delivery"],
-    ["doc", "Setup guide & docs", "+€5", { add: 5 }, "How to install, use and edit it"],
-    ["maint", "Monthly maintenance", "+€15/mo", { monthly: 15 }, "Updates and fixes every month"]
+    ["lang", "Multi-language", "+10%", { pct: 10 }, "Texts ready for several languages"],
+    ["support", "30-day support", "+€5", { add: 5 }, "Fixes and questions after delivery"],
+    ["doc", "Setup guide & docs", "+€3", { add: 3 }, "How to install, use and edit it"],
+    ["maint", "Monthly maintenance", "+€8/mo", { monthly: 8 }, "Updates and fixes every month"]
   ];
   const QKEY = "exiozz-quote-v2";
   const qDefault = () => ({ browse: "roblox", items: [{ cat: "roblox", svc: 0, size: "medium", qty: 1 }], plat: ["pc"], extras: [], time: "std", budget: 0, msg: "", links: "", contact: "discord", email: "" });
@@ -1106,6 +1106,8 @@
   if (!plans[qs.browse]) qs.browse = "roblox";
   const saveQ = () => { try { localStorage.setItem(QKEY, JSON.stringify(qs)); } catch (e) {} };
   const round5 = n => Math.max(5, Math.round(n / 5) * 5);
+  // Arrondi lisible : à l'euro sous 20 €, aux 5 € au-dessus
+  const nice = n => (n < 20 ? Math.max(1, Math.round(n)) : round5(n));
   const catLabel = c => cats.find(x => x[0] === c)[1];
   const hasPlat = () => qs.items.some(it => PLAT_CATS.includes(it.cat));
   const quote = () => {
@@ -1115,9 +1117,9 @@
     const platPct = hasPlat() ? qs.plat.reduce((s, k) => s + (PLATFORMS.find(p => p[0] === k) || [0, 0, 0, 0])[3], 0) : 0;
     const lines = qs.items.map(it => {
       const [name, , base] = plans[it.cat][it.svc], size = SIZES.find(x => x[0] === it.size);
-      const units = 1 + .8 * (it.qty - 1); // chaque exemplaire en plus compte pour 80 %
+      const units = 1 + .6 * (it.qty - 1); // chaque exemplaire en plus compte pour 60 %
       const est = base * size[3] * units * (1 + (PLAT_CATS.includes(it.cat) ? platPct : 0) / 100) * (1 + pct / 100) * time[3];
-      const low = Math.max(base, round5(est * .9)), high = Math.max(low + 5, round5(est * 1.25));
+      const low = Math.max(base, nice(est * .9)), high = Math.max(low + (low < 20 ? 2 : 5), nice(est * 1.15));
       return { it, name, cat: catLabel(it.cat), size: size[1], base, low, high, days: Math.max(1, Math.ceil(base * size[3] * (1 + .5 * (it.qty - 1)) / 10)) };
     });
     const low = lines.reduce((s, l) => s + l.low, 0) + (lines.length ? add : 0), high = lines.reduce((s, l) => s + l.high, 0) + (lines.length ? add : 0);

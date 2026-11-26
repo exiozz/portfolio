@@ -11,10 +11,10 @@
   };
 
   /* Messages */
-  const toast = msg => {
+  const toast = (msg, ms) => {
     const t = $("#toast"); if (!t) return;
     t.textContent = msg; t.classList.add("open");
-    clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("open"), 2600);
+    clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("open"), ms || Math.max(2600, Math.min(9000, String(msg).length * 55)));
   };
   document.addEventListener("click", e => { const t = e.target.closest("[data-toast]"); if (t) toast(t.dataset.toast); });
 
@@ -655,7 +655,10 @@
     const btn = e.target.querySelector(".btn.wide"); btn.disabled = true;
     try {
       const r = await api("/api/admin/orders", { method: "POST", body: JSON.stringify({ discordId: o.discordId, customerName: o.customerName, items, currency: o.currency, status: o.status, note: o.note, notify: o.notify }) });
-      toast(`Order #${String(r.id).slice(-6).toUpperCase()} created${o.notify ? " · client notified on Discord" : ""}`);
+      const ref = `#${String(r.id).slice(-6).toUpperCase()}`;
+      // le bot n'a pas lu le profil : la commande existe quand même, le vrai nom arrivera à la connexion du client
+      if (r.botError) toast(`Order ${ref} created for “${r.name}”. Discord bot: ${r.botError}. Their real name shows up when they sign in.${o.notify ? " No DM sent." : ""}`, 9000);
+      else toast(`Order ${ref} created for ${r.name}${o.notify ? " · client notified on Discord" : ""}`);
       newOrder = null; adminQuery = ""; renderAdmin();
     } catch (err) { toast(err.message); btn.disabled = false; }
   });

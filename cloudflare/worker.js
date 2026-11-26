@@ -62,7 +62,7 @@ async function hmac(env, data) {
   return b64url(new Uint8Array(await crypto.subtle.sign('HMAC', hmacKey, enc.encode(data))));
 }
 async function signToken(env, user) {
-  const payload = b64url(enc.encode(JSON.stringify({ id: user.id, name: user.name, avatar: user.avatar, exp: Date.now() + SESSION_DAYS * 864e5 })));
+  const payload = b64url(enc.encode(JSON.stringify({ id: user.id, name: user.name, username: user.username || '', avatar: user.avatar, exp: Date.now() + SESSION_DAYS * 864e5 })));
   return payload + '.' + await hmac(env, payload);
 }
 async function verifyToken(env, token) {
@@ -112,6 +112,16 @@ async function discordDM(env, discordId, content) {
     if (!msg.ok) throw new Error('envoi ' + msg.status);
   } catch (e) { console.warn(`MP Discord à ${discordId} impossible :`, e.message); }
 }
+// Profil Discord public (pseudo @, avatar) via le bot : sert à compléter les fiches clients
+async function discordUser(env, discordId) {
+  if (!env.DISCORD_BOT_TOKEN || !/^\d{17,20}$/.test(discordId)) return null;
+  try {
+    const r = await fetch(`https://discord.com/api/v10/users/${discordId}`, { headers: { Authorization: `Bot ${env.DISCORD_BOT_TOKEN}` } });
+    if (!r.ok) return null;
+    const u = await r.json();
+    return { username: u.username, name: u.global_name || u.username, avatar: u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128` : '' };
+  } catch (e) { return null; }
+}
 async function notifyAdmin(env, content) {
   if (!isHttps(env.DISCORD_ORDERS_WEBHOOK_URL)) return;
   try {
@@ -121,6 +131,8 @@ async function notifyAdmin(env, content) {
 
 /* ------------------------------------------------- fichiers livrés (KV) */
 const liveFiles = (order) => (order.files || []).filter((f) => f.expiresAt > Date.now());
+// La conversation a-t-elle un message de l'autre côté pas encore lu ?
+const chatUnread = (o, isAdmin) => !!(o.chat && o.chat.last && o.chat.last.from === (isAdmin ? 'client' : 'admin') && o.chat.last.ts > (o.chat[isAdmin ? 'readA' : 'readC'] || 0));
 const publicOrder = (o) => ({ ...o, files: liveFiles(o).map((f) => ({ id: f.id, name: f.name, size: f.size, kind: f.url ? 'link' : 'file', expiresAt: f.expiresAt })) });
 const partKey = (id, i) => `file:${id}:${i}`;
 const shotKey = (id) => `shot:${id}`;           // captures de la vitrine des clients
@@ -256,7 +268,7 @@ async function route(request, env, ctx) {
     const meRes = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${access_token}` } });
     if (!meRes.ok) return back('#login_error=1');
     const u = await meRes.json();
-    const user = { id: u.id, name: u.global_name || u.username, avatar: u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128` : '' };
+    const user = { id: u.id, name: u.global_name || u.username, username: u.username, avatar: u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128` : '' };
     // Le jeton passe dans le # de l'URL : il n'est jamais envoyé à un serveur.
     const p = new URLSearchParams({ token: await signToken(env, user), discord_id: user.id, discord_user: user.name, discord_avatar: user.avatar });
     return back('#' + p.toString());
@@ -280,7 +292,7 @@ async function route(request, env, ctx) {
     }));
     if (!items.length) throw new HttpError(400, 'Panier vide.');
     const order = {
-      id: newId(), customerName: user.name, discordId: user.id, items,
+      id: newId(), customerName: user.name, discordId: user.id, discordUsername: user.username || undefined, avatar: user.avatar || undefined, items,
       total: items.reduce((s, it) => s + it.price, 0),
       currency: clampStr(b.currency || '€', 5), source: clampStr(b.source || 'site', 20),
       note: clampStr(b.note, 1000).trim() || undefined, // message du client (demande de devis)
@@ -292,7 +304,7 @@ async function route(request, env, ctx) {
       ctx.waitUntil(updateVal(env, 'promos', [], (list) => { const pr = list.find((x) => x.code === promoCode); if (pr) pr.uses = (pr.uses || 0) + 1; return list; }).catch(() => {}));
     }
     await updateVal(env, 'orders', [], (orders) => { orders.unshift(order); return orders; });
-    ctx.waitUntil(notifyAdmin(env, `🛒 Nouvelle commande de **${order.customerName}** (<@${order.discordId}>) — ${order.total} ${order.currency}\n` + items.map((it) => `• ${it.title} — ${it.price}`).join('\n') + (order.note ? `\n> ${order.note.slice(0, 500)}` : '')));
+    ctx.waitUntil(notifyAdmin(env, `🛒 Nouvelle commande de **${order.customerName}**${order.discordUsername ? ` (@${order.discordUsername})` : ''} — <@${order.discordId}> — ${order.total} ${order.currency}\n` + items.map((it) => `• ${it.title} — ${it.price}`).join('\n') + (order.note ? `\n> ${order.note.slice(0, 500)}` : '')));
     return json({ ok: true, id: order.id });
   }
 
@@ -301,13 +313,27 @@ async function route(request, env, ctx) {
     const discordId = decodeURIComponent(m[1]);
     if (discordId !== user.id && !user.isAdmin) throw new HttpError(403, 'Accès refusé.');
     const orders = await getVal(env, 'orders', []);
-    return json(orders.filter((o) => o.discordId === discordId).map(publicOrder));
+    return json(orders.filter((o) => o.discordId === discordId).map((o) => ({ ...publicOrder(o), unread: chatUnread(o, false) })));
   }
 
   if (path === '/api/admin/orders' && method === 'GET') {
     const user = await auth(env, request); adminOnly(user);
     await ensureImported(env);
-    return json((await getVal(env, 'orders', [])).map(publicOrder));
+    let orders = await getVal(env, 'orders', []);
+    // Complète les fiches sans pseudo Discord (anciennes commandes) grâce au bot, puis les garde en base
+    const missing = [...new Set(orders.filter((o) => !o.discordUsername && o.discordId).map((o) => o.discordId))].slice(0, 15);
+    if (missing.length) {
+      const found = Object.fromEntries((await Promise.all(missing.map(async (id) => [id, await discordUser(env, id)]))).filter(([, u]) => u));
+      if (Object.keys(found).length) {
+        orders = await updateVal(env, 'orders', [], (list) => {
+          for (const o of list) { const u = found[o.discordId]; if (u && !o.discordUsername) { o.discordUsername = u.username; if (!o.avatar) o.avatar = u.avatar; } }
+          return list;
+        });
+      }
+    }
+    // nombre de commandes par client, pour repérer les habitués
+    const count = {}; for (const o of orders) count[o.discordId] = (count[o.discordId] || 0) + 1;
+    return json(orders.map((o) => ({ ...publicOrder(o), clientOrders: count[o.discordId] || 1, unread: chatUnread(o, true) })));
   }
 
   // Commande créée par l'admin pour un client (ex. demande reçue en MP Discord)
@@ -326,8 +352,9 @@ async function route(request, env, ctx) {
     })).filter((it) => it.title);
     if (!items.length) throw new HttpError(400, 'Ajoute au moins un article.');
     const status = ORDER_STATUSES.includes(b.status) ? b.status : 'Confirmée';
+    const prof = await discordUser(env, discordId);
     const order = {
-      id: newId(), customerName, discordId, items,
+      id: newId(), customerName, discordId, discordUsername: prof ? prof.username : undefined, avatar: prof ? prof.avatar || undefined : undefined, items,
       total: items.reduce((s, it) => s + it.price, 0),
       currency: b.currency === 'R$' ? 'R$' : '€', source: 'admin',
       note: clampStr(b.note, 1000).trim() || undefined,
@@ -361,7 +388,73 @@ async function route(request, env, ctx) {
     });
     if (!removed) throw new HttpError(404, 'Commande introuvable.');
     for (const f of removed.files || []) await removeFile(env, f);
+    await (await db(env)).prepare('DELETE FROM store WHERE key = ?').bind('chat:' + removed.id).run();
     return json({ ok: true });
+  }
+
+  /* --- Messagerie d'une commande : le client et l'admin discutent sur le site --- */
+  // Messages non lus pour la personne connectée (pastille dans le menu)
+  if (path === '/api/messages/unread' && method === 'GET') {
+    const user = await auth(env, request);
+    const orders = await getVal(env, 'orders', []);
+    const mine = user.isAdmin ? orders : orders.filter((o) => o.discordId === user.id);
+    const ids = mine.filter((o) => chatUnread(o, user.isAdmin)).map((o) => o.id);
+    return json({ count: ids.length, orders: ids });
+  }
+
+  if ((m = /^\/api\/orders\/([^/]+)\/messages$/.exec(path)) && (method === 'GET' || method === 'POST')) {
+    const user = await auth(env, request);
+    const orderId = decodeURIComponent(m[1]);
+    const orders = await getVal(env, 'orders', []);
+    const order = orders.find((o) => o.id === orderId);
+    if (!order) throw new HttpError(404, 'Commande introuvable.');
+    if (order.discordId !== user.id && !user.isAdmin) throw new HttpError(403, 'Accès refusé.');
+    const side = user.isAdmin ? 'admin' : 'client';
+    const key = 'chat:' + orderId;
+
+    if (method === 'GET') {
+      const msgs = await getVal(env, key, []);
+      // marque la conversation comme lue pour ce côté
+      if (chatUnread(order, user.isAdmin)) {
+        await updateVal(env, 'orders', [], (list) => { const o = list.find((x) => x.id === orderId); if (o) { o.chat = o.chat || {}; o.chat[side === 'admin' ? 'readA' : 'readC'] = Date.now(); } return list; });
+      }
+      const other = order.chat ? order.chat[side === 'admin' ? 'readC' : 'readA'] || 0 : 0;
+      return json({ messages: msgs, seenUntil: other, client: { name: order.customerName, username: order.discordUsername || '', avatar: order.avatar || '' } });
+    }
+
+    const b = await readJson(request);
+    const text = clampStr(b.text, 2000).trim();
+    if (!text) throw new HttpError(400, 'Message vide.');
+    const now = Date.now();
+    let prevLast = null;
+    const msgs = await updateVal(env, key, [], (list) => {
+      const lastMine = [...list].reverse().find((x) => x.from === side);
+      if (lastMine && now - lastMine.ts < 1200) throw new HttpError(429, 'Doucement : attends une seconde.');
+      if (list.length >= 500) throw new HttpError(400, 'Conversation pleine : contacte-moi sur Discord.');
+      prevLast = list.length ? list[list.length - 1] : null;
+      list.push({ id: newId(), from: side, name: user.name, text, ts: now });
+      return list;
+    });
+    let chat = null;
+    await updateVal(env, 'orders', [], (list) => {
+      const o = list.find((x) => x.id === orderId);
+      if (o) {
+        o.chat = o.chat || {};
+        o.chat.n = msgs.length; o.chat.last = { from: side, ts: now, text: text.slice(0, 80) };
+        o.chat[side === 'admin' ? 'readA' : 'readC'] = now;
+        chat = { ...o.chat };
+      }
+      return list;
+    });
+    // Notification Discord seulement si l'autre n'a pas déjà un message non lu de notre part (pas de spam)
+    const otherRead = chat ? chat[side === 'admin' ? 'readC' : 'readA'] || 0 : 0;
+    const alreadyPinged = prevLast && prevLast.from === side && prevLast.ts > otherRead && now - prevLast.ts < 6 * 3600e3;
+    if (!alreadyPinged) {
+      const ref = '#' + orderId.slice(-6).toUpperCase();
+      if (side === 'admin') ctx.waitUntil(discordDM(env, order.discordId, `💬 Nouveau message d'Exiozz sur ta commande ${ref} :\n> ${text.slice(0, 300)}\nRéponds ici : ${FRONT}/shop.html#chat=${orderId}`));
+      else ctx.waitUntil(notifyAdmin(env, `💬 **${order.customerName}**${order.discordUsername ? ` (@${order.discordUsername})` : ''} t'a écrit sur la commande ${ref} :\n> ${text.slice(0, 500)}\n${FRONT}/shop.html#chat=${orderId}`));
+    }
+    return json({ ok: true, messages: msgs });
   }
 
   /* --- Fichiers livrés (24 h) --- */

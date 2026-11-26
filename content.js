@@ -32,11 +32,15 @@
         imgs: [["hud.webp", "HUD & Quests — in game"]] },
       { name: "UI Kit — Dark Modern", desc: "Menus, HUD, inventory, shop, notifications", id: "modern-school-ui",
         imgs: [["ui-dark-modern.webp", "UI Kit — Dark Modern"]] }
-    ]
+    ],
+    // Personnes : avec qui tu as travaillé, contributeurs, donateurs, meilleurs acheteurs (rempli depuis l'admin)
+    // group : collab | contrib | donor | buyer ; l'ordre de la liste = l'ordre affiché (et le classement des acheteurs)
+    people: []
   };
+  const PEOPLE_GROUPS = [["collab", "Collaborators", "Worked with me"], ["contrib", "Contributors", "Helped the project"], ["donor", "Donors", "Supported my work"], ["buyer", "Top buyers", "Most loyal clients"]];
   const clone = v => JSON.parse(JSON.stringify(v));
   // Les tableaux et objets gardent la même référence : l'accueil les relit après chaque mise à jour
-  const DATA = { plans: clone(DEFAULTS.plans), projects: clone(DEFAULTS.projects), packs: clone(DEFAULTS.packs) };
+  const DATA = { plans: clone(DEFAULTS.plans), projects: clone(DEFAULTS.projects), packs: clone(DEFAULTS.packs), people: clone(DEFAULTS.people) };
   const KEY = "exiozz-content";
   const store = {
     get() { try { return JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { return {}; } },
@@ -47,15 +51,15 @@
     else { Object.keys(target).forEach(k => delete target[k]); Object.assign(target, clone(value)); }
   };
   const apply = (server, quiet) => {
-    ["plans", "projects", "packs"].forEach(k => fill(DATA[k], server && server[k] ? server[k] : DEFAULTS[k]));
+    ["plans", "projects", "packs", "people"].forEach(k => fill(DATA[k], server && server[k] ? server[k] : DEFAULTS[k]));
     if (!quiet) document.dispatchEvent(new CustomEvent("contentchange"));
   };
   apply(store.get(), true);
   // Image d'un pack : nom de fichier seul (dossier img/) ou adresse complète (envoyée depuis l'espace admin)
   const imgSrc = f => /^(https?:)?\/\//.test(f) || /^(img|assets)\//.test(f) ? f : "img/" + f;
   const SiteContent = {
-    CATS, DEFAULTS, imgSrc,
-    get plans() { return DATA.plans; }, get projects() { return DATA.projects; }, get packs() { return DATA.packs; },
+    CATS, DEFAULTS, imgSrc, PEOPLE_GROUPS,
+    get plans() { return DATA.plans; }, get projects() { return DATA.projects; }, get packs() { return DATA.packs; }, get people() { return DATA.people; },
     edited: () => store.get(),
     async reload() {
       try { const r = await fetch(API + "/api/content", { cache: "no-store" }); if (!r.ok) return; const d = await r.json(); store.set(d || {}); apply(d || {}); } catch (e) {}

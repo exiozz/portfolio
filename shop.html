@@ -329,7 +329,6 @@
         <div class="pcard-img" data-details="${p.id}" role="button" tabindex="0" aria-label="Details: ${p.name}"><span class="flag">${p.badge}</span><img src="${p.cover}" alt="${p.name}" loading="lazy"></div>
         <div class="pcard-body"><span class="cat">${p.catLabel}${rateHTML(p.id)}</span><h3>${p.name}</h3><p>${p.desc}</p>
           <div class="tags">${p.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
-          <div class="react" data-react="${p.id}"></div>
           <div class="item-foot">${X.priceHTML(p.eur, cur, "", p.rbx)}
             <button class="btn ${inCart ? "in-cart" : "btn-w"}" data-add="${p.id}">${inCart ? '<i data-lucide="check"></i>In cart' : '<i data-lucide="plus"></i>Add'}</button>
             ${heartHTML(p)}
@@ -410,7 +409,6 @@
         <div class="d-head"><span class="kicker">${p.catLabel} · ${p.badge}</span>${heartHTML(p)}</div>
         <h3>${p.name}</h3><p>${p.desc}</p>
         <div class="tags">${p.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
-        <div class="react" data-react="${p.id}" style="margin:-6px 0 4px"></div>
         <div class="offers" role="radiogroup" aria-label="Offer">
           <button class="offer" role="radio" aria-checked="${offer === "single"}" data-offer="single"><span class="radio"></span><span><b>Single purchase</b><small>Current version of the asset</small></span>${X.priceHTML(p.eur, cur, "", p.rbx)}</button>
           <button class="offer" role="radio" aria-checked="${offer === "pass"}" data-offer="pass"><span class="radio"></span><span><b>Asset Pass</b><small>+ every future update, for life</small></span><span class="mono" style="font-size:12px;color:var(--ink-4)">on Discord</span></button>

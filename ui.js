@@ -415,6 +415,8 @@
   const dayKey = ts => new Date(ts).toDateString();
   const dayLbl = ts => { const d = new Date(ts), n = new Date(); const y = new Date(n - 864e5); return d.toDateString() === n.toDateString() ? "Today" : d.toDateString() === y.toDateString() ? "Yesterday" : d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }); };
   const hhmm = ts => new Date(ts).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  const TICK1 = '<svg viewBox="0 0 16 12" aria-hidden="true"><path d="M1.5 6.5 5 10l7-8"/></svg>';
+  const TICK2 = '<svg viewBox="0 0 20 12" aria-hidden="true"><path d="M1.5 6.5 5 10l7-8M8.5 9.2 9.3 10l7-8"/></svg>';
   const linkify = t => esc(t).replace(/https?:\/\/[^\s<]+/g, u => `<a href="${u}" target="_blank" rel="noopener nofollow">${u}</a>`);
   function paintMsgs(data) {
     const list = chatD.querySelector(".ch-list"); if (!list) return;
@@ -426,8 +428,13 @@
       if (dayKey(m.ts) !== prevDay) { html += `<div class="ch-day">${dayLbl(m.ts)}</div>`; prevDay = dayKey(m.ts); prevFrom = ""; }
       const mine = m.from === me, next = data.messages[i + 1];
       const tail = !next || next.from !== m.from || dayKey(next.ts) !== dayKey(m.ts);
-      const seen = mine && tail && !next && data.seenUntil >= m.ts;
-      html += `<div class="ch-msg ${mine ? "me" : "them"}${prevFrom === m.from ? " cont" : ""}${tail ? " tail" : ""}"><p>${linkify(m.text)}</p>${tail ? `<span>${hhmm(m.ts)}${seen ? " · Seen" : ""}</span>` : ""}</div>`;
+      // Accusé de lecture sur ton dernier message : « Sent ✓ » puis « Seen ✓✓ · heure » dès que l'autre ouvre la conversation
+      const lastMine = mine && !next;
+      const seen = lastMine && data.seenUntil >= m.ts;
+      const receipt = lastMine ? (seen
+        ? `<em class="rc seen" title="Read ${new Date(data.seenUntil).toLocaleString("en-US")}">${TICK2}Seen${dayKey(data.seenUntil) === dayKey(Date.now()) ? " " + hhmm(data.seenUntil) : " " + dayLbl(data.seenUntil).toLowerCase()}</em>`
+        : `<em class="rc">${TICK1}Sent</em>`) : "";
+      html += `<div class="ch-msg ${mine ? "me" : "them"}${prevFrom === m.from ? " cont" : ""}${tail || lastMine ? " tail" : ""}"><p>${linkify(m.text)}</p>${tail || lastMine ? `<span>${hhmm(m.ts)}${receipt}</span>` : ""}</div>`;
       prevFrom = m.from;
     });
     list.innerHTML = html; icons();
@@ -468,7 +475,7 @@
     // affichage immédiat, confirmé par le serveur juste après
     const list = chatD.querySelector(".ch-list");
     list.querySelector(".ch-empty")?.remove();
-    list.insertAdjacentHTML("beforeend", `<div class="ch-msg me tail pending"><p>${linkify(text)}</p><span>Sending…</span></div>`);
+    list.insertAdjacentHTML("beforeend", `<div class="ch-msg me tail pending"><p>${linkify(text)}</p><span><em class="rc">Sending…</em></span></div>`);
     list.scrollTop = list.scrollHeight;
     try { const r = await api(`/api/orders/${encodeURIComponent(chat.id)}/messages`, { method: "POST", body: JSON.stringify({ text }) }); chat.painted = true; paintMsgs({ messages: r.messages, seenUntil: chat.seen || 0 }); list.scrollTop = list.scrollHeight; }
     catch (e) { list.querySelector(".pending")?.remove(); ta.value = text; toast(e.message); }
@@ -503,7 +510,7 @@
         return `<button class="ib-row${o.unread ? " unread" : ""}" data-inbox-chat="${esc(o.id)}">${av}
           <span class="ib-main"><span class="ib-top"><b>${title}</b>${l ? `<time>${shortAgo(l.ts)}</time>` : ""}</span>
           <span class="ib-sub">${sub}</span>
-          <span class="ib-last">${l ? `${mine ? "You: " : ""}${esc(l.text)}` : "No messages yet · tap to write"}</span></span>
+          <span class="ib-last">${l && mine ? (((o.chat || {})[isAdmin() ? "readC" : "readA"] || 0) >= l.ts ? `<i class="ib-rc seen" title="Seen">${TICK2}</i>` : `<i class="ib-rc" title="Sent">${TICK1}</i>`) : ""}${l ? `${mine ? "You: " : ""}${esc(l.text)}` : "No messages yet · tap to write"}</span></span>
           ${o.unread ? '<i class="ib-dot" aria-label="Unread"></i>' : ""}</button>`;
       };
       body.innerHTML = withMsg.length || rest.length
@@ -573,12 +580,29 @@
     </article>`;
   }
   /* Espace admin (réservé à ton compte Discord : le serveur le vérifie à chaque appel) */
-  let adminTab = "orders", adminOrders = null;
+  let adminTab = "orders", adminOrders = null, adminQuery = "";
+  // Recherche : n° de commande (#XYZ789 ou id complet), ID Discord, nom ou @pseudo
+  const matchOrder = (o, q) => {
+    const t = q.trim().toLowerCase().replace(/^[#@]/, ""); if (!t) return true;
+    const id = String(o.id).toLowerCase();
+    if (id === t || id.endsWith(t)) return true;
+    if (/^\d{3,}$/.test(t) && String(o.discordId || "").includes(t)) return true;
+    return [o.customerName, o.discordUsername].some(v => v && String(v).toLowerCase().includes(t));
+  };
+  function paintOrderList() {
+    const list = $("#a-olist"); if (!list || !adminOrders) return;
+    const hits = adminOrders.filter(o => matchOrder(o, adminQuery));
+    list.innerHTML = hits.length ? hits.map(orderCard).join("")
+      : `<div class="d-empty"><i data-lucide="search-x"></i><b>No order found</b><span>Nothing matches “${esc(adminQuery.trim())}”. Try the 6 characters after #, the full Discord ID, or a name.</span></div>`;
+    const c = $("#a-ocount"); if (c) c.textContent = adminQuery.trim() ? `${hits.length} result${hits.length === 1 ? "" : "s"}` : "";
+    icons();
+  }
+  document.addEventListener("input", e => { if (e.target.id === "a-osearch") { adminQuery = e.target.value; paintOrderList(); } });
   async function renderAdmin() {
     const body = adminD.querySelector(".drawer-body");
     adminD.querySelector(".drawer-foot").innerHTML = `<a class="btn btn-o wide" href="admin.html"><i data-lucide="folder-cog"></i>Full admin panel · files, asset library, new order</a>`;
     if (!isAdmin()) { body.innerHTML = `<div class="d-empty"><i data-lucide="lock"></i><b>Admin only</b><span>Sign in with the admin Discord account</span></div>`; icons(); return; }
-    const tabs = [["orders", "Orders"], ["shop", "Shop"], ["prices", "Prices"], ["projects", "Projects"], ["photos", "Photos"], ["community", "Community"], ["promo", "Promo codes"], ["avail", "Availability"], ["shots", "Showcase"]];
+    const tabs = [["orders", "Orders"], ["shop", "Shop"], ["prices", "Prices"], ["projects", "Projects"], ["photos", "Photos"], ["people", "People"], ["community", "Community"], ["promo", "Promo codes"], ["avail", "Availability"], ["shots", "Showcase"]];
     const head = `<div class="a-tabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${k === adminTab}" data-atab="${k}">${l}</button>`).join("")}</div>`;
     if (adminTab === "orders") {
       body.innerHTML = head + `<div id="a-orders"></div>`; const box = $("#a-orders");
@@ -588,9 +612,10 @@
         const pending = adminOrders.filter(o => o.status === "En attente de contact").length;
         const paid = adminOrders.filter(o => o.status === "Payée").reduce((s, o) => s + (o.currency === "R$" ? 0 : o.total || 0), 0);
         box.innerHTML = `<div class="a-stats"><div><b>${adminOrders.length}</b><span>Orders</span></div><div><b>${pending}</b><span>To contact</span></div><div><b>${X.money(Math.round(paid * 100) / 100)}</b><span>Paid (€)</span></div></div>` +
-          (adminOrders.length ? `<div class="a-table">${adminOrders.map(orderCard).join("")}</div>`
+          (adminOrders.length ? `<div class="a-searchrow"><label class="a-search"><i data-lucide="search"></i><span class="sr">Search orders</span><input type="search" id="a-osearch" placeholder="Order #, Discord ID, name or @username" value="${esc(adminQuery)}" autocomplete="off" spellcheck="false" enterkeyhint="search"></label><span class="a-ocount" id="a-ocount" aria-live="polite"></span></div><div class="a-table" id="a-olist"></div>`
             : `<div class="d-empty"><i data-lucide="inbox"></i><b>No orders yet</b><span>They show up here as soon as a client orders</span></div>`);
         icons();
+        paintOrderList();
       } catch (e) { errorBox(box, e.message); }
     } else if (adminTab === "avail") {
       body.innerHTML = head + `<div id="a-avail"></div>`; const box = $("#a-avail");
@@ -624,6 +649,8 @@
       body.innerHTML = head + `<div id="a-projects"></div>`; renderProjectsAdmin();
     } else if (adminTab === "photos") {
       body.innerHTML = head + `<div id="a-photos"></div>`; renderPhotosAdmin();
+    } else if (adminTab === "people") {
+      body.innerHTML = head + `<div id="a-people"></div>`; renderPeopleAdmin();
     } else {
       body.innerHTML = head + `<div class="a-stats"><div><b data-discord="members">—</b><span>Discord members</span></div><div><b data-discord="online">—</b><span>Online</span></div><div><b id="a-rev">—</b><span>Reviews</span></div></div><div id="a-mod"></div>`;
       icons(); discord(); renderModeration();
@@ -821,6 +848,75 @@
   }
   const projFromForm = f => { const v = n => f.elements.namedItem(n).value.trim(); return { ...projEdit, t: v("t"), short: v("short"), d: v("d"), status: v("status"), tech: v("tech").split(",").map(x => x.trim()).filter(Boolean), universeId: v("universeId") || null }; };
   const saveProjects = async (list, msg) => saveSection("projects", list.map(({ _i, ...p }) => p), msg);
+
+  /* Personnes : collaborateurs, contributeurs, donateurs, meilleurs acheteurs (onglet People de l'accueil) */
+  let personEdit = null, peopleFilter = "all";
+  const PGROUPS = () => SC().PEOPLE_GROUPS;
+  const gLabel = k => (PGROUPS().find(g => g[0] === k) || [k, k])[1];
+  const personAv = p => p.avatar ? `<img src="${esc(SC().imgSrc(p.avatar))}" alt="" loading="lazy">` : `<span class="a-pav">${esc((p.name || "?").charAt(0).toUpperCase())}</span>`;
+  function renderPeopleAdmin() {
+    const box = $("#a-people"); if (!box) return;
+    const all = SC().people;
+    if (!personEdit) {
+      const idx = all.map((p, i) => [p, i]).filter(([p]) => peopleFilter === "all" || p.group === peopleFilter);
+      box.innerHTML = `<div class="a-shop-top"><p class="d-note" style="margin:0">People in the <b>People</b> tab of the home page. For top buyers, the order here is the ranking (#1, #2, #3).</p><button class="btn btn-w" data-person-new><i data-lucide="user-plus"></i>Add a person</button></div>
+        <div class="a-modtabs" role="tablist">${[["all", "Everyone"], ...PGROUPS()].map(([k, l]) => `<button role="tab" aria-selected="${k === peopleFilter}" data-pfilter="${k}">${l} <span class="a-n">${k === "all" ? all.length : all.filter(p => p.group === k).length}</span></button>`).join("")}</div>
+        <div class="a-prods">${idx.map(([p, i]) => `<div class="a-prod a-person">${personAv(p)}
+          <div class="a-prod-info"><b>${esc(p.name)}</b><span>${esc(gLabel(p.group))}${p.role ? " · " + esc(p.role) : ""}${p.amount ? " · " + esc(p.amount) : ""}${p.roblox ? " · @" + esc(p.roblox) : ""}</span></div>
+          <div class="a-prod-acts"><button class="btn btn-o" data-person-edit="${i}"><i data-lucide="pencil"></i>Edit</button><button class="c-rm" data-person-up="${i}" aria-label="Move up"${i ? "" : " disabled"}><i data-lucide="arrow-up"></i></button><button class="c-rm" data-person-del="${i}" aria-label="Delete ${esc(p.name)}"><i data-lucide="trash-2"></i></button></div></div>`).join("") || `<div class="d-empty"><i data-lucide="users"></i><b>Nobody here yet</b><span>Add collaborators, contributors, donors or your best buyers.</span></div>`}</div>`;
+      icons(); return;
+    }
+    const p = personEdit;
+    box.innerHTML = `<form class="a-form a-prod-form" id="person-form" novalidate>
+        <button type="button" class="a-back" data-person-back><i data-lucide="arrow-left"></i>All people</button>
+        <b class="a-form-t">${p._i === undefined ? "Add a person" : "Edit · " + esc(p.name)}</b>
+        <div class="a-grid3">
+          <label class="a-lbl">Name <input name="pname" maxlength="60" value="${esc(p.name || "")}" placeholder="e.g. Roky"></label>
+          <label class="a-lbl">Group <select name="group" class="a-select">${PGROUPS().map(([k, l]) => `<option value="${k}"${k === p.group ? " selected" : ""}>${l}</option>`).join("")}</select></label>
+          <label class="a-lbl">Role <input name="role" maxlength="60" value="${esc(p.role || "")}" placeholder="e.g. 3D artist, Builder"></label>
+        </div>
+        <label class="a-lbl">Sentence on the card <input name="note" maxlength="200" value="${esc(p.note || "")}" placeholder="e.g. Modeled the lava dragon with me"></label>
+        <div class="a-grid3">
+          <label class="a-lbl">Amount / badge <input name="amount" maxlength="30" value="${esc(p.amount || "")}" placeholder="e.g. €25, 6 orders"></label>
+          <label class="a-lbl">Roblox username <input name="roblox" maxlength="21" value="${esc(p.roblox || "")}" placeholder="optional · shows their avatar"></label>
+          <label class="a-lbl">Link <input name="link" type="url" maxlength="300" value="${esc(p.link || "")}" placeholder="https://… (optional)"></label>
+        </div>
+        <div class="a-lbl">Photo <span class="a-hint">Optional. Without a photo, the Roblox avatar is used, or the first letter of the name.</span></div>
+        <div class="a-imgs">${p.avatar ? `<div class="a-img cover a-img-round"><img src="${esc(SC().imgSrc(p.avatar))}" alt=""><div class="a-img-acts"><button type="button" data-person-noimg aria-label="Remove photo">×</button></div></div>` : ""}
+          <label class="a-img add"><input type="file" accept="image/png,image/jpeg,image/webp" id="person-img" class="sr"><i data-lucide="image-plus"></i><span>${p.avatar ? "Replace photo" : "Add a photo"}</span></label></div>
+        <button class="btn btn-w wide"><i data-lucide="save"></i>${p._i === undefined ? "Add to the page" : "Save"}</button>
+      </form>`;
+    icons();
+  }
+  const personFromForm = f => { const v = n => f.elements.namedItem(n).value.trim(); return { ...personEdit, name: v("pname"), group: v("group"), role: v("role"), note: v("note"), amount: v("amount"), roblox: v("roblox").replace(/^@/, ""), link: v("link") }; };
+  const savePeople = async (list, msg) => saveSection("people", list.map(({ _i, ...p }) => p), msg);
+  document.addEventListener("click", async e => {
+    if (e.target.closest("[data-person-new]")) { personEdit = { group: peopleFilter === "all" ? "collab" : peopleFilter }; renderPeopleAdmin(); return; }
+    if (e.target.closest("[data-person-back]")) { personEdit = null; renderPeopleAdmin(); return; }
+    const pf = e.target.closest("[data-pfilter]"); if (pf) { peopleFilter = pf.dataset.pfilter; renderPeopleAdmin(); return; }
+    if (e.target.closest("[data-person-noimg]")) { Object.assign(personEdit, personFromForm($("#person-form"))); personEdit.avatar = ""; renderPeopleAdmin(); return; }
+    const pe = e.target.closest("[data-person-edit]"); if (pe) { personEdit = { ...deep(SC().people[+pe.dataset.personEdit]), _i: +pe.dataset.personEdit }; renderPeopleAdmin(); return; }
+    const pu = e.target.closest("[data-person-up]"); if (pu) { const l = deep(SC().people), i = +pu.dataset.personUp; [l[i - 1], l[i]] = [l[i], l[i - 1]]; try { await savePeople(l, "Order saved"); } catch (err) { toast(err.message); } renderPeopleAdmin(); return; }
+    const pd = e.target.closest("[data-person-del]"); if (pd) { const l = deep(SC().people), i = +pd.dataset.personDel; if (!confirm(`Remove ${l[i].name} from the page?`)) return; l.splice(i, 1); try { await savePeople(l, "Removed"); } catch (err) { toast(err.message); } renderPeopleAdmin(); }
+  });
+  document.addEventListener("change", async e => {
+    if (e.target.id !== "person-img" || !e.target.files[0]) return;
+    Object.assign(personEdit, personFromForm($("#person-form")));
+    const add = e.target.closest(".a-img"); add.classList.add("busy"); add.querySelector("span").textContent = "Uploading…";
+    try { personEdit.avatar = await uploadImg(e.target.files[0]); } catch (err) { toast(err.message); }
+    renderPeopleAdmin();
+  });
+  document.addEventListener("submit", async e => {
+    if (e.target.id !== "person-form") return;
+    e.preventDefault();
+    const p = personFromForm(e.target);
+    if (!p.name) { toast("Give the person a name"); return; }
+    if (p.roblox && !/^[A-Za-z0-9_]{3,20}$/.test(p.roblox)) { toast("Roblox username: 3 to 20 letters, digits or _"); return; }
+    if (p.link && !/^https:\/\//.test(p.link)) { toast("The link must start with https://"); return; }
+    const l = deep(SC().people); if (p._i === undefined) l.push(p); else l[p._i] = p;
+    const btn = e.target.querySelector(".btn-w"); btn.disabled = true;
+    try { await savePeople(l, p._i === undefined ? "Added · live on the site" : "Saved · live on the site"); personEdit = null; renderPeopleAdmin(); } catch (err) { toast(err.message); btn.disabled = false; }
+  });
 
   /* Photos (packs) */
   let packEdit = null;

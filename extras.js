@@ -377,37 +377,6 @@
   })();
   const API = UI.Account.API;
 
-  /* ---------- Réactions 🔥 😍 🤯 sur les projets et les assets (sans compte) ---------- */
-  const REACTS = [["fire", "🔥", "Fire"], ["love", "😍", "Love it"], ["wow", "🤯", "Mind-blowing"]];
-  let reacts = {}, reactsLoaded = false;
-  const paintReact = el => {
-    const t = el.dataset.react, r = reacts[t] || { fire: 0, love: 0, wow: 0, mine: [] };
-    el.innerHTML = REACTS.map(([k, e, l]) => { const on = (r.mine || []).includes(k), n = r[k] || 0; return `<button type="button" class="rx${on ? " on" : ""}" data-rx="${k}" aria-pressed="${on}" aria-label="${l}: ${n}"><span class="rx-e" aria-hidden="true">${e}</span><span class="rx-n">${n || ""}</span></button>`; }).join("");
-    el.setAttribute("role", "group"); el.setAttribute("aria-label", "Reactions");
-  };
-  const paintAllReacts = () => document.querySelectorAll("[data-react]").forEach(paintReact);
-  const loadReacts = async () => { try { const r = await fetch(`${API}/api/reactions?cid=${encodeURIComponent(cid)}`); if (r.ok) { reacts = await r.json(); reactsLoaded = true; paintAllReacts(); } } catch (e) {} };
-  if (document.querySelector("[data-react]") || location.pathname.match(/shop\.html$/)) loadReacts();
-  // Les cartes du shop sont redessinées souvent : on remplit les nouvelles zones de réactions
-  new MutationObserver(() => document.querySelectorAll("[data-react]:empty").forEach(paintReact)).observe(document.body, { childList: true, subtree: true });
-  paintAllReacts();
-  document.addEventListener("click", async e => {
-    const b = e.target.closest("[data-rx]"); if (!b) return;
-    e.preventDefault(); e.stopPropagation();
-    const box = b.closest("[data-react]"), t = box.dataset.react, k = b.dataset.rx;
-    const r = reacts[t] || (reacts[t] = { fire: 0, love: 0, wow: 0, mine: [] });
-    const before = JSON.stringify(r), on = !(r.mine || []).includes(k);
-    r.mine = on ? [...(r.mine || []), k] : r.mine.filter(x => x !== k); r[k] = Math.max(0, (r[k] || 0) + (on ? 1 : -1));
-    document.querySelectorAll(`[data-react="${t}"]`).forEach(paintReact);
-    if (on && !reduce) document.querySelectorAll(`[data-react="${t}"] [data-rx="${k}"] .rx-e`).forEach(x => x.animate([{ transform: "scale(1)" }, { transform: "scale(1.6) rotate(-12deg)" }, { transform: "scale(1)" }], { duration: 450, easing: "cubic-bezier(.34, 1.56, .64, 1)" }));
-    try {
-      const res = await fetch(`${API}/api/reactions`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ target: t, kind: k, cid }) });
-      const d = await res.json(); if (!res.ok) throw new Error(d.error || "Server error");
-      reacts[t] = { fire: d.fire, love: d.love, wow: d.wow, mine: d.mine };
-    } catch (err) { reacts[t] = JSON.parse(before); toast("Couldn't save your reaction, try again"); }
-    document.querySelectorAll(`[data-react="${t}"]`).forEach(paintReact);
-  }, true);
-
   /* ---------- « En ce moment sur le site » : un signe toutes les 45 s tant que l'onglet est visible ---------- */
   const presenceEls = () => document.querySelectorAll("[data-presence]");
   const beat = async () => {
@@ -429,7 +398,6 @@
   document.addEventListener("visibilitychange", () => { if (!document.hidden) beat(); });
 
   window.UI.cid = cid;
-  window.UI.reactions = { paint: paintAllReacts, reload: loadReacts };
   window.UI.palette = { add: fn => providers.push(fn), open: openPal };
   window.UI.game = Game;
   window.UI.copyDiscord = copyDiscord;

@@ -212,19 +212,7 @@
     <div class="panels" id="panels">
 
     <div class="panel" id="p-projects" role="tabpanel">
-      <div class="proj-grid">
-        <article class="pcard">
-          <div class="pcard-img"><img src="img/bomb-duels.jpg" alt="Bomb Duels" loading="lazy"><span class="pc-live" data-proj-live="0" hidden></span></div>
-          <div class="pcard-body"><h3>Bomb Duels</h3><p>Roblox arena game with a smooth movement system.</p>
-            <div class="react" data-react="bomb-duels"></div>
-            <div class="pcard-foot"><span class="mono">Completed</span><button class="details" data-proj="0">Details <i data-lucide="arrow-right"></i></button></div></div>
-        </article>
-        <article class="pcard empty">
-          <i data-lucide="plus"></i>
-          <h3>Your project could be next</h3>
-          <button class="btn btn-o" data-tab="pricing">See pricing</button>
-        </article>
-      </div>
+      <div class="proj-grid" id="proj-grid"></div>
     </div>
 
     <div class="panel" id="p-pricing" role="tabpanel" hidden>
@@ -473,6 +461,7 @@
 
 <script src="promo.js"></script>
 <script src="advent.js"></script>
+<script src="content.js"></script>
 <script src="ui.js"></script>
 <script src="extras.js"></script>
 <script src="community.js"></script>
@@ -637,30 +626,25 @@
   moveInd(true);
 
   /* Photos des packs */
-  const packs = [
-    { name: "Lava Mounts Pack", desc: "Rigged lava dragon and horse, summoning bell and fire portal", id: "lava-mounts-pack",
-      imgs: [["dragon.webp", "Lava dragon"], ["dragon-tete.webp", "Lava dragon — head"], ["cheval.webp", "Lava horse"], ["portail.webp", "Fire portal"], ["cheval-profil.webp", "Lava horse — side"], ["dragon-profil.webp", "Lava dragon — side"], ["cloche.webp", "Summoning bell"]] },
-    { name: "Stylized Forest Pack", desc: "18 stylized nature assets: trees, bushes, rocks, mushrooms, flowers…", id: "stylized-forest-pack",
-      imgs: [["forest.jpg", "Forest Pack — full scene"]].concat(["Oak", "Oak — variant", "Autumn tree", "Birch", "Pine", "Pine — variant", "Bush", "Berry bush", "Stump", "Log", "Large rock", "Medium rock", "Small rock", "Red mushroom", "Brown mushrooms", "Flowers", "Grass", "Fern"].map((n, i) => [`forest-${String(i + 1).padStart(2, "0")}.webp`, n, "sq"])) },
-    { name: "HUD & Quests Pack", desc: "Compass, working minimap, quest tracker, notifications and health bars", id: "hud-quest-pack",
-      imgs: [["hud.webp", "HUD & Quests — in game"]] },
-    { name: "UI Kit — Dark Modern", desc: "Menus, HUD, inventory, shop, notifications", id: "modern-school-ui",
-      imgs: [["ui-dark-modern.webp", "UI Kit — Dark Modern"]] }
-  ];
+  const packs = SiteContent.packs;
   const SHOW = 9;
   const count = p => `${p.imgs.length} render${p.imgs.length > 1 ? "s" : ""}`;
   let packIdx = 0;
   const dd = $("#dd"), ddBtn = $("#dd-btn"), ddMenu = $("#dd-menu");
-  ddMenu.innerHTML = packs.map((p, i) => `<li><button role="option" data-pack="${i}" aria-selected="${i === 0}"><img src="img/${p.imgs[0][0]}" alt=""><span><b>${p.name}</b><small>${count(p)}</small></span><i class="tick" data-lucide="check"></i></button></li>`).join("");
+  const src = f => SiteContent.imgSrc(f);
+  const buildPackMenu = () => { ddMenu.innerHTML = packs.map((p, i) => `<li><button role="option" data-pack="${i}" aria-selected="${i === packIdx}"><img src="${esc(src((p.imgs[0] || [""])[0]))}" alt=""><span><b>${esc(p.name)}</b><small>${count(p)}</small></span><i class="tick" data-lucide="check"></i></button></li>`).join(""); icons(); };
+  buildPackMenu();
   const renderPack = () => {
+    if (!packs.length) { $("#gallery").innerHTML = ""; $("#dd-name").textContent = "No photos yet"; $("#dd-meta").textContent = ""; $("#photo-desc").textContent = ""; return; }
+    packIdx = Math.min(packIdx, packs.length - 1);
     const p = packs[packIdx];
-    $("#dd-thumb").src = "img/" + p.imgs[0][0];
+    $("#dd-thumb").src = src((p.imgs[0] || [""])[0]);
     $("#dd-name").textContent = p.name;
     $("#dd-meta").textContent = count(p);
     $("#photo-desc").textContent = p.desc;
-    $("#photo-shop").href = "shop.html?product=" + p.id;
+    $("#photo-shop").href = p.id ? "shop.html?product=" + p.id : "shop.html"; $("#photo-shop").hidden = !p.id;
     $$("[data-pack]", ddMenu).forEach(b => b.setAttribute("aria-selected", +b.dataset.pack === packIdx));
-    $("#gallery").innerHTML = p.imgs.slice(0, SHOW).map(([f, n, c], i) => `<button class="${i === 0 ? "big" : c || ""}" data-photo="${packIdx}:${i}" aria-label="Enlarge: ${n}"><img src="img/${f}" alt="${n}" loading="lazy">${i === SHOW - 1 && p.imgs.length > SHOW ? `<span class="more">+${p.imgs.length - SHOW}</span>` : ""}</button>`).join("");
+    $("#gallery").innerHTML = p.imgs.slice(0, SHOW).map(([f, n, c], i) => `<button class="${i === 0 ? "big" : c || ""}" data-photo="${packIdx}:${i}" aria-label="Enlarge: ${esc(n)}"><img src="${esc(src(f))}" alt="${esc(n)}" loading="lazy">${i === SHOW - 1 && p.imgs.length > SHOW ? `<span class="more">+${p.imgs.length - SHOW}</span>` : ""}</button>`).join("");
   };
   const setDD = o => { dd.classList.toggle("open", o); ddBtn.setAttribute("aria-expanded", o); };
   ddBtn.addEventListener("click", e => { e.stopPropagation(); setDD(!dd.classList.contains("open")); });
@@ -680,7 +664,7 @@
   const showPhoto = () => {
     const [f, n] = packs[lbPack].imgs[lbIdx];
     $("#modal-in").className = "modal-in solo";
-    $("#modal-in").innerHTML = `<img class="lb-img" src="img/${f}" alt="${n}"><div class="cap">${n} · ${packs[lbPack].name} · ${lbIdx + 1} / ${packs[lbPack].imgs.length}</div>
+    $("#modal-in").innerHTML = `<img class="lb-img" src="${esc(src(f))}" alt="${esc(n)}"><div class="cap">${esc(n)} · ${esc(packs[lbPack].name)} · ${lbIdx + 1} / ${packs[lbPack].imgs.length}</div>
       <div class="btns" style="justify-content:center;margin-top:12px"><button class="btn btn-o" data-step="-1" aria-label="Previous photo"><i data-lucide="arrow-left"></i></button><button class="btn btn-o" data-step="1" aria-label="Next photo"><i data-lucide="arrow-right"></i></button></div>`;
     icons();
   };
@@ -692,11 +676,18 @@
   });
 
   /* Projets : fenêtre de détails */
-  // universeId : l'identifiant Roblox du jeu, pour afficher joueurs et visites en direct (null = rien n'est affiché)
-  const BOMB_DUELS_UNIVERSE = null;
-  const projects = [
-    { t: "Bomb Duels", img: "img/bomb-duels.jpg", d: "Roblox arena game with a smooth movement system, built for fast-paced duels.", tech: ["Lua", "Movement system", "Arena"], universeId: BOMB_DUELS_UNIVERSE }
-  ];
+  const projects = SiteContent.projects;
+  const projKey = p => p.id || String(p.t || "project").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const renderProjects = () => {
+    $("#proj-grid").innerHTML = projects.map((p, i) => `<article class="pcard">
+        <div class="pcard-img"><img src="${esc(SiteContent.imgSrc(p.img))}" alt="${esc(p.t)}" loading="lazy"><span class="pc-live" data-proj-live="${i}" hidden></span></div>
+        <div class="pcard-body"><h3>${esc(p.t)}</h3><p>${esc(p.short || p.d)}</p>
+          <div class="react" data-react="${esc(projKey(p))}"></div>
+          <div class="pcard-foot"><span class="mono">${esc(p.status || "Completed")}</span><button class="details" data-proj="${i}">Details <i data-lucide="arrow-right"></i></button></div></div>
+      </article>`).join("") + `<article class="pcard empty"><i data-lucide="plus"></i><h3>Your project could be next</h3><button class="btn btn-o" data-tab="pricing">See pricing</button></article>`;
+    icons(); UI.reactions && UI.reactions.paint();
+  };
+  renderProjects();
   // Joueurs et visites en direct sur les cartes projets
   const liveCards = {};
   async function liveProjects() {
@@ -719,9 +710,9 @@
     const p = projects[+b.dataset.proj];
     $("#modal-in").className = "modal-in";
     const g = liveCards[+b.dataset.proj];
-    $("#modal-in").innerHTML = `<img src="${p.img}" alt="${p.t}"><div><span class="kicker">Project · Completed</span><h3>${p.t}</h3><p>${p.d}</p>
+    $("#modal-in").innerHTML = `<img src="${esc(SiteContent.imgSrc(p.img))}" alt="${esc(p.t)}"><div><span class="kicker">Project · ${esc(p.status || "Completed")}</span><h3>${esc(p.t)}</h3><p>${esc(p.d)}</p>
       ${g ? `<div class="a-stats" style="margin-bottom:20px"><div><b>${fmtN(g.playing)}</b><span>Playing now</span></div><div><b>${fmtN(g.visits)}</b><span>Visits</span></div><div><b>${fmtN(g.favoritedCount || 0)}</b><span>Favourites</span></div></div>` : ""}
-      <div class="kicker" style="margin-bottom:12px">Technologies</div><div class="tags">${p.tech.map(x => `<span class="tag">${x}</span>`).join("")}</div>
+      <div class="kicker" style="margin-bottom:12px">Technologies</div><div class="tags">${(p.tech || []).map(x => `<span class="tag">${esc(x)}</span>`).join("")}</div>
       <a href="#contact" class="btn btn-w" id="modal-cta">Similar project? Contact me</a></div>`;
     modal.classList.add("open"); icons();
     $("#modal-cta").addEventListener("click", () => modal.classList.remove("open"));
@@ -732,24 +723,16 @@
   addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 
   /* Tarifs (prix suivis par le code promo) */
-  const cats = [["roblox", "Roblox"], ["script", "Script"], ["build", "Build"], ["web", "Web"], ["uiux", "UI/UX"], ["gfx", "GFX"], ["discord", "Discord"], ["3d", "3D"]];
-  const plans = {
-    roblox: [["Custom system", "A specific system built into your game: inventory, combat, economy, quests, anti-exploit…", 15, "depending on complexity", ["1 complete system", "Testing & fixes included", "7-day support"]], ["Full game", "A Roblox game from A to Z: concept, mechanics, scripts, UI and publishing.", 80, "depending on scope", ["Concept & game design", "Build & UI included", "Support until release"]], ["Maintenance & Support", "Bugs, performance, new features on an existing project.", 6, "depending on workload", ["Diagnosis included", "Detailed report", "Billed per task"]]],
-    script: [["Custom script", "A specific script or system, on Roblox or elsewhere.", 9, "depending on complexity", ["Commented & organized", "Testing included", "7-day support"]], ["Automation", "A repetitive task automated: data, internal tool…", 7, "depending on workload", ["Needs analysis", "Ready to use", "Documentation included"]], ["Debug & Optimization", "Bugs and performance on an existing script or project.", 5, "depending on workload", ["Diagnosis included", "Quick fixes", "Detailed report"]]],
-    build: [["Custom build", "An environment, a map or a detailed structure.", 12, "depending on size", ["Mapping / terrain", "Props & details", "Optimization included"]], ["Lighting & VFX", "Lighting atmosphere and visual effects for an environment.", 7, "depending on scope", ["Ambient lighting", "Visual effects", "Revisions included"]], ["Build optimization", "A heavy or messy environment, made smooth.", 6, "depending on workload", ["Diagnosis included", "Quick fixes", "Detailed report"]]],
-    web: [["Showcase website", "A simple, elegant site to present your activity.", 20, "1-3 pages", ["Responsive", "SEO optimized", "Clean code"]], ["Full website", "Multi-page with animations and dynamic content.", 40, "4-8 pages", ["CSS/JS animations", "Contact form", "Performance optimized"]], ["Website with backend", "Database, authentication, API, admin dashboard.", 60, "depending on complexity", ["Database", "Authentication", "Custom API"]]],
-    uiux: [["Wireframe / Mockup", "The structure of an interface before development.", 4, "per screen count", ["Clear wireframes", "Content structure", "1 revision"]], ["UI Design", "A complete interface: screens, components, consistency.", 12, "per screen count", ["High fidelity", "Reusable components", "Source files"]], ["Interactive prototype", "A clickable prototype to validate a user flow.", 10, "depending on flow", ["Clickable flow", "Fast iterations", "Feedback included"]]],
-    gfx: [["Profile picture (PFP)", "A polished profile picture for you, your channel or your group.", 3, "per PFP", ["Square HD format", "2 revisions", "Fast delivery"]], ["Banner", "YouTube, Discord or Roblox group, at the right size.", 5, "per banner", ["Right dimensions", "2 revisions", "Source on request"]], ["Thumbnail", "An eye-catching thumbnail for your game or video.", 7, "per thumbnail", ["Original composition", "Built for clicks", "2 revisions"]]],
-    discord: [["Custom Discord bot", "Moderation, economy, levels, custom commands…", 9, "depending on features", ["Source code included", "Hosting help", "7-day support"]], ["Server setup", "Channels, roles, permissions and a consistent design.", 6, "depending on size", ["Channel structure", "Roles & permissions", "Basic bots configured"]]],
-    "3d": [["3D model", "A prop, object or character, textured and ready to use.", 10, "depending on complexity", ["Modeling & texturing", "Export in your format", "2 revisions"]]]
-  };
+  const cats = SiteContent.CATS;
+  const plans = SiteContent.plans;
   let cat = "roblox", cur = "eur";
   $("#cats").innerHTML = cats.map(([id, l]) => `<button aria-pressed="${id === cat}" data-cat="${id}">${l}</button>`).join("");
   const renderPlans = () => {
+    if (!(plans[cat] || []).length) { $("#plans").innerHTML = `<div class="empty-note" style="grid-column:1/-1;padding:40px;text-align:center;color:var(--ink-3)">No service in this category for now. <a href="#contact" style="text-decoration:underline">Ask me anyway</a></div>`; return; }
     $("#plans").innerHTML = plans[cat].map(([n, d, eur, note, feats]) => `<article class="plan">
-      <h3>${n}</h3><p>${d}</p><span class="from">Starting at</span>
+      <h3>${esc(n)}</h3><p>${esc(d)}</p><span class="from">Starting at</span>
       <div class="price">${X.priceHTML(eur, cur)}</div><span class="note">${note}</span>
-      <ul>${feats.map(f => `<li><i data-lucide="check"></i>${f}</li>`).join("")}</ul>
+      <ul>${(feats || []).map(f => `<li><i data-lucide="check"></i>${esc(f)}</li>`).join("")}</ul>
       <div class="plan-btns"><a class="btn btn-w" href="mailto:tomokari.pro@gmail.com?subject=${encodeURIComponent("Quote - " + n)}">Request a quote</a><a class="btn btn-o" href="#quote" data-quote="${cat}:${plans[cat].findIndex(x => x[0] === n)}" aria-label="Estimate ${n}"><i data-lucide="calculator"></i></a><button class="btn btn-o" data-svc="${n}|${eur}" aria-label="Add ${n} to cart"><i data-lucide="shopping-cart"></i></button></div>
     </article>`).join("");
     icons();
@@ -758,6 +741,12 @@
   $$("[data-cur]").forEach(b => b.addEventListener("click", () => { cur = b.dataset.cur; $$("[data-cur]").forEach(x => x.setAttribute("aria-pressed", x === b)); renderPlans(); }));
   renderPlans();
   document.addEventListener("promochange", renderPlans);
+  document.addEventListener("contentchange", () => {
+    renderProjects(); liveProjects();
+    buildPackMenu(); renderPack();
+    renderPlans();
+    if (typeof renderQuote === "function") { qs.items = qs.items.filter(it => plans[it.cat] && plans[it.cat][it.svc]); if (!plans[qs.browse]) qs.browse = cats[0][0]; renderQuote(); }
+  });
   X.mountBar();
   X.mountPromoForm($("#promo-form"));
 
@@ -932,6 +921,7 @@
   const paintForm = () => { $("#comment-form").hidden = !Acc.user; $("#review-signin").hidden = !!Acc.user; };
   paintForm();
   document.addEventListener("authchange", () => { paintForm(); loadReviews(); });
+  document.addEventListener("moderated", e => { if (e.detail === "reviews") loadReviews(); });
   $("#comment-form").addEventListener("submit", async e => {
     e.preventDefault();
     const f = new FormData(e.target), text = String(f.get("text")).trim(), country = f.get("country") || undefined;
@@ -995,7 +985,7 @@
   /* Globe : deux catégories, Projets et Avis */
   const PROJECTS = [
     { name: "Exiozz · base", place: "France", lat: 46.6, lon: 2.4, desc: "Where everything is built: scripts, builds, GFX, websites and Discord bots.", tags: ["Roblox", "Web", "GFX", "Discord"] },
-    { name: "Bomb Duels", place: "Roblox arena game", at: 0, desc: "Roblox arena game with a smooth movement system.", tags: ["Lua", "Movement system", "Arena"], universeId: BOMB_DUELS_UNIVERSE }
+    { name: "Bomb Duels", place: "Roblox arena game", at: 0, desc: "Roblox arena game with a smooth movement system.", tags: ["Lua", "Movement system", "Arena"], universeId: (projects[0] || {}).universeId }
     // Ajoute tes clients : { name: "Client project", place: "Montreal, Canada", lat: 45.5, lon: -73.57, desc: "…", tags: ["Lua"], universeId: 1234567890 },
   ];
   let worldMode = "projects", globe = null, list = [], markers = [];
@@ -1260,7 +1250,7 @@
   UI.palette.add(() => [
     ...faq.map(([c, q, a], i) => ({ g: "FAQ", label: q, hint: a, icon: "circle-help", run: () => { faqF = "all"; faqOpen = i; $$("#faq-filters [data-f]").forEach(x => x.setAttribute("aria-pressed", x.dataset.f === "all")); renderFaq(false); $("#faq").scrollIntoView({ behavior: "smooth" }); } })),
     ...projects.map((p, i) => ({ g: "Projects", label: p.t, hint: p.d, img: p.img, k: p.tech.join(" "), run: () => { showTab("projects"); $(`[data-proj="${i}"]`).click(); } })),
-    ...packs.map((p, i) => ({ g: "Photos", label: p.name + " · photos", hint: p.desc, img: "img/" + p.imgs[0][0], run: () => { showTab("photos"); packIdx = i; renderPack(); $("#portfolio").scrollIntoView({ behavior: "smooth" }); } })),
+    ...packs.map((p, i) => ({ g: "Photos", label: p.name + " · photos", hint: p.desc, img: src((p.imgs[0] || [""])[0]), run: () => { showTab("photos"); packIdx = i; renderPack(); $("#portfolio").scrollIntoView({ behavior: "smooth" }); } })),
     { g: "Go to", label: "Quote simulator", hint: "Get a price range for your project", icon: "calculator", k: "price estimate devis cost", run: () => $("#quote").scrollIntoView({ behavior: "smooth" }), top: true },
     ...Object.entries(plans).flatMap(([c, list]) => list.map(([n, d, eur], i) => ({ g: "Services", label: n, hint: `${cats.find(x => x[0] === c)[1]} · from ${X.money(eur)}`, icon: "receipt", k: d + " price pricing service", run: () => { qAdd(c, i); toQuote(); toast(`${n} added to your quote`); } })))
   ]);

@@ -409,7 +409,7 @@
     const body = adminD.querySelector(".drawer-body");
     adminD.querySelector(".drawer-foot").innerHTML = `<a class="btn btn-o wide" href="admin.html"><i data-lucide="folder-cog"></i>Full admin panel · files, asset library, new order</a>`;
     if (!isAdmin()) { body.innerHTML = `<div class="d-empty"><i data-lucide="lock"></i><b>Admin only</b><span>Sign in with the admin Discord account</span></div>`; icons(); return; }
-    const tabs = [["orders", "Orders"], ["shop", "Shop"], ["promo", "Promo codes"], ["avail", "Availability"], ["shots", "Showcase"], ["community", "Community"]];
+    const tabs = [["orders", "Orders"], ["shop", "Shop"], ["prices", "Prices"], ["projects", "Projects"], ["photos", "Photos"], ["community", "Community"], ["promo", "Promo codes"], ["avail", "Availability"], ["shots", "Showcase"]];
     const head = `<div class="a-tabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${k === adminTab}" data-atab="${k}">${l}</button>`).join("")}</div>`;
     if (adminTab === "orders") {
       body.innerHTML = head + `<div id="a-orders"></div>`; const box = $("#a-orders");
@@ -455,11 +455,15 @@
       body.innerHTML = head + `<div id="a-shop"></div>`; renderShopAdmin($("#a-shop"));
     } else if (adminTab === "promo") {
       body.innerHTML = head + `<div id="a-promo"></div>`; renderPromoAdmin($("#a-promo"));
+    } else if (adminTab === "prices") {
+      body.innerHTML = head + `<div id="a-prices"></div>`; renderPricesAdmin();
+    } else if (adminTab === "projects") {
+      body.innerHTML = head + `<div id="a-projects"></div>`; renderProjectsAdmin();
+    } else if (adminTab === "photos") {
+      body.innerHTML = head + `<div id="a-photos"></div>`; renderPhotosAdmin();
     } else {
-      body.innerHTML = head + `<div class="a-stats"><div><b data-discord="members">—</b><span>Discord members</span></div><div><b data-discord="online">—</b><span>Online</span></div><div><b id="a-rev">—</b><span>Reviews</span></div></div>
-        <a class="btn btn-o" href="https://discord.gg/rGcdngHsCe"><i data-lucide="message-circle"></i>Open the Discord server</a>`;
-      icons(); discord();
-      fetch(API + "/api/reviews").then(r => r.json()).then(l => { const el = $("#a-rev"); if (el) el.textContent = l.length; }).catch(() => {});
+      body.innerHTML = head + `<div class="a-stats"><div><b data-discord="members">—</b><span>Discord members</span></div><div><b data-discord="online">—</b><span>Online</span></div><div><b id="a-rev">—</b><span>Reviews</span></div></div><div id="a-mod"></div>`;
+      icons(); discord(); renderModeration();
     }
   }
   /* Shop : ajouter, modifier, masquer ou supprimer des assets (gardés sur le serveur) */
@@ -578,6 +582,205 @@
     catch (err) { toast(err.message); btn.disabled = false; }
   });
   document.addEventListener("catalogchange", () => { if (adminTab === "shop" && !shopEdit && openD === adminD) renderShopAdmin(); });
+
+  /* ===== Contenu de l'accueil : tarifs, projets, photos (gardés sur le serveur) ===== */
+  const SC = () => window.SiteContent;
+  const deep = v => JSON.parse(JSON.stringify(v));
+  const saveSection = async (section, value, msg) => {
+    await api("/api/admin/content", { method: "POST", body: JSON.stringify({ section, value }) });
+    await SC().reload(); toast(msg || "Saved · live on the site");
+  };
+  const resetSection = async (section, label) => {
+    if (!confirm(`Restore the original ${label}? Your changes on this part are removed.`)) return false;
+    await api(`/api/admin/content/${section}`, { method: "DELETE" }); await SC().reload(); toast("Original version restored"); return true;
+  };
+  const uploadImg = async file => (await api("/api/admin/images", { method: "POST", body: JSON.stringify({ image: await shrinkImg(file) }) })).url;
+
+  /* Tarifs des services */
+  let priceDraft = null, priceCat = "roblox";
+  const syncPrices = () => {
+    $$("#a-prices [data-svc-row]").forEach(row => {
+      const k = +row.dataset.svcRow, r = priceDraft[priceCat][k]; if (!r) return;
+      r[0] = row.querySelector("[data-f=name]").value; r[2] = +row.querySelector("[data-f=price]").value;
+      r[3] = row.querySelector("[data-f=note]").value; r[1] = row.querySelector("[data-f=desc]").value;
+      r[4] = row.querySelector("[data-f=feats]").value.split("\n").map(x => x.trim()).filter(Boolean);
+    });
+  };
+  function renderPricesAdmin() {
+    const box = $("#a-prices"); if (!box) return;
+    if (!priceDraft) priceDraft = deep(SC().plans);
+    const list = priceDraft[priceCat] || (priceDraft[priceCat] = []);
+    box.innerHTML = `<p class="d-note" style="margin:0 0 12px">Starting prices shown in the Pricing tab and used by the quote simulator.${SC().edited().plans ? ' <b style="color:var(--accent)">Edited</b>' : ""}</p>
+      <div class="cats a-pcats">${SC().CATS.map(([id, l]) => `<button type="button" aria-pressed="${id === priceCat}" data-pcat="${id}">${l}<span class="n">${(priceDraft[id] || []).length}</span></button>`).join("")}</div>
+      <div class="a-svcs">${list.map(([n, d, eur, note, feats], k) => `<div class="a-svc" data-svc-row="${k}">
+          <div class="a-svc-top"><input data-f="name" value="${esc(n)}" placeholder="Service name" maxlength="60" aria-label="Service name"><label class="a-price"><input data-f="price" type="number" min="0.5" step="0.5" value="${eur}" aria-label="Starting price in euros"><span>€</span></label><button type="button" class="c-rm" data-svc-del="${k}" aria-label="Delete ${esc(n)}"><i data-lucide="trash-2"></i></button></div>
+          <input data-f="note" value="${esc(note || "")}" placeholder="Precision (e.g. per thumbnail)" maxlength="60" aria-label="Precision">
+          <details><summary>Description and what's included</summary>
+            <textarea data-f="desc" rows="2" maxlength="240" placeholder="Short description">${esc(d || "")}</textarea>
+            <textarea data-f="feats" rows="3" placeholder="What's included, one per line">${esc((feats || []).join("\n"))}</textarea></details>
+        </div>`).join("") || `<div class="d-empty" style="padding:24px"><span>No service in this category</span></div>`}</div>
+      <button type="button" class="btn btn-o wide" data-svc-add><i data-lucide="plus"></i>Add a service</button>
+      <div class="a-save"><button type="button" class="btn btn-w" data-prices-save><i data-lucide="save"></i>Save prices</button>${SC().edited().plans ? '<button type="button" class="btn btn-o" data-prices-reset><i data-lucide="rotate-ccw"></i>Restore original</button>' : ""}</div>`;
+    icons();
+  }
+
+  /* Projets */
+  let projEdit = null;
+  function renderProjectsAdmin() {
+    const box = $("#a-projects"); if (!box) return;
+    const list = SC().projects;
+    if (!projEdit) {
+      box.innerHTML = `<div class="a-shop-top"><p class="d-note" style="margin:0">Project cards in the Projects tab.${SC().edited().projects ? ' <b style="color:var(--accent)">Edited</b>' : ""}</p><button class="btn btn-w" data-proj-new><i data-lucide="plus"></i>New project</button></div>
+        <div class="a-prods">${list.map((p, i) => `<div class="a-prod"><img src="${esc(SC().imgSrc(p.img))}" alt="" loading="lazy">
+          <div class="a-prod-info"><b>${esc(p.t)}</b><span>${esc(p.status || "Completed")}${(p.tech || []).length ? " · " + esc(p.tech.join(", ")) : ""}${p.universeId ? " · live stats on" : ""}</span></div>
+          <div class="a-prod-acts"><button class="btn btn-o" data-proj-edit="${i}"><i data-lucide="pencil"></i>Edit</button><button class="c-rm" data-proj-up="${i}" aria-label="Move up"${i ? "" : " disabled"}><i data-lucide="arrow-up"></i></button><button class="c-rm" data-proj-del="${i}" aria-label="Delete ${esc(p.t)}"><i data-lucide="trash-2"></i></button></div></div>`).join("") || `<div class="d-empty"><i data-lucide="folder-open"></i><b>No project</b></div>`}</div>
+        ${SC().edited().projects ? '<div class="a-save"><button type="button" class="btn btn-o" data-proj-reset><i data-lucide="rotate-ccw"></i>Restore original projects</button></div>' : ""}`;
+      icons(); return;
+    }
+    const p = projEdit;
+    box.innerHTML = `<form class="a-form a-prod-form" id="proj-form" novalidate>
+        <button type="button" class="a-back" data-proj-back><i data-lucide="arrow-left"></i>All projects</button>
+        <b class="a-form-t">${p._i === undefined ? "New project" : "Edit · " + esc(p.t)}</b>
+        <label class="a-lbl">Title <input name="t" maxlength="80" value="${esc(p.t || "")}" placeholder="e.g. Obby Rush"></label>
+        <label class="a-lbl">One line for the card <input name="short" maxlength="160" value="${esc(p.short || "")}" placeholder="e.g. A fast obby with 50 stages"></label>
+        <label class="a-lbl">Description (details window) <textarea name="d" rows="3" maxlength="600">${esc(p.d || "")}</textarea></label>
+        <div class="a-grid3">
+          <label class="a-lbl">Status <select name="status" class="a-select">${["Completed", "In progress", "Released", "Commission"].map(x => `<option${x === (p.status || "Completed") ? " selected" : ""}>${x}</option>`).join("")}</select></label>
+          <label class="a-lbl">Technologies <input name="tech" maxlength="140" value="${esc((p.tech || []).join(", "))}" placeholder="Lua, UI, DataStore"></label>
+          <label class="a-lbl">Roblox universe ID <input name="universeId" inputmode="numeric" maxlength="15" value="${esc(p.universeId || "")}" placeholder="optional"></label>
+        </div>
+        <div class="a-lbl">Image <span class="a-hint">Shown on the card and in the details window.</span></div>
+        <div class="a-imgs">${p.img ? `<div class="a-img cover"><img src="${esc(SC().imgSrc(p.img))}" alt=""></div>` : ""}
+          <label class="a-img add"><input type="file" accept="image/png,image/jpeg,image/webp" id="proj-img" class="sr"><i data-lucide="image-plus"></i><span>${p.img ? "Replace image" : "Add an image"}</span></label></div>
+        <button class="btn btn-w wide"><i data-lucide="save"></i>${p._i === undefined ? "Add project" : "Save project"}</button>
+      </form>`;
+    icons();
+  }
+  const projFromForm = f => { const v = n => f.elements.namedItem(n).value.trim(); return { ...projEdit, t: v("t"), short: v("short"), d: v("d"), status: v("status"), tech: v("tech").split(",").map(x => x.trim()).filter(Boolean), universeId: v("universeId") || null }; };
+  const saveProjects = async (list, msg) => saveSection("projects", list.map(({ _i, ...p }) => p), msg);
+
+  /* Photos (packs) */
+  let packEdit = null;
+  function renderPhotosAdmin() {
+    const box = $("#a-photos"); if (!box) return;
+    const list = SC().packs;
+    if (!packEdit) {
+      box.innerHTML = `<div class="a-shop-top"><p class="d-note" style="margin:0">Packs shown in the Photos tab.${SC().edited().packs ? ' <b style="color:var(--accent)">Edited</b>' : ""}</p><button class="btn btn-w" data-pack-new><i data-lucide="plus"></i>New pack</button></div>
+        <div class="a-prods">${list.map((p, i) => `<div class="a-prod"><img src="${esc(SC().imgSrc((p.imgs[0] || [""])[0]))}" alt="" loading="lazy">
+          <div class="a-prod-info"><b>${esc(p.name)}</b><span>${p.imgs.length} photo${p.imgs.length > 1 ? "s" : ""}${p.id ? " · linked to the shop" : ""}</span></div>
+          <div class="a-prod-acts"><button class="btn btn-o" data-pack-edit="${i}"><i data-lucide="pencil"></i>Edit</button><button class="c-rm" data-pack-up="${i}" aria-label="Move up"${i ? "" : " disabled"}><i data-lucide="arrow-up"></i></button><button class="c-rm" data-pack-del="${i}" aria-label="Delete ${esc(p.name)}"><i data-lucide="trash-2"></i></button></div></div>`).join("") || `<div class="d-empty"><i data-lucide="images"></i><b>No pack</b></div>`}</div>
+        ${SC().edited().packs ? '<div class="a-save"><button type="button" class="btn btn-o" data-pack-reset><i data-lucide="rotate-ccw"></i>Restore original photos</button></div>' : ""}`;
+      icons(); return;
+    }
+    const p = packEdit;
+    box.innerHTML = `<form class="a-form a-prod-form" id="pack-form" novalidate>
+        <button type="button" class="a-back" data-pack-back><i data-lucide="arrow-left"></i>All packs</button>
+        <b class="a-form-t">${p._i === undefined ? "New pack" : "Edit · " + esc(p.name)}</b>
+        <label class="a-lbl">Name <input name="name" maxlength="80" value="${esc(p.name || "")}" placeholder="e.g. Medieval Castle Pack"></label>
+        <label class="a-lbl">Description <input name="desc" maxlength="200" value="${esc(p.desc || "")}" placeholder="What's in the pictures"></label>
+        <label class="a-lbl">Linked shop asset <select name="linked" class="a-select"><option value="">None (no “View in shop” button)</option>${X.Catalog.all().map(a => `<option value="${esc(a.id)}"${a.id === p.id ? " selected" : ""}>${esc(a.name)}</option>`).join("")}</select></label>
+        <div class="a-lbl">Photos <span class="a-hint">The first one is the big picture. Resized automatically.</span></div>
+        <div class="a-imgs">${(p.imgs || []).map(([f, cap], i) => `<div class="a-img${i ? "" : " cover"}"><img src="${esc(SC().imgSrc(f))}" alt=""><input data-pcap="${i}" value="${esc(cap || "")}" placeholder="Caption" maxlength="80">
+            <div class="a-img-acts"><button type="button" data-pimg-left="${i}" aria-label="Move left"${i ? "" : " disabled"}>←</button><button type="button" data-pimg-del="${i}" aria-label="Remove photo">×</button></div></div>`).join("")}
+          <label class="a-img add"><input type="file" accept="image/png,image/jpeg,image/webp" multiple id="pack-img" class="sr"><i data-lucide="image-plus"></i><span>Add photos</span></label></div>
+        <button class="btn btn-w wide"><i data-lucide="save"></i>${p._i === undefined ? "Add pack" : "Save pack"}</button>
+      </form>`;
+    icons();
+  }
+  const syncPack = () => { const f = $("#pack-form"); if (!f) return; const v = n => f.elements.namedItem(n).value.trim(); packEdit.name = v("name"); packEdit.desc = v("desc"); packEdit.id = v("linked"); $$("#pack-form [data-pcap]").forEach(i => { packEdit.imgs[+i.dataset.pcap][1] = i.value; }); };
+  const savePacks = async (list, msg) => saveSection("packs", list.map(({ _i, ...p }) => p), msg);
+
+  document.addEventListener("click", async e => {
+    if (!e.target.closest("#admin-drawer")) return;
+    // Tarifs
+    const pc = e.target.closest("[data-pcat]"); if (pc) { syncPrices(); priceCat = pc.dataset.pcat; renderPricesAdmin(); return; }
+    if (e.target.closest("[data-svc-add]")) { syncPrices(); priceDraft[priceCat].push(["New service", "", 10, "depending on scope", []]); renderPricesAdmin(); const rows = $$("#a-prices [data-svc-row]"); const last = rows[rows.length - 1]; last && last.querySelector("[data-f=name]").select(); return; }
+    const sd = e.target.closest("[data-svc-del]"); if (sd) { syncPrices(); priceDraft[priceCat].splice(+sd.dataset.svcDel, 1); renderPricesAdmin(); return; }
+    const ps = e.target.closest("[data-prices-save]");
+    if (ps) { syncPrices(); ps.disabled = true; try { await saveSection("plans", priceDraft, "Prices saved · live on the site"); priceDraft = null; renderPricesAdmin(); } catch (err) { toast(err.message); ps.disabled = false; } return; }
+    if (e.target.closest("[data-prices-reset]")) { try { if (await resetSection("plans", "prices")) { priceDraft = null; renderPricesAdmin(); } } catch (err) { toast(err.message); } return; }
+    // Projets
+    if (e.target.closest("[data-proj-new]")) { projEdit = { status: "Completed", tech: [] }; renderProjectsAdmin(); return; }
+    if (e.target.closest("[data-proj-back]")) { projEdit = null; renderProjectsAdmin(); return; }
+    const pe = e.target.closest("[data-proj-edit]"); if (pe) { projEdit = { ...deep(SC().projects[+pe.dataset.projEdit]), _i: +pe.dataset.projEdit }; renderProjectsAdmin(); return; }
+    const pu = e.target.closest("[data-proj-up]"); if (pu) { const l = deep(SC().projects), i = +pu.dataset.projUp; [l[i - 1], l[i]] = [l[i], l[i - 1]]; try { await saveProjects(l, "Order saved"); } catch (err) { toast(err.message); } renderProjectsAdmin(); return; }
+    const pd = e.target.closest("[data-proj-del]"); if (pd) { const l = deep(SC().projects), i = +pd.dataset.projDel; if (!confirm(`Delete the project ${l[i].t}?`)) return; l.splice(i, 1); try { await saveProjects(l, "Project deleted"); } catch (err) { toast(err.message); } renderProjectsAdmin(); return; }
+    if (e.target.closest("[data-proj-reset]")) { try { if (await resetSection("projects", "projects")) renderProjectsAdmin(); } catch (err) { toast(err.message); } return; }
+    // Photos
+    if (e.target.closest("[data-pack-new]")) { packEdit = { imgs: [], id: "" }; renderPhotosAdmin(); return; }
+    if (e.target.closest("[data-pack-back]")) { packEdit = null; renderPhotosAdmin(); return; }
+    const ke = e.target.closest("[data-pack-edit]"); if (ke) { packEdit = { ...deep(SC().packs[+ke.dataset.packEdit]), _i: +ke.dataset.packEdit }; renderPhotosAdmin(); return; }
+    const ku = e.target.closest("[data-pack-up]"); if (ku) { const l = deep(SC().packs), i = +ku.dataset.packUp; [l[i - 1], l[i]] = [l[i], l[i - 1]]; try { await savePacks(l, "Order saved"); } catch (err) { toast(err.message); } renderPhotosAdmin(); return; }
+    const kd = e.target.closest("[data-pack-del]"); if (kd) { const l = deep(SC().packs), i = +kd.dataset.packDel; if (!confirm(`Delete the pack ${l[i].name} from the Photos tab?`)) return; l.splice(i, 1); try { await savePacks(l, "Pack deleted"); } catch (err) { toast(err.message); } renderPhotosAdmin(); return; }
+    if (e.target.closest("[data-pack-reset]")) { try { if (await resetSection("packs", "photos")) renderPhotosAdmin(); } catch (err) { toast(err.message); } return; }
+    const il = e.target.closest("[data-pimg-left]"); if (il) { syncPack(); const g = packEdit.imgs, i = +il.dataset.pimgLeft; [g[i - 1], g[i]] = [g[i], g[i - 1]]; renderPhotosAdmin(); return; }
+    const idl = e.target.closest("[data-pimg-del]"); if (idl) { syncPack(); packEdit.imgs.splice(+idl.dataset.pimgDel, 1); renderPhotosAdmin(); return; }
+  });
+  document.addEventListener("change", async e => {
+    if (e.target.id === "proj-img" && e.target.files[0]) {
+      Object.assign(projEdit, projFromForm($("#proj-form")));
+      const add = e.target.closest(".a-img"); add.classList.add("busy"); add.querySelector("span").textContent = "Uploading…";
+      try { projEdit.img = await uploadImg(e.target.files[0]); } catch (err) { toast(err.message); }
+      renderProjectsAdmin();
+    }
+    if (e.target.id === "pack-img" && e.target.files.length) {
+      syncPack();
+      const files = [...e.target.files], add = e.target.closest(".a-img"); add.classList.add("busy"); add.querySelector("span").textContent = `Uploading ${files.length}…`;
+      for (const f of files) { try { packEdit.imgs.push([await uploadImg(f), f.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ")]); } catch (err) { toast(err.message); } }
+      renderPhotosAdmin();
+    }
+  });
+  document.addEventListener("submit", async e => {
+    if (e.target.id === "proj-form") {
+      e.preventDefault();
+      const p = projFromForm(e.target);
+      if (!p.t) { toast("Give the project a title"); return; }
+      if (!p.img) { toast("Add an image"); return; }
+      const l = deep(SC().projects); if (p._i === undefined) l.push(p); else l[p._i] = p;
+      const btn = e.target.querySelector(".btn-w"); btn.disabled = true;
+      try { await saveProjects(l, p._i === undefined ? "Project added" : "Project saved"); projEdit = null; renderProjectsAdmin(); } catch (err) { toast(err.message); btn.disabled = false; }
+    }
+    if (e.target.id === "pack-form") {
+      e.preventDefault(); syncPack();
+      if (!packEdit.name) { toast("Give the pack a name"); return; }
+      if (!packEdit.imgs.length) { toast("Add at least one photo"); return; }
+      const l = deep(SC().packs); if (packEdit._i === undefined) l.push(packEdit); else l[packEdit._i] = packEdit;
+      const btn = e.target.querySelector(".btn-w"); btn.disabled = true;
+      try { await savePacks(l, packEdit._i === undefined ? "Pack added" : "Pack saved"); packEdit = null; renderPhotosAdmin(); } catch (err) { toast(err.message); btn.disabled = false; }
+    }
+  });
+
+  /* Modération : avis, idées, livre d'or */
+  let modTab = "reviews";
+  const agoShort = ts => { const m = Math.round((Date.now() - ts) / 6e4); return m < 60 ? `${Math.max(1, m)} min` : m < 1440 ? `${Math.round(m / 60)} h` : `${Math.round(m / 1440)} d`; };
+  async function renderModeration() {
+    const box = $("#a-mod"); if (!box) return;
+    const sub = `<div class="a-modtabs" role="tablist">${[["reviews", "Reviews"], ["ideas", "Idea wall"], ["guestbook", "Guestbook"]].map(([k, l]) => `<button role="tab" aria-selected="${k === modTab}" data-mod="${k}">${l}</button>`).join("")}</div>`;
+    box.innerHTML = sub + `<div id="a-modlist"></div>`; loading($("#a-modlist"));
+    const get = async p => { const r = await fetch(API + p, { headers: user ? { Authorization: "Bearer " + user.token } : {} }); return r.ok ? r.json() : []; };
+    try {
+      let rows = [];
+      if (modTab === "reviews") {
+        const l = await get("/api/reviews"); const ar = $("#a-rev"); if (ar) ar.textContent = l.length;
+        rows = l.map(r => ({ del: `reviews|${r.discordId}`, title: `${"★".repeat(r.rating)} ${r.name || "?"}`, text: r.text, meta: `${r.country ? r.country + " · " : ""}${r.likes || 0} like${r.likes === 1 ? "" : "s"} · ${agoShort(r.timestamp)} ago` }));
+      } else if (modTab === "ideas") {
+        rows = (await get("/api/ideas")).map(i => ({ del: `ideas|${i.id}`, title: i.title, text: i.text, meta: `${i.author || "?"} · ${i.votes} vote${i.votes === 1 ? "" : "s"} · ${i.status} · ${agoShort(i.timestamp)} ago` }));
+      } else {
+        rows = (await get("/api/guestbook")).map(n => ({ del: `guestbook|${n.id}`, title: `${n.emoji} ${n.name}${n.verified ? " ✓" : ""}`, text: n.text, meta: `${agoShort(n.timestamp)} ago` }));
+      }
+      $("#a-modlist").innerHTML = rows.length ? `<div class="a-list">${rows.map(r => `<div class="a-item a-mod"><div><b>${esc(r.title)}</b>${r.text ? `<p>${esc(r.text)}</p>` : ""}<span>${esc(r.meta)}</span></div><button class="c-rm" data-mod-del="${esc(r.del)}" aria-label="Delete"><i data-lucide="trash-2"></i></button></div>`).join("")}</div>`
+        : `<div class="d-empty" style="padding:28px"><i data-lucide="inbox"></i><b>Nothing here</b></div>`;
+      icons();
+    } catch (err) { errorBox($("#a-modlist"), err.message); }
+  }
+  document.addEventListener("click", async e => {
+    const t = e.target.closest("[data-mod]"); if (t) { modTab = t.dataset.mod; renderModeration(); return; }
+    const d = e.target.closest("[data-mod-del]"); if (!d) return;
+    const [kind, id] = d.dataset.modDel.split("|");
+    if (!confirm("Delete it for good?")) return;
+    try { await api(`/api/${kind}/${encodeURIComponent(id)}`, { method: "DELETE" }); toast("Deleted"); document.dispatchEvent(new CustomEvent("moderated", { detail: kind })); } catch (err) { toast(err.message); }
+    renderModeration();
+  });
 
   /* Codes promo : création depuis l'espace admin (gardés sur le serveur) */
   const STATE_EN = { active: ["Active", "ok"], scheduled: ["Scheduled", "run"], expired: ["Expired", "off"], "used up": ["Used up", "off"] };

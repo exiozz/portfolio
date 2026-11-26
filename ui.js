@@ -602,7 +602,7 @@
     const body = adminD.querySelector(".drawer-body");
     adminD.querySelector(".drawer-foot").innerHTML = `<a class="btn btn-o wide" href="admin.html"><i data-lucide="folder-cog"></i>Full admin panel · files, asset library, new order</a>`;
     if (!isAdmin()) { body.innerHTML = `<div class="d-empty"><i data-lucide="lock"></i><b>Admin only</b><span>Sign in with the admin Discord account</span></div>`; icons(); return; }
-    const tabs = [["orders", "Orders"], ["shop", "Shop"], ["prices", "Prices"], ["projects", "Projects"], ["photos", "Photos"], ["community", "Community"], ["promo", "Promo codes"], ["avail", "Availability"], ["shots", "Showcase"]];
+    const tabs = [["orders", "Orders"], ["shop", "Shop"], ["prices", "Prices"], ["projects", "Projects"], ["photos", "Photos"], ["people", "People"], ["community", "Community"], ["promo", "Promo codes"], ["avail", "Availability"], ["shots", "Showcase"]];
     const head = `<div class="a-tabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${k === adminTab}" data-atab="${k}">${l}</button>`).join("")}</div>`;
     if (adminTab === "orders") {
       body.innerHTML = head + `<div id="a-orders"></div>`; const box = $("#a-orders");
@@ -649,6 +649,8 @@
       body.innerHTML = head + `<div id="a-projects"></div>`; renderProjectsAdmin();
     } else if (adminTab === "photos") {
       body.innerHTML = head + `<div id="a-photos"></div>`; renderPhotosAdmin();
+    } else if (adminTab === "people") {
+      body.innerHTML = head + `<div id="a-people"></div>`; renderPeopleAdmin();
     } else {
       body.innerHTML = head + `<div class="a-stats"><div><b data-discord="members">—</b><span>Discord members</span></div><div><b data-discord="online">—</b><span>Online</span></div><div><b id="a-rev">—</b><span>Reviews</span></div></div><div id="a-mod"></div>`;
       icons(); discord(); renderModeration();
@@ -846,6 +848,75 @@
   }
   const projFromForm = f => { const v = n => f.elements.namedItem(n).value.trim(); return { ...projEdit, t: v("t"), short: v("short"), d: v("d"), status: v("status"), tech: v("tech").split(",").map(x => x.trim()).filter(Boolean), universeId: v("universeId") || null }; };
   const saveProjects = async (list, msg) => saveSection("projects", list.map(({ _i, ...p }) => p), msg);
+
+  /* Personnes : collaborateurs, contributeurs, donateurs, meilleurs acheteurs (onglet People de l'accueil) */
+  let personEdit = null, peopleFilter = "all";
+  const PGROUPS = () => SC().PEOPLE_GROUPS;
+  const gLabel = k => (PGROUPS().find(g => g[0] === k) || [k, k])[1];
+  const personAv = p => p.avatar ? `<img src="${esc(SC().imgSrc(p.avatar))}" alt="" loading="lazy">` : `<span class="a-pav">${esc((p.name || "?").charAt(0).toUpperCase())}</span>`;
+  function renderPeopleAdmin() {
+    const box = $("#a-people"); if (!box) return;
+    const all = SC().people;
+    if (!personEdit) {
+      const idx = all.map((p, i) => [p, i]).filter(([p]) => peopleFilter === "all" || p.group === peopleFilter);
+      box.innerHTML = `<div class="a-shop-top"><p class="d-note" style="margin:0">People in the <b>People</b> tab of the home page. For top buyers, the order here is the ranking (#1, #2, #3).</p><button class="btn btn-w" data-person-new><i data-lucide="user-plus"></i>Add a person</button></div>
+        <div class="a-modtabs" role="tablist">${[["all", "Everyone"], ...PGROUPS()].map(([k, l]) => `<button role="tab" aria-selected="${k === peopleFilter}" data-pfilter="${k}">${l} <span class="a-n">${k === "all" ? all.length : all.filter(p => p.group === k).length}</span></button>`).join("")}</div>
+        <div class="a-prods">${idx.map(([p, i]) => `<div class="a-prod a-person">${personAv(p)}
+          <div class="a-prod-info"><b>${esc(p.name)}</b><span>${esc(gLabel(p.group))}${p.role ? " · " + esc(p.role) : ""}${p.amount ? " · " + esc(p.amount) : ""}${p.roblox ? " · @" + esc(p.roblox) : ""}</span></div>
+          <div class="a-prod-acts"><button class="btn btn-o" data-person-edit="${i}"><i data-lucide="pencil"></i>Edit</button><button class="c-rm" data-person-up="${i}" aria-label="Move up"${i ? "" : " disabled"}><i data-lucide="arrow-up"></i></button><button class="c-rm" data-person-del="${i}" aria-label="Delete ${esc(p.name)}"><i data-lucide="trash-2"></i></button></div></div>`).join("") || `<div class="d-empty"><i data-lucide="users"></i><b>Nobody here yet</b><span>Add collaborators, contributors, donors or your best buyers.</span></div>`}</div>`;
+      icons(); return;
+    }
+    const p = personEdit;
+    box.innerHTML = `<form class="a-form a-prod-form" id="person-form" novalidate>
+        <button type="button" class="a-back" data-person-back><i data-lucide="arrow-left"></i>All people</button>
+        <b class="a-form-t">${p._i === undefined ? "Add a person" : "Edit · " + esc(p.name)}</b>
+        <div class="a-grid3">
+          <label class="a-lbl">Name <input name="pname" maxlength="60" value="${esc(p.name || "")}" placeholder="e.g. Roky"></label>
+          <label class="a-lbl">Group <select name="group" class="a-select">${PGROUPS().map(([k, l]) => `<option value="${k}"${k === p.group ? " selected" : ""}>${l}</option>`).join("")}</select></label>
+          <label class="a-lbl">Role <input name="role" maxlength="60" value="${esc(p.role || "")}" placeholder="e.g. 3D artist, Builder"></label>
+        </div>
+        <label class="a-lbl">Sentence on the card <input name="note" maxlength="200" value="${esc(p.note || "")}" placeholder="e.g. Modeled the lava dragon with me"></label>
+        <div class="a-grid3">
+          <label class="a-lbl">Amount / badge <input name="amount" maxlength="30" value="${esc(p.amount || "")}" placeholder="e.g. €25, 6 orders"></label>
+          <label class="a-lbl">Roblox username <input name="roblox" maxlength="21" value="${esc(p.roblox || "")}" placeholder="optional · shows their avatar"></label>
+          <label class="a-lbl">Link <input name="link" type="url" maxlength="300" value="${esc(p.link || "")}" placeholder="https://… (optional)"></label>
+        </div>
+        <div class="a-lbl">Photo <span class="a-hint">Optional. Without a photo, the Roblox avatar is used, or the first letter of the name.</span></div>
+        <div class="a-imgs">${p.avatar ? `<div class="a-img cover a-img-round"><img src="${esc(SC().imgSrc(p.avatar))}" alt=""><div class="a-img-acts"><button type="button" data-person-noimg aria-label="Remove photo">×</button></div></div>` : ""}
+          <label class="a-img add"><input type="file" accept="image/png,image/jpeg,image/webp" id="person-img" class="sr"><i data-lucide="image-plus"></i><span>${p.avatar ? "Replace photo" : "Add a photo"}</span></label></div>
+        <button class="btn btn-w wide"><i data-lucide="save"></i>${p._i === undefined ? "Add to the page" : "Save"}</button>
+      </form>`;
+    icons();
+  }
+  const personFromForm = f => { const v = n => f.elements.namedItem(n).value.trim(); return { ...personEdit, name: v("pname"), group: v("group"), role: v("role"), note: v("note"), amount: v("amount"), roblox: v("roblox").replace(/^@/, ""), link: v("link") }; };
+  const savePeople = async (list, msg) => saveSection("people", list.map(({ _i, ...p }) => p), msg);
+  document.addEventListener("click", async e => {
+    if (e.target.closest("[data-person-new]")) { personEdit = { group: peopleFilter === "all" ? "collab" : peopleFilter }; renderPeopleAdmin(); return; }
+    if (e.target.closest("[data-person-back]")) { personEdit = null; renderPeopleAdmin(); return; }
+    const pf = e.target.closest("[data-pfilter]"); if (pf) { peopleFilter = pf.dataset.pfilter; renderPeopleAdmin(); return; }
+    if (e.target.closest("[data-person-noimg]")) { Object.assign(personEdit, personFromForm($("#person-form"))); personEdit.avatar = ""; renderPeopleAdmin(); return; }
+    const pe = e.target.closest("[data-person-edit]"); if (pe) { personEdit = { ...deep(SC().people[+pe.dataset.personEdit]), _i: +pe.dataset.personEdit }; renderPeopleAdmin(); return; }
+    const pu = e.target.closest("[data-person-up]"); if (pu) { const l = deep(SC().people), i = +pu.dataset.personUp; [l[i - 1], l[i]] = [l[i], l[i - 1]]; try { await savePeople(l, "Order saved"); } catch (err) { toast(err.message); } renderPeopleAdmin(); return; }
+    const pd = e.target.closest("[data-person-del]"); if (pd) { const l = deep(SC().people), i = +pd.dataset.personDel; if (!confirm(`Remove ${l[i].name} from the page?`)) return; l.splice(i, 1); try { await savePeople(l, "Removed"); } catch (err) { toast(err.message); } renderPeopleAdmin(); }
+  });
+  document.addEventListener("change", async e => {
+    if (e.target.id !== "person-img" || !e.target.files[0]) return;
+    Object.assign(personEdit, personFromForm($("#person-form")));
+    const add = e.target.closest(".a-img"); add.classList.add("busy"); add.querySelector("span").textContent = "Uploading…";
+    try { personEdit.avatar = await uploadImg(e.target.files[0]); } catch (err) { toast(err.message); }
+    renderPeopleAdmin();
+  });
+  document.addEventListener("submit", async e => {
+    if (e.target.id !== "person-form") return;
+    e.preventDefault();
+    const p = personFromForm(e.target);
+    if (!p.name) { toast("Give the person a name"); return; }
+    if (p.roblox && !/^[A-Za-z0-9_]{3,20}$/.test(p.roblox)) { toast("Roblox username: 3 to 20 letters, digits or _"); return; }
+    if (p.link && !/^https:\/\//.test(p.link)) { toast("The link must start with https://"); return; }
+    const l = deep(SC().people); if (p._i === undefined) l.push(p); else l[p._i] = p;
+    const btn = e.target.querySelector(".btn-w"); btn.disabled = true;
+    try { await savePeople(l, p._i === undefined ? "Added · live on the site" : "Saved · live on the site"); personEdit = null; renderPeopleAdmin(); } catch (err) { toast(err.message); btn.disabled = false; }
+  });
 
   /* Photos (packs) */
   let packEdit = null;

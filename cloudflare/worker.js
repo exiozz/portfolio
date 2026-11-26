@@ -1117,6 +1117,16 @@ async function route(request, env, ctx) {
         short: clampStr(pr.short, 160).trim(), d: clampStr(pr.d, 600).trim(), status: clampStr(pr.status, 30).trim() || 'Completed',
         tech: (Array.isArray(pr.tech) ? pr.tech : []).map((x) => clampStr(x, 30).trim()).filter(Boolean).slice(0, 8), universeId: /^\d{1,15}$/.test(uid) ? +uid : null };
     }),
+    people: (v) => (Array.isArray(v) ? v : []).slice(0, 120).map((pp) => {
+      const name = clampStr(pp && pp.name, 60).trim();
+      if (!name) throw new HttpError(400, 'Chaque personne a besoin d\'un nom.');
+      const group = ['collab', 'contrib', 'donor', 'buyer'].includes(pp.group) ? pp.group : 'collab';
+      const roblox = String(pp.roblox || '').trim().replace(/^@/, '');
+      const link = String(pp.link || '').trim();
+      return { name, group, role: clampStr(pp.role, 60).trim(), note: clampStr(pp.note, 200).trim(), amount: clampStr(pp.amount, 30).trim(),
+        avatar: anyImg(pp.avatar), roblox: /^[A-Za-z0-9_]{3,20}$/.test(roblox) ? roblox : '',
+        link: /^https:\/\/[^\s"'<>]{3,300}$/.test(link) ? link : '' };
+    }),
     packs: (v) => (Array.isArray(v) ? v : []).slice(0, 20).map((pk) => {
       const name = clampStr(pk && pk.name, 80).trim();
       const imgs = (Array.isArray(pk && pk.imgs) ? pk.imgs : []).slice(0, 60).map((g) => [anyImg(g && g[0]), clampStr(g && g[1], 80).trim(), g && g[2] === 'sq' ? 'sq' : undefined].filter((x) => x !== undefined)).filter((g) => g[0]);

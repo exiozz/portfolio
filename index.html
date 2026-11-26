@@ -208,6 +208,7 @@
       <button role="tab" aria-selected="false" data-tab="photos">Photos</button>
       <button role="tab" aria-selected="false" data-tab="pricing">Pricing</button>
       <button role="tab" aria-selected="false" data-tab="stack">Tech Stack</button>
+      <button role="tab" aria-selected="false" data-tab="people">People</button>
     </div>
     <div class="panels" id="panels">
 
@@ -234,6 +235,11 @@
         <a class="btn btn-o" id="photo-shop" href="shop.html">View in shop <i data-lucide="arrow-up-right"></i></a>
       </div>
       <div class="gallery" id="gallery"></div>
+    </div>
+
+    <div class="panel" id="p-people" role="tabpanel" hidden>
+      <div class="pp-chips" id="pp-chips" role="group" aria-label="Filter people"></div>
+      <div id="pp-list"></div>
     </div>
 
     <div class="panel" id="p-stack" role="tabpanel" hidden>
@@ -583,7 +589,7 @@
   links.forEach(a => a.addEventListener("click", () => $("#nav-in").classList.remove("open")));
 
   /* Onglets du showcase : le fond glisse, le contenu se fond, la hauteur s'ajuste */
-  const TABS = ["projects", "photos", "pricing", "stack"];
+  const TABS = ["projects", "photos", "pricing", "stack", "people"];
   const ind = $("#tab-ind"), panels = $("#panels");
   let current = "projects", switching = null;
   const moveInd = instant => {
@@ -677,15 +683,13 @@
 
   /* Projets : fenêtre de détails */
   const projects = SiteContent.projects;
-  const projKey = p => p.id || String(p.t || "project").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const renderProjects = () => {
     $("#proj-grid").innerHTML = projects.map((p, i) => `<article class="pcard">
         <div class="pcard-img"><img src="${esc(SiteContent.imgSrc(p.img))}" alt="${esc(p.t)}" loading="lazy"><span class="pc-live" data-proj-live="${i}" hidden></span></div>
         <div class="pcard-body"><h3>${esc(p.t)}</h3><p>${esc(p.short || p.d)}</p>
-          <div class="react" data-react="${esc(projKey(p))}"></div>
           <div class="pcard-foot"><span class="mono">${esc(p.status || "Completed")}</span><button class="details" data-proj="${i}">Details <i data-lucide="arrow-right"></i></button></div></div>
       </article>`).join("") + `<article class="pcard empty"><i data-lucide="plus"></i><h3>Your project could be next</h3><button class="btn btn-o" data-tab="pricing">See pricing</button></article>`;
-    icons(); UI.reactions && UI.reactions.paint();
+    icons();
   };
   renderProjects();
   // Joueurs et visites en direct sur les cartes projets
@@ -741,8 +745,48 @@
   $$("[data-cur]").forEach(b => b.addEventListener("click", () => { cur = b.dataset.cur; $$("[data-cur]").forEach(x => x.setAttribute("aria-pressed", x === b)); renderPlans(); }));
   renderPlans();
   document.addEventListener("promochange", renderPlans);
+  /* Personnes : collaborateurs, contributeurs, donateurs, meilleurs acheteurs (modifiables dans l'admin) */
+  let ppGroup = "all";
+  const robloxAv = {};
+  const loadRobloxAv = name => {
+    if (robloxAv[name] !== undefined) return;
+    robloxAv[name] = null;
+    fetch(`${X.API}/api/roblox-avatar?u=${encodeURIComponent(name)}`).then(r => r.ok ? r.json() : null).then(d => {
+      robloxAv[name] = d && d.img ? d.img : "";
+      if (robloxAv[name]) $$(`[data-rbx-av="${name}"]`).forEach(el => { const img = document.createElement("img"); img.className = "pp-av"; img.alt = ""; img.src = robloxAv[name]; el.replaceWith(img); });
+    }).catch(() => { robloxAv[name] = ""; });
+  };
+  const ppAvatar = p => {
+    if (p.avatar) return `<img class="pp-av" src="${esc(SiteContent.imgSrc(p.avatar))}" alt="" loading="lazy">`;
+    if (p.roblox) { loadRobloxAv(p.roblox); if (robloxAv[p.roblox]) return `<img class="pp-av" src="${esc(robloxAv[p.roblox])}" alt="" loading="lazy">`; }
+    return `<span class="pp-av"${p.roblox ? ` data-rbx-av="${esc(p.roblox)}"` : ""}>${esc(p.name.trim().charAt(0).toUpperCase())}</span>`;
+  };
+  const ppCard = (p, rank) => `<article class="pp-card pp-${p.group}">
+      ${rank ? `<span class="pp-rank r${rank}">#${rank}</span>` : ""}
+      ${ppAvatar(p)}
+      <div class="pp-info"><b>${esc(p.name)}</b>${p.role ? `<span class="pp-role">${esc(p.role)}</span>` : ""}</div>
+      ${p.note ? `<p>${esc(p.note)}</p>` : ""}
+      ${p.amount || p.roblox || p.link ? `<div class="pp-foot">${p.amount ? `<span class="pp-amt">${esc(p.amount)}</span>` : "<span></span>"}<span class="pp-links">${p.roblox ? `<a class="pp-link" href="https://www.roblox.com/search/users?keyword=${encodeURIComponent(p.roblox)}" target="_blank" rel="noopener">@${esc(p.roblox)}</a>` : ""}${p.link ? `<a class="pp-link ic" href="${esc(p.link)}" target="_blank" rel="noopener nofollow" aria-label="${esc(p.name)}'s link"><i data-lucide="arrow-up-right"></i></a>` : ""}</span></div>` : ""}
+    </article>`;
+  const renderPeople = () => {
+    const people = SiteContent.people, G = SiteContent.PEOPLE_GROUPS;
+    const groups = G.map(([k, l, sub]) => ({ k, l, sub, list: people.filter(p => p.group === k) })).filter(g => g.list.length);
+    if (ppGroup !== "all" && !groups.some(g => g.k === ppGroup)) ppGroup = "all";
+    $("#pp-chips").innerHTML = groups.length > 1 ? [["all", "Everyone", people.length], ...groups.map(g => [g.k, g.l, g.list.length])].map(([k, l, n]) => `<button aria-pressed="${k === ppGroup}" data-pp="${k}">${l}<span>${n}</span></button>`).join("") : "";
+    const shown = ppGroup === "all" ? groups : groups.filter(g => g.k === ppGroup);
+    const cta = (t, sub) => `<div class="pp-cta"><b>${t}</b><span>${sub}</span><div><a class="btn btn-w" href="shop.html"><i data-lucide="shopping-bag"></i>Open the shop</a><button class="btn btn-o" data-tab="pricing">See pricing</button></div></div>`;
+    $("#pp-list").innerHTML = groups.length
+      ? shown.map(g => `<section class="pp-group"><div class="pp-head"><h3>${g.l}</h3><span>${g.sub}</span></div>
+          <div class="pp-grid">${g.list.map((p, i) => ppCard(p, g.k === "buyer" && i < 3 ? i + 1 : 0)).join("")}</div></section>`).join("")
+        + cta("Want to see your name here?", "Work with me, support the project or order from the shop.")
+      : cta("The people behind the work", "Collaborators, contributors, donors and top buyers will show up here soon.");
+    icons();
+  };
+  $("#pp-chips").addEventListener("click", e => { const b = e.target.closest("[data-pp]"); if (!b) return; ppGroup = b.dataset.pp; smoothHeight(renderPeople, $("#p-people")); });
+  renderPeople();
+
   document.addEventListener("contentchange", () => {
-    renderProjects(); liveProjects();
+    renderProjects(); liveProjects(); renderPeople();
     buildPackMenu(); renderPack();
     renderPlans();
     if (typeof renderQuote === "function") { qs.items = qs.items.filter(it => plans[it.cat] && plans[it.cat][it.svc]); if (!plans[qs.browse]) qs.browse = cats[0][0]; renderQuote(); }

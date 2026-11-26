@@ -78,7 +78,7 @@
   <div class="nav-in" id="nav-in">
     <a href="#home" class="brand"><b>exiozz</b>.dev</a>
     <nav class="links" aria-label="Sections">
-      <a href="#home" class="on">Home</a><a href="#about">About</a><a href="#portfolio">Portfolio</a><a href="#making">Making</a><a href="#quote">Quote</a><a href="#world">World</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
+      <a href="#home" class="on">Home</a><a href="#about">About</a><a href="#portfolio">Portfolio</a><a href="#quote">Quote</a><a href="#world">World</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
     </nav>
     <div class="nav-tools">
       <button class="icon-btn" id="theme-btn" aria-label="Switch theme"></button>
@@ -235,21 +235,6 @@
   </div>
 </section>
 
-<section class="sec" id="making">
-  <div class="wrap">
-    <div class="mk-top">
-      <div>
-        <div class="kicker rv">Behind the scenes</div>
-        <h2 class="title rv" style="margin-top:16px">From pieces<br>to a scene</h2>
-        <p class="subtitle rv">How a pack is made, step by step. Drag the slider to compare the separate assets with the finished scene.</p>
-      </div>
-      <div class="faq-filters rv" role="tablist" aria-label="Pack" id="mk-packs" style="margin:0"></div>
-    </div>
-    <div class="cmp mk-cmp rv" id="mk-cmp"></div>
-    <ol class="mk-steps" id="mk-steps"></ol>
-  </div>
-</section>
-
 <section class="sec" id="quote">
   <div class="wrap">
     <div class="center">
@@ -326,7 +311,7 @@
         <div><b>Another question?</b><span>Message me directly, I'll answer on Discord or by email.</span></div>
         <div class="btns" style="margin-top:4px">
           <a class="btn btn-w" href="https://discord.gg/rGcdngHsCe"><i data-lucide="message-circle"></i>Discord</a>
-          <button class="btn btn-o copy-btn" type="button" data-copy-discord><i class="copy-ic" data-lucide="copy"></i><i class="copy-ok" data-lucide="check"></i><b style="font-weight:500">Copy @zo7q</b></button>
+          <button class="btn btn-o copy-btn" type="button" data-copy-discord><i class="copy-ic" data-lucide="copy"></i><i class="copy-ok" data-lucide="check"></i><span class="copy-lbl">Copy @zo7q</span></button>
           <a class="btn btn-o" href="mailto:tomokari.pro@gmail.com"><i data-lucide="mail"></i>Email</a>
         </div>
       </div>
@@ -360,10 +345,10 @@
           <span class="mono">Find me</span>
           <div class="socials">
             <a class="social" href="https://discord.gg/rGcdngHsCe"><i data-lucide="message-circle"></i><div><b>Discord</b><span class="live"><span><span data-discord="members">124</span> members</span> <span><span data-discord="online">38</span> online</span></span></div></a>
-            <button class="social copy-btn full" type="button" data-copy-discord aria-label="Copy my Discord username zo7q"><i class="copy-ic" data-lucide="copy"></i><i class="copy-ok" data-lucide="check"></i><div style="text-align:left"><b>Copy my Discord username</b><span data-handle>@zo7q</span></div></button>
+            <button class="social copy-btn" type="button" data-copy-discord aria-label="Copy my Discord username zo7q"><i class="copy-ic" data-lucide="copy"></i><i class="copy-ok" data-lucide="check"></i><div style="text-align:left"><b>Discord username</b><span data-handle>@zo7q</span></div></button>
             <a class="social" href="https://www.roblox.com/users/1675753236/profile"><i data-lucide="gamepad-2"></i><div><b>Roblox</b><span>@Noah_646467</span></div></a>
             <a class="social" href="mailto:tomokari.pro@gmail.com"><i data-lucide="mail"></i><div><b>Email</b><span>Write to me</span></div></a>
-            <a class="social" href="shop.html"><i data-lucide="shopping-bag"></i><div><b>Shop</b><span>My assets</span></div></a>
+            <a class="social full" href="shop.html"><i data-lucide="shopping-bag"></i><div><b>Shop</b><span>My assets</span></div></a>
           </div>
         </div>
       </div>
@@ -1239,50 +1224,6 @@
     for (let i = 0; i < 70; i++) { const p = document.createElement("i"); p.style.cssText = `left:${50 + (Math.random() - .5) * 30}%;background:${colors[i % colors.length]};--dx:${(Math.random() - .5) * 900}px;--dy:${-200 - Math.random() * 500}px;--r:${Math.random() * 720}deg;animation-delay:${Math.random() * .15}s`; layer.appendChild(p); }
     document.body.appendChild(layer); setTimeout(() => layer.remove(), 2200);
   }
-
-  /* Coulisses : avant / après et étapes de fabrication d'un pack */
-  const MAKING = [
-    { id: "stylized-forest-pack", name: "Stylized Forest Pack", before: "assets/forest-pack/planche.jpg", after: "assets/forest-pack/hero.jpg", labels: ["18 separate assets", "The finished scene"],
-      steps: [
-        ["One model at a time", "Each tree, rock and mushroom is modeled and painted on its own in Blender, in the same stylized look.", "img/forest-01.webp"],
-        ["The full set", "18 assets at the same scale, checked side by side so nothing looks out of place.", "assets/forest-pack/planche.jpg"],
-        ["Assembled together", "Everything goes into one scene to see how it reads together, like it would in a game.", "assets/forest-pack/hero.jpg"],
-        ["Ready for Roblox", "Exported as Roblox-ready FBX with baked Color and Normal maps, plus a presentation video.", "assets/forest-pack/presentation-poster.jpg", "assets/forest-pack/presentation.mp4"]] },
-    { id: "lava-mounts-pack", name: "Lava Mounts Pack", before: "assets/lava-mounts-pack/planche.jpg", after: "assets/lava-mounts-pack/hero.jpg", labels: ["The 4 models", "In a scene"],
-      steps: [
-        ["The dragon", "Modeled and textured with glowing lava cracks running through the scales.", "img/dragon-tete.webp"],
-        ["The whole pack", "Dragon, horse with saddle and harness, summoning bell and fire portal, in one consistent style.", "assets/lava-mounts-pack/planche.jpg"],
-        ["Rigged and posed", "The mounts are rigged so they can be animated and ridden in game.", "img/dragon-profil.webp"],
-        ["Ready for Roblox", "Exported as FBX with PBR textures, plus a presentation video.", "assets/lava-mounts-pack/presentation-poster.jpg", "assets/lava-mounts-pack/presentation.mp4"]] }
-  ];
-  let mk = 0;
-  const renderMaking = () => {
-    const m = MAKING[mk];
-    $("#mk-packs").innerHTML = MAKING.map((x, i) => `<button role="tab" aria-pressed="${i === mk}" data-mk="${i}">${x.name.replace(" Pack", "")}</button>`).join("");
-    $("#mk-cmp").style.setProperty("--pos", "50%");
-    $("#mk-cmp").innerHTML = `<img src="${m.after}" alt="${m.labels[1]}" loading="lazy"><img class="cmp-before" src="${m.before}" alt="${m.labels[0]}" loading="lazy"><span class="cmp-line"></span><span class="cmp-lbl" style="left:12px">${m.labels[0]}</span><span class="cmp-lbl" style="right:12px">${m.labels[1]}</span><input type="range" min="0" max="100" value="50" aria-label="Compare ${m.labels[0].toLowerCase()} with ${m.labels[1].toLowerCase()}">`;
-    $("#mk-steps").innerHTML = m.steps.map(([t, d, img, vid], i) => `<li class="mk-step" style="--i:${i}"><span class="mk-n">${String(i + 1).padStart(2, "0")}</span>
-      <div class="mk-img">${vid ? `<button class="mk-play" data-mk-video="${vid}" data-poster="${img}" aria-label="Play the presentation video"><img src="${img}" alt="" loading="lazy"><span><i data-lucide="play"></i></span></button>` : `<img src="${img}" alt="${esc(t)}" loading="lazy">`}</div>
-      <b>${esc(t)}</b><p>${esc(d)}</p></li>`).join("") + `<li class="mk-step mk-end"><span class="mk-n">→</span><div class="mk-cta"><b>Get the pack</b><p>${esc(m.name)}, ready to drop in your game.</p><a class="btn btn-w" href="shop.html?product=${m.id}">View in shop <i data-lucide="arrow-up-right"></i></a></div></li>`;
-    icons(); mkIO();
-  };
-  // L'étape apparaît et la ligne se remplit au scroll
-  const mkIO = () => { const o = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); o.unobserve(e.target); } }), { threshold: .3 }); $$(".mk-step").forEach(el => o.observe(el)); };
-  $("#mk-packs").addEventListener("click", e => { const b = e.target.closest("[data-mk]"); if (!b || +b.dataset.mk === mk) return; mk = +b.dataset.mk; renderMaking(); });
-  $("#mk-cmp").addEventListener("input", e => { $("#mk-cmp").style.setProperty("--pos", e.target.value + "%"); });
-  // Petit indice : le curseur glisse tout seul la première fois qu'on voit le bloc
-  new IntersectionObserver((es, o) => { if (!es[0].isIntersecting || reduce) return; o.disconnect(); const c = $("#mk-cmp"), t0 = performance.now();
-    const tick = now => { const k = Math.min(1, (now - t0) / 1600), v = 50 + Math.sin(k * Math.PI * 2) * 22; c.style.setProperty("--pos", v + "%"); const r = c.querySelector("input"); if (r) r.value = v; if (k < 1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }, { threshold: .6 }).observe($("#mk-cmp"));
-  document.addEventListener("click", e => {
-    const v = e.target.closest("[data-mk-video]"); if (!v) return;
-    $("#modal-in").className = "modal-in solo";
-    $("#modal-in").innerHTML = `<video class="lb-img" src="${v.dataset.mkVideo}" poster="${v.dataset.poster}" controls autoplay playsinline></video>`;
-    $("#modal").classList.add("open");
-  });
-  renderMaking();
-  // La vidéo s'arrête quand on ferme la fenêtre
-  $("#modal-close").addEventListener("click", () => $$("#modal video").forEach(x => x.pause()));
-  $("#modal").addEventListener("click", e => { if (e.target.id === "modal") $$("#modal video").forEach(x => x.pause()); });
 
   /* Quiz : 3 questions → le bon service, pré-rempli dans le simulateur */
   const QUIZ = [

@@ -9,7 +9,9 @@ Le serveur tient dans **un seul fichier** : `worker.js`. Il gère :
 - les **notes des assets** (seuls les clients avec une commande « Payée » peuvent noter) ;
 - la **liste d'envies** de chaque client, gardée avec son compte Discord ;
 - tes **disponibilités** (« 2 places libres ce mois-ci »), réglées dans l'espace admin → onglet Availability ;
-- les **demandes de devis** du simulateur : elles arrivent comme des commandes, avec le message du client.
+- les **demandes de devis** du simulateur : elles arrivent comme des commandes, avec le message du client ;
+- l'**activité récente anonyme** (bulles « quelqu'un vient de commander… » sur l'accueil, aucun nom affiché) ;
+- l'**avatar Roblox** d'un pseudo, pour le badge personnalisé de l'accueil.
 
 > Après chaque mise à jour de `worker.js` dans ce dépôt, recolle-le dans Cloudflare (Edit code → Deploy).
 

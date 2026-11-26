@@ -7,6 +7,7 @@
  *  - Bibliothèque des assets : les fichiers de chaque asset, rangés une fois,
  *    envoyés au client en un clic depuis une commande
  *  - Avis clients, notes des assets, liste d'envies, disponibilités
+ *  - Activité récente anonyme, avatar Roblox pour le badge de l'accueil
  *  - Récupération automatique des avis et commandes de l'ancien serveur
  *
  * À coller tel quel dans l'éditeur Cloudflare (Workers → ton worker → Edit code).
@@ -607,6 +608,37 @@ async function route(request, env, ctx) {
     const value = { slots, note: clampStr(b.note, 140).trim(), updatedAt: Date.now() };
     await setVal(env, 'availability', value);
     return json({ ok: true, ...value });
+  }
+
+  /* --- Activité récente, anonyme (aucun nom) : bulles « quelqu'un vient de commander… » sur l'accueil --- */
+  if (path === '/api/activity' && method === 'GET') {
+    const since = Date.now() - 30 * 864e5;
+    const [orders, reviews, assetReviews] = await Promise.all([getVal(env, 'orders', []), getVal(env, 'reviews', []), getVal(env, 'assetReviews', {})]);
+    const clean = (t) => String(t || '').replace(/\s*\((bundle|code)[^)]*\)\s*$/i, '').slice(0, 80);
+    const events = [
+      ...orders.filter((o) => o.timestamp > since && o.status !== 'Annulée' && o.source !== 'admin')
+        .map((o) => {
+          const asset = (o.items || []).find((it) => it.productId);
+          return asset ? { kind: 'order', title: clean(asset.title), more: (o.items || []).length - 1, ts: o.timestamp }
+            : (o.items || []).some((it) => it.type === 'quote') ? { kind: 'quote', ts: o.timestamp } : null;
+        }).filter(Boolean),
+      ...reviews.filter((r) => r.timestamp > since).map((r) => ({ kind: 'review', rating: r.rating, country: r.country || null, ts: r.timestamp })),
+      ...Object.entries(assetReviews).flatMap(([pid, list]) => list.filter((r) => r.timestamp > since).map((r) => ({ kind: 'rating', productId: pid, rating: r.rating, ts: r.timestamp })))
+    ].sort((a, b) => b.ts - a.ts).slice(0, 12);
+    return new Response(JSON.stringify(events), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=60' } });
+  }
+
+  /* --- Avatar Roblox d'un pseudo, pour le badge personnalisé de l'accueil --- */
+  if (path === '/api/roblox-avatar' && method === 'GET') {
+    const name = String(url.searchParams.get('u') || '').trim();
+    if (!/^[A-Za-z0-9_]{3,20}$/.test(name)) throw new HttpError(400, 'Pseudo Roblox invalide.');
+    const ur = await fetch('https://users.roblox.com/v1/usernames/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ usernames: [name], excludeBannedUsers: true }) });
+    const u = ur.ok ? ((await ur.json()).data || [])[0] : null;
+    if (!u) throw new HttpError(404, 'Aucun joueur Roblox avec ce pseudo.');
+    const tr = await fetch(`https://thumbnails.roblox.com/v1/users/avatar?userIds=${u.id}&size=420x420&format=Png&isCircular=false`);
+    const t = tr.ok ? ((await tr.json()).data || [])[0] : null;
+    if (!t || !t.imageUrl) throw new HttpError(502, 'Avatar indisponible pour le moment, réessaie.');
+    return new Response(JSON.stringify({ id: u.id, name: u.name, displayName: u.displayName || u.name, img: t.imageUrl }), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=600' } });
   }
 
   return json({ error: 'Route inconnue.' }, 404);

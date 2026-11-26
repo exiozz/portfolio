@@ -8,7 +8,8 @@
 (() => {
   /* ---------- Réglages à modifier ---------- */
   const PROMO = {
-    // CODE: { pct: remise en %, label: texte affiché, until: dernier jour valable (AAAA-MM-JJ) ou null }
+    // CODE: { pct: remise en %, label: texte affiché, from: premier jour valable, until: dernier jour valable (AAAA-MM-JJ) ou null }
+    // Les codes du calendrier de l'Avent sont ajoutés automatiquement par advent.js
     // Exemple : EXIOZZ10: { pct: 10, label: "10% off the whole site", until: "2026-12-31" }
     codes: {},
     // Code mis en avant dans la barre du haut, ou null pour ne pas afficher de barre
@@ -56,12 +57,13 @@
   const inCur = (eur, cur) => (cur === "rbx" ? eur * ROBUX_PER_EURO : eur);
 
   /* ---------- Codes promo ---------- */
-  const today = () => new Date().toISOString().slice(0, 10);
+  const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
   const lookup = raw => {
     const code = String(raw || "").trim().toUpperCase().replace(/\s+/g, "");
     if (!code) return { ok: false, msg: "Enter a code" };
     const p = PROMO.codes[code];
     if (!p) return { ok: false, msg: "This code doesn't exist" };
+    if (p.from && today() < p.from) return { ok: false, msg: "This code isn't active yet" };
     if (p.until && today() > p.until) return { ok: false, msg: "This code has expired" };
     return { ok: true, code, ...p };
   };

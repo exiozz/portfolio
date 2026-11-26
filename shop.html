@@ -88,13 +88,6 @@
 .d-thumbs .t-badge { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,.35); color: #fff; }
 .d-thumbs .t-badge svg { width: 18px; height: 18px; }
 .d-thumbs .t-badge.txt { font: 600 11px/1 var(--mono); }
-.cmp { position: relative; width: 100%; height: 100%; --pos: 50%; user-select: none; }
-.cmp img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.cmp .cmp-before { clip-path: inset(0 calc(100% - var(--pos)) 0 0); }
-.cmp-line { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 2px; translate: -1px 0; background: #fff; pointer-events: none; }
-.cmp-line::after { content: "⟷"; position: absolute; top: 50%; left: 50%; translate: -50% -50%; width: 36px; height: 36px; border-radius: 18px; display: grid; place-items: center; background: #fff; color: #0a0a0a; font-size: 15px; box-shadow: 0 4px 16px rgba(0,0,0,.35); }
-.cmp-lbl { position: absolute; top: 10px; height: 24px; display: inline-flex; align-items: center; padding: 0 8px; border-radius: 6px; background: rgba(10,10,10,.72); color: #f2f2f2; font: 500 11px/1 var(--mono); pointer-events: none; }
-.cmp input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: ew-resize; margin: 0; }
 .d-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .ar { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
 .ar-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
@@ -227,6 +220,7 @@
 <script src="promo.js"></script>
 <script src="ui.js"></script>
 <script src="extras.js"></script>
+<script src="motion.js" defer></script>
 <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 <script>
 (() => {

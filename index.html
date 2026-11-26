@@ -13,19 +13,72 @@
 </head>
 <body>
 
-<div class="intro" id="intro" aria-hidden="true">
+<div class="intro" id="intro" role="status" aria-live="polite" aria-label="Loading the site">
+  <div class="ld-cols" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
   <div class="intro-in">
-    <div class="intro-icons"><span><i data-lucide="code-xml"></i></span><span><i data-lucide="user"></i></span><span><i data-lucide="globe"></i></span></div>
-    <h1>Welcome to my<br>portfolio</h1>
+    <div class="ld-stage" aria-hidden="true"><div class="ld-plate"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div>
+    <h1 class="ld-title"><span><span>Welcome</span></span> <span><span>to</span></span> <span><span>my</span></span><br><span><span>portfolio</span></span></h1>
+    <div class="ld-meta"><span class="ld-status" id="ld-status">Loading the site</span><span class="ld-pct"><b id="ld-pct">0</b>%</span></div>
+    <div class="ld-bar" aria-hidden="true"><i id="ld-bar"></i></div>
     <span class="pill">exiozz.github.io/portfolio</span>
   </div>
 </div>
+<script>
+/* Écran de chargement : attend que le site soit vraiment chargé (images, polices, page complète),
+   au moins 3 secondes, puis s'ouvre en volets. Au plus 10 secondes si une image traîne. */
+(function () {
+  var MIN = 3000, MAX = 10000, t0 = performance.now(), root = document.documentElement;
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var intro = document.getElementById("intro"), pctEl = document.getElementById("ld-pct"), barEl = document.getElementById("ld-bar"), stEl = document.getElementById("ld-status");
+  var bricks = intro.querySelectorAll(".ld-plate span");
+  var seen = false; try { seen = sessionStorage.getItem("exiozz-intro") === "1"; sessionStorage.setItem("exiozz-intro", "1"); } catch (e) {}
+  var done, gate = new Promise(function (r) { done = r; });
+  window.IntroGate = gate;
+  if (seen) { intro.remove(); root.classList.add("intro-done"); done(); return; }
+  root.classList.add("loading");
+  var parts = { dom: 0, imgs: 0, fonts: 0, load: 0 }, real = 0, shown = 0, finished = false;
+  var calc = function () { real = parts.dom * 15 + parts.imgs * 55 + parts.fonts * 15 + parts.load * 15; };
+  var trackImgs = function () {
+    var list = [].slice.call(document.images).filter(function (i) { return i.loading !== "lazy" && !i.closest("#intro"); });
+    if (!list.length) { parts.imgs = 1; calc(); return; }
+    var n = 0, step = function () { n++; parts.imgs = n / list.length; calc(); };
+    list.forEach(function (i) { if (i.complete) step(); else { i.addEventListener("load", step, { once: true }); i.addEventListener("error", step, { once: true }); } });
+  };
+  document.addEventListener("DOMContentLoaded", function () { parts.dom = 1; calc(); trackImgs(); (document.fonts ? document.fonts.ready : Promise.resolve()).then(function () { parts.fonts = 1; calc(); }); });
+  addEventListener("load", function () { parts.load = 1; parts.imgs = 1; parts.fonts = 1; calc(); });
+  var STATUS = [[0, "Loading the site"], [30, "Loading images"], [60, "Polishing the details"], [88, "Almost there"]];
+  var frame = function (now) {
+    var t = now - t0, ready = (real >= 100 && t >= MIN) || t >= MAX;
+    // Le compteur suit le vrai chargement, sans dépasser ce que permet le temps minimum
+    var cap = ready ? 100 : Math.min(99, real, 100 * Math.min(1, t / MIN) + (real >= 100 ? 0 : -1));
+    shown += (Math.max(shown, cap) - shown) * (ready ? .25 : .08);
+    if (ready && shown > 99.5) shown = 100;
+    var v = Math.floor(shown);
+    pctEl.textContent = v; barEl.style.transform = "scaleX(" + (shown / 100) + ")";
+    for (var k = 0; k < bricks.length; k++) bricks[k].classList.toggle("on", v >= (k + 1) * (100 / bricks.length) - .5);
+    var st = STATUS[0][1]; STATUS.forEach(function (s) { if (v >= s[0]) st = s[1]; });
+    stEl.textContent = v >= 100 ? "Ready" : st;
+    if (v >= 100 && !finished) { finished = true; return leave(); }
+    requestAnimationFrame(frame);
+  };
+  function leave() {
+    intro.classList.add("ready");
+    setTimeout(function () {
+      intro.classList.add("out");
+      root.classList.remove("loading");
+      setTimeout(function () { root.classList.add("intro-done"); done(); }, reduce ? 0 : 420);
+      setTimeout(function () { intro.remove(); }, reduce ? 300 : 1500);
+    }, reduce ? 150 : 650);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
 
 <header class="nav">
   <div class="nav-in" id="nav-in">
     <a href="#home" class="brand"><b>exiozz</b>.dev</a>
     <nav class="links" aria-label="Sections">
-      <a href="#home" class="on">Home</a><a href="#about">About</a><a href="#portfolio">Portfolio</a><a href="#quote">Quote</a><a href="#world">World</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
+      <a href="#home" class="on">Home</a><a href="#about">About</a><a href="#portfolio">Portfolio</a><a href="#making">Making</a><a href="#quote">Quote</a><a href="#world">World</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
     </nav>
     <div class="nav-tools">
       <button class="icon-btn" id="theme-btn" aria-label="Switch theme"></button>
@@ -52,7 +105,7 @@
 <main>
 <section class="hero" id="home">
   <div class="wrap">
-    <div>
+    <div data-parallax=".12">
       <div class="avail rv" data-avail><i></i><span data-avail-text>Available for work</span></div>
       <h2 class="big rv">Roblox<span>Developer</span></h2>
       <div class="typing rv" id="typing" aria-live="polite"></div>
@@ -100,10 +153,24 @@
       </a>
     </div>
     <div class="stats">
-      <a href="#portfolio" class="stat rv" data-tab="projects"><div class="stat-top"><span class="stat-ic"><i data-lucide="code-xml"></i></span><b>22+</b></div><div class="stat-bot"><span>Projects delivered</span><i data-lucide="arrow-up-right"></i></div></a>
-      <a href="#portfolio" class="stat rv" data-tab="stack"><div class="stat-top"><span class="stat-ic"><i data-lucide="award"></i></span><b>3+</b></div><div class="stat-bot"><span>Years of experience</span><i data-lucide="arrow-up-right"></i></div></a>
-      <a href="#contact" class="stat rv"><div class="stat-top"><span class="stat-ic"><i data-lucide="star"></i></span><b>5.0</b></div><div class="stat-bot"><span>10 client reviews</span><i data-lucide="arrow-up-right"></i></div></a>
+      <a href="#portfolio" class="stat rv" data-tab="projects"><div class="stat-top"><span class="stat-ic"><i data-lucide="code-xml"></i></span><b data-count="22" data-suffix="+">22+</b></div><div class="stat-bot"><span>Projects delivered</span><i data-lucide="arrow-up-right"></i></div></a>
+      <a href="#portfolio" class="stat rv" data-tab="stack"><div class="stat-top"><span class="stat-ic"><i data-lucide="award"></i></span><b data-count="3" data-suffix="+">3+</b></div><div class="stat-bot"><span>Years of experience</span><i data-lucide="arrow-up-right"></i></div></a>
+      <a href="#contact" class="stat rv"><div class="stat-top"><span class="stat-ic"><i data-lucide="star"></i></span><b data-count="5" data-dec="1" id="stat-avg">5.0</b></div><div class="stat-bot"><span id="stat-rev">10 client reviews</span><i data-lucide="arrow-up-right"></i></div></a>
     </div>
+  </div>
+</section>
+
+<section class="sec adv" id="advent" hidden>
+  <div class="wrap">
+    <div class="adv-top">
+      <div>
+        <div class="kicker rv">Advent calendar</div>
+        <h2 class="title rv" style="margin-top:16px">A gift<br>every day</h2>
+        <p class="subtitle rv">From December 1st to 24th, a new box opens at midnight: promo codes, wallpapers, Roblox dev tips and challenges. Come back every day.</p>
+      </div>
+      <div class="adv-xmas rv"><span class="kicker">Christmas in</span><b data-xmas>—</b></div>
+    </div>
+    <div class="adv-grid rv" data-advent-grid></div>
   </div>
 </section>
 
@@ -168,36 +235,62 @@
   </div>
 </section>
 
+<section class="sec" id="making">
+  <div class="wrap">
+    <div class="mk-top">
+      <div>
+        <div class="kicker rv">Behind the scenes</div>
+        <h2 class="title rv" style="margin-top:16px">From pieces<br>to a scene</h2>
+        <p class="subtitle rv">How a pack is made, step by step. Drag the slider to compare the separate assets with the finished scene.</p>
+      </div>
+      <div class="faq-filters rv" role="tablist" aria-label="Pack" id="mk-packs" style="margin:0"></div>
+    </div>
+    <div class="cmp mk-cmp rv" id="mk-cmp"></div>
+    <ol class="mk-steps" id="mk-steps"></ol>
+  </div>
+</section>
+
 <section class="sec" id="quote">
   <div class="wrap">
     <div class="center">
       <div class="kicker rv">Quote simulator</div>
       <h2 class="title rv" style="margin-top:16px">How much for<br>your project?</h2>
       <p class="subtitle rv">Pick what you need and get a price range right away. The final price is confirmed together.</p>
+      <button class="btn btn-o rv qz-open" type="button" data-quiz><i data-lucide="sparkles"></i>Not sure? Take the 3-question quiz</button>
     </div>
     <div class="qs rv" id="qs">
       <div class="qs-form">
-        <div class="qs-step"><span class="qs-n">01</span><div><b>What do you need?</b>
+        <div class="qs-step"><span class="qs-n">01</span><div><b>What do you need? <small>pick as many as you want</small></b>
           <div class="cats qs-cats" id="qs-cats" role="group" aria-label="Category"></div>
-          <div class="qs-svcs" id="qs-svcs" role="radiogroup" aria-label="Service"></div></div></div>
-        <div class="qs-step"><span class="qs-n">02</span><div><b>How big is it?</b>
-          <div class="qs-seg" id="qs-size" role="radiogroup" aria-label="Size"></div></div></div>
-        <div class="qs-step"><span class="qs-n">03</span><div><b>Extras</b>
+          <div class="qs-svcs" id="qs-svcs" role="group" aria-label="Services"></div></div></div>
+        <div class="qs-step"><span class="qs-n">02</span><div><b>Your selection <small id="qs-sel-n"></small></b>
+          <p class="qs-help">Set the size and quantity of each piece. Several of the same (pages, thumbnails, systems…)? Use the quantity.</p>
+          <div class="qs-lines" id="qs-lines"></div></div></div>
+        <div class="qs-step" id="qs-plat-step"><span class="qs-n">03</span><div><b>Platforms <small>for Roblox work</small></b>
+          <div class="qs-chips" id="qs-plat" role="group" aria-label="Platforms"></div></div></div>
+        <div class="qs-step"><span class="qs-n">04</span><div><b>Extras <small>optional</small></b>
           <div class="qs-extras" id="qs-extras"></div></div></div>
-        <div class="qs-step"><span class="qs-n">04</span><div><b>When do you need it?</b>
+        <div class="qs-step"><span class="qs-n">05</span><div><b>When do you need it?</b>
           <div class="qs-seg" id="qs-time" role="radiogroup" aria-label="Deadline"></div></div></div>
-        <div class="qs-step"><span class="qs-n">05</span><div><b>Tell me more <small>optional</small></b>
-          <label class="field plain" style="margin:12px 0 0"><span class="sr">Your project in a few words</span><textarea id="qs-msg" maxlength="900" placeholder="Your idea in a few words: game genre, references, links…" style="min-height:84px"></textarea></label></div></div>
+        <div class="qs-step"><span class="qs-n">06</span><div><b>Your budget <small>optional</small></b>
+          <div class="qs-budget"><input type="range" id="qs-budget" min="0" max="2000" step="10" value="0" aria-label="Your budget in euros"><output id="qs-budget-out" for="qs-budget">No budget set</output></div></div></div>
+        <div class="qs-step"><span class="qs-n">07</span><div><b>Tell me more <small>optional</small></b>
+          <label class="field plain" style="margin:12px 0 8px"><span class="sr">Your project in a few words</span><textarea id="qs-msg" maxlength="900" placeholder="Your idea in a few words: game genre, style, what you already have…" style="min-height:84px"></textarea></label>
+          <label class="field plain" style="margin-bottom:12px"><span class="sr">Reference links</span><input id="qs-links" maxlength="300" placeholder="Reference links (game, Figma, Pinterest…)" autocomplete="off"></label>
+          <div class="qs-contact"><span class="qs-lbl">Contact me on</span><div class="qs-chips" id="qs-contact" role="radiogroup" aria-label="Preferred contact"><button type="button" role="radio" data-qcontact="discord"><i data-lucide="message-circle"></i>Discord</button><button type="button" role="radio" data-qcontact="email"><i data-lucide="mail"></i>Email</button></div>
+            <label class="field plain qs-email" id="qs-email-wrap" hidden><span class="sr">Your email</span><input id="qs-email" type="email" maxlength="120" placeholder="you@example.com" autocomplete="email"></label></div></div></div>
       </div>
       <aside class="qs-res" aria-live="polite">
-        <span class="kicker">Estimated price</span>
+        <div class="qs-res-top"><span class="kicker">Estimated price</span><span class="qs-count" id="qs-count"></span></div>
         <div class="qs-price" id="qs-price"></div>
         <div class="qs-rbx" id="qs-rbx"></div>
+        <div class="qs-promo" id="qs-promo" hidden></div>
+        <div class="qs-fit" id="qs-fit" hidden></div>
         <div class="qs-meta"><div><i data-lucide="clock"></i><span id="qs-days"></span></div><div class="avail" data-avail style="margin:0"><i></i><span data-avail-text>Taking new projects</span></div></div>
         <ul class="qs-sum" id="qs-sum"></ul>
         <button class="btn btn-w wide" id="qs-send"><i data-lucide="send"></i>Send this request</button>
-        <div class="qs-alt"><button class="btn btn-o" id="qs-copy" type="button"><i data-lucide="copy"></i>Copy for Discord</button><a class="btn btn-o" id="qs-mail" href="#"><i data-lucide="mail"></i>Email</a></div>
-        <p class="d-note"><i data-lucide="info" style="width:14px;height:14px;flex:none;margin-top:2px"></i>An estimate, not a final price. Sending it creates a request in “My orders”, then I contact you on Discord.</p>
+        <div class="qs-alt"><button class="btn btn-o" id="qs-copy" type="button"><i data-lucide="copy"></i>Copy</button><a class="btn btn-o" id="qs-mail" href="#"><i data-lucide="mail"></i>Email</a><button class="btn btn-o" id="qs-reset" type="button" aria-label="Start over"><i data-lucide="rotate-ccw"></i></button></div>
+        <p class="d-note"><i data-lucide="info" style="width:14px;height:14px;flex:none;margin-top:2px"></i>An estimate, not a final price. Sending it creates a request in “My orders”, then I contact you. Your choices are saved on this device.</p>
       </aside>
     </div>
   </div>
@@ -297,6 +390,21 @@
 </section>
 </main>
 
+<section class="badge-me" id="badge-me" aria-labelledby="bm-title">
+  <div class="wrap">
+    <div class="bm-box">
+      <img class="bm-av" id="bm-av" src="img/avatar-bust.png" alt="">
+      <div class="bm-txt"><b id="bm-title">Put your avatar on the badge</b><span>Type your Roblox username and you're hanging at the top of the page. Share the link with your friends.</span></div>
+      <form class="bm-form" id="bm-form" novalidate>
+        <label class="sr" for="bm-in">Roblox username</label>
+        <input id="bm-in" name="u" placeholder="Roblox username" autocomplete="off" spellcheck="false" maxlength="20">
+        <button class="btn btn-w" id="bm-go"><i data-lucide="user-round"></i>Try it</button>
+      </form>
+      <div class="bm-acts" id="bm-acts" hidden><button class="btn btn-o" type="button" id="bm-share"><i data-lucide="link"></i>Copy link</button><button class="btn btn-o" type="button" id="bm-reset"><i data-lucide="rotate-ccw"></i>Reset</button></div>
+    </div>
+  </div>
+</section>
+
 <footer>
   <nav aria-label="Footer"><a href="shop.html">Shop</a><a href="https://exiozz.github.io/portfolio/mentions-legales.html">Legal notice</a><a href="https://exiozz.github.io/portfolio/cgu.html">Terms of use</a><a href="https://exiozz.github.io/portfolio/cgv.html">Terms of sale</a><a href="https://exiozz.github.io/portfolio/confidentialite.html">Privacy</a></nav>
   © 2026 Exiozz — All rights reserved.
@@ -307,13 +415,16 @@
   <div class="modal-in" id="modal-in"></div>
 </div>
 <div class="toast" id="toast" role="status"></div>
+<aside class="act" id="act" hidden aria-live="polite"></aside>
 
 <script src="promo.js"></script>
+<script src="advent.js"></script>
 <script src="ui.js"></script>
 <script src="extras.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script src="globe.js"></script>
+<script src="motion.js" defer></script>
 <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 <script>
 (() => {
@@ -327,11 +438,8 @@
   const fmtN = n => Number(n).toLocaleString("en-US");
 
   /* Intro, une fois par visite */
-  const intro = $("#intro");
-  let seen = false;
-  try { seen = sessionStorage.getItem("exiozz-intro") === "1"; sessionStorage.setItem("exiozz-intro", "1"); } catch (e) {}
-  const endIntro = () => intro.classList.add("out");
-  if (seen || reduce) endIntro(); else { setTimeout(endIntro, 4200); intro.addEventListener("click", endIntro); }
+  // L'écran de chargement (en haut de la page) gère tout seul l'intro ; le texte qui s'écrit attend qu'il soit parti
+  const introGate = window.IntroGate || Promise.resolve();
 
   /* Typing */
   const words = ["Lua Scripter", "Game Developer", "Web Developer", "GFX Designer"];
@@ -346,17 +454,20 @@
     else { del = false; wi = (wi + 1) % words.length; }
     setTimeout(type, del ? 45 : 85);
   };
-  if (reduce) tEl.textContent = words[0]; else setTimeout(type, 4400);
+  if (reduce) tEl.textContent = words[0]; else introGate.then(() => setTimeout(type, 700));
 
   /* Badge sur un cordon élastique : un poids au bout d'un ressort, calculé à pas fixe (fluide sur tous les écrans) */
   const lan = $("#lanyard"), wrap = $("#badge-wrap"), badge = $("#badge");
   const ropePath = $("#rope-path"), ropeEdge = $("#rope-edge");
-  const L = 400, GRAV = 1800, STRETCH = 38, AIR = .9, RADIAL = 5, FOLLOW = 16, DT = 1 / 120;
+  let L = 400; const GRAV = 1800, STRETCH = 38, AIR = .9, RADIAL = 5, DT = 1 / 120, MAX_PULL = 2.6;
   let anchor = { x: 0, y: -260 }, pos = { x: 0, y: 0 }, vel = { x: 0, y: 0 };
   let drag = null, ptr = { x: 0, y: 0 }, tilt = 0, tiltV = 0;
-  const place = () => { anchor = { x: lan.clientWidth / 2, y: -260 }; pos = { x: anchor.x + 90, y: anchor.y + L + 20 }; vel = { x: 0, y: 0 }; };
+  const place = () => { const small = innerWidth <= 960; L = small ? 230 : 400; anchor = { x: lan.clientWidth / 2, y: small ? -150 : -260 }; pos = { x: anchor.x + 90, y: anchor.y + L + 20 }; vel = { x: 0, y: 0 }; };
   place();
-  addEventListener("resize", place);
+  let lastW = innerWidth;
+  addEventListener("resize", () => { if (innerWidth !== lastW) { lastW = innerWidth; place(); } });
+  // Petit coup sur le badge (quand un visiteur y met son avatar)
+  const kickBadge = () => { if (reduce) return; vel.x += (Math.random() > .5 ? 1 : -1) * (700 + Math.random() * 300); vel.y -= 300; };
   const local = e => { const r = lan.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
   badge.addEventListener("pointerdown", e => {
     e.preventDefault();
@@ -368,7 +479,7 @@
   const release = () => {
     if (!drag) return;
     drag = null; badge.classList.remove("grabbing");
-    const v = Math.hypot(vel.x, vel.y), cap = 1400;
+    const v = Math.hypot(vel.x, vel.y), cap = 3200;
     if (v > cap) { vel.x *= cap / v; vel.y *= cap / v; }
   };
   addEventListener("pointerup", release);
@@ -376,11 +487,15 @@
   const step = dt => {
     let ax, ay;
     if (drag) {
+      // Tenu : le badge colle au doigt / à la souris, sans retard ; sa vitesse est gardée pour le lancer
       let tx = ptr.x - drag.ox, ty = ptr.y - drag.oy;
-      const dx = tx - anchor.x, dy = ty - anchor.y, d = Math.hypot(dx, dy), max = L * 1.45;
+      const dx = tx - anchor.x, dy = ty - anchor.y, d = Math.hypot(dx, dy), max = L * MAX_PULL;
       if (d > max) { tx = anchor.x + dx / d * max; ty = anchor.y + dy / d * max; }
-      ax = (tx - pos.x) * FOLLOW * FOLLOW - vel.x * 2 * FOLLOW;
-      ay = (ty - pos.y) * FOLLOW * FOLLOW - vel.y * 2 * FOLLOW;
+      vel.x += ((tx - pos.x) / dt - vel.x) * .35; vel.y += ((ty - pos.y) / dt - vel.y) * .35;
+      pos.x = tx; pos.y = ty;
+      const target = Math.max(-95, Math.min(95, -Math.atan2(pos.x - anchor.x, pos.y - anchor.y) * 180 / Math.PI)) + Math.max(-25, Math.min(25, vel.x * .012));
+      tiltV += ((target - tilt) * 90 - tiltV * 14) * dt; tilt += tiltV * dt;
+      return;
     } else {
       ax = -vel.x * AIR; ay = GRAV - vel.y * AIR;
       const dx = pos.x - anchor.x, dy = pos.y - anchor.y, len = Math.hypot(dx, dy) || 1;
@@ -391,6 +506,7 @@
       }
     }
     vel.x += ax * dt; vel.y += ay * dt;
+    if (!drag) { const sp = Math.hypot(vel.x, vel.y), lim = 4200; if (sp > lim) { vel.x *= lim / sp; vel.y *= lim / sp; } }
     pos.x += vel.x * dt; pos.y += vel.y * dt;
     const target = Math.max(-95, Math.min(95, -Math.atan2(pos.x - anchor.x, pos.y - anchor.y) * 180 / Math.PI));
     tiltV += ((target - tilt) * 70 - tiltV * 13) * dt;
@@ -741,6 +857,11 @@
       serverReviews = (Array.isArray(d) ? d : []).map(x => ({ n: x.name || "?", t: x.text || "", rating: +x.rating || 0, avatar: x.avatar || "", discordId: x.discordId, c: x.country || null, at: x.timestamp }));
     } catch (e) { /* serveur injoignable : on garde la liste vide */ }
     renderReviews(); if (worldMode === "reviews") renderWorld();
+    if (serverReviews.length) {
+      const avg = serverReviews.reduce((s, r) => s + r.rating, 0) / serverReviews.length;
+      $("#stat-avg").dataset.count = avg.toFixed(1); $("#stat-avg").textContent = avg.toFixed(1);
+      $("#stat-rev").textContent = `${serverReviews.length} client review${serverReviews.length === 1 ? "" : "s"}`;
+    }
   };
   // Formulaire : visible une fois connecté avec Discord
   let rating = 5;
@@ -860,79 +981,176 @@
     toast(`${name} added to cart`);
   });
 
-  /* Simulateur de devis : une fourchette de prix tout de suite, envoyée en demande sur le serveur */
+  /* Simulateur de devis : plusieurs services, chacun avec sa taille et sa quantité, puis plateformes,
+     options, délai, budget et contact. Les choix restent enregistrés sur l'appareil. */
   const SIZES = [["small", "Small", "A simple version", 1], ["medium", "Medium", "The usual scope", 1.8], ["large", "Large", "Big and detailed", 3]];
   const TIMES = [["flex", "Flexible", "No rush · −10%", .9, 1.4], ["std", "Standard", "Usual timeline", 1, 1], ["fast", "Fast", "+30%", 1.3, .7], ["rush", "Rush", "ASAP · +60%", 1.6, .5]];
-  const EXTRAS = [["polish", "UI & visual polish", "+25%", { pct: 25 }], ["rev", "Extra revisions", "+15%", { pct: 15 }], ["support", "30-day support", "+€10", { add: 10 }], ["doc", "Setup guide & docs", "+€5", { add: 5 }]];
-  const qs = { cat: "roblox", svc: 0, size: "medium", time: "std", extras: new Set() };
+  const PLATFORMS = [["pc", "PC", "Included", 0, "monitor"], ["mobile", "Mobile", "+15%", 15, "smartphone"], ["console", "Console", "+20%", 20, "gamepad-2"], ["vr", "VR", "+25%", 25, "glasses"]];
+  const PLAT_CATS = ["roblox", "script", "build", "uiux"];
+  const EXTRAS = [
+    ["polish", "UI & visual polish", "+25%", { pct: 25 }, "Extra care on visuals, animations and feel"],
+    ["rev", "Extra revisions", "+15%", { pct: 15 }, "More rounds of changes"],
+    ["priority", "Priority updates", "+10%", { pct: 10 }, "Daily progress updates on Discord"],
+    ["private", "Private / NDA", "+10%", { pct: 10 }, "Kept confidential, not shown in my portfolio"],
+    ["lang", "Multi-language", "+15%", { pct: 15 }, "Texts ready for several languages"],
+    ["support", "30-day support", "+€10", { add: 10 }, "Fixes and questions after delivery"],
+    ["doc", "Setup guide & docs", "+€5", { add: 5 }, "How to install, use and edit it"],
+    ["maint", "Monthly maintenance", "+€15/mo", { monthly: 15 }, "Updates and fixes every month"]
+  ];
+  const QKEY = "exiozz-quote-v2";
+  const qDefault = () => ({ browse: "roblox", items: [{ cat: "roblox", svc: 0, size: "medium", qty: 1 }], plat: ["pc"], extras: [], time: "std", budget: 0, msg: "", links: "", contact: "discord", email: "" });
+  let qs = (() => { try { const v = JSON.parse(localStorage.getItem(QKEY) || "null"); return v ? { ...qDefault(), ...v } : qDefault(); } catch (e) { return qDefault(); } })();
+  qs.items = (qs.items || []).filter(it => plans[it.cat] && plans[it.cat][it.svc]).map(it => ({ ...it, qty: Math.max(1, Math.min(20, +it.qty || 1)), size: SIZES.some(x => x[0] === it.size) ? it.size : "medium" }));
+  if (!plans[qs.browse]) qs.browse = "roblox";
+  const saveQ = () => { try { localStorage.setItem(QKEY, JSON.stringify(qs)); } catch (e) {} };
   const round5 = n => Math.max(5, Math.round(n / 5) * 5);
+  const catLabel = c => cats.find(x => x[0] === c)[1];
+  const hasPlat = () => qs.items.some(it => PLAT_CATS.includes(it.cat));
   const quote = () => {
-    const [name, , base] = plans[qs.cat][qs.svc];
-    const size = SIZES.find(x => x[0] === qs.size), time = TIMES.find(x => x[0] === qs.time);
-    let pct = 0, add = 0; qs.extras.forEach(k => { const e = EXTRAS.find(x => x[0] === k)[3]; pct += e.pct || 0; add += e.add || 0; });
-    const est = (base * size[3] * (1 + pct / 100) + add) * time[3];
-    const low = Math.max(base, round5(est * .9)), high = Math.max(low + 5, round5(est * 1.25));
-    const d = Math.max(1, Math.ceil(base * size[3] / 10 * time[4]));
-    const days = [d, Math.ceil(d * 1.6)];
-    const dur = days[1] > 14 ? `About ${Math.round(days[0] / 7) || 1}–${Math.ceil(days[1] / 7)} weeks` : days[1] <= 1 ? "About 1 day" : `About ${days[0]}–${days[1]} days`;
-    const cat = cats.find(c => c[0] === qs.cat)[1];
-    const extras = [...qs.extras].map(k => EXTRAS.find(x => x[0] === k)[1]);
-    return { name, cat, low, high, dur, size: size[1], time: time[1], extras };
+    const time = TIMES.find(x => x[0] === qs.time);
+    let pct = 0, add = 0, monthly = 0;
+    qs.extras.forEach(k => { const e = EXTRAS.find(x => x[0] === k); if (!e) return; pct += e[3].pct || 0; add += e[3].add || 0; monthly += e[3].monthly || 0; });
+    const platPct = hasPlat() ? qs.plat.reduce((s, k) => s + (PLATFORMS.find(p => p[0] === k) || [0, 0, 0, 0])[3], 0) : 0;
+    const lines = qs.items.map(it => {
+      const [name, , base] = plans[it.cat][it.svc], size = SIZES.find(x => x[0] === it.size);
+      const units = 1 + .8 * (it.qty - 1); // chaque exemplaire en plus compte pour 80 %
+      const est = base * size[3] * units * (1 + (PLAT_CATS.includes(it.cat) ? platPct : 0) / 100) * (1 + pct / 100) * time[3];
+      const low = Math.max(base, round5(est * .9)), high = Math.max(low + 5, round5(est * 1.25));
+      return { it, name, cat: catLabel(it.cat), size: size[1], base, low, high, days: Math.max(1, Math.ceil(base * size[3] * (1 + .5 * (it.qty - 1)) / 10)) };
+    });
+    const low = lines.reduce((s, l) => s + l.low, 0) + (lines.length ? add : 0), high = lines.reduce((s, l) => s + l.high, 0) + (lines.length ? add : 0);
+    // Délai : le plus long en entier, les autres à moitié (une partie se fait en parallèle)
+    const ds = lines.map(l => l.days).sort((a, b) => b - a);
+    const d = ds.length ? Math.max(1, Math.ceil((ds[0] + ds.slice(1).reduce((s, x) => s + x * .5, 0)) * time[4])) : 0;
+    const d2 = Math.ceil(d * 1.6);
+    const dur = !d ? "—" : d2 > 14 ? `About ${Math.max(1, Math.round(d / 7))}–${Math.ceil(d2 / 7)} weeks` : d2 <= 1 ? "About 1 day" : `About ${d}–${d2} days`;
+    const promo = X.Promo.active();
+    return { lines, low, high, add, monthly, dur, time: time[1], promo,
+      extras: qs.extras.map(k => (EXTRAS.find(x => x[0] === k) || [])[1]).filter(Boolean),
+      plats: hasPlat() ? qs.plat.map(k => PLATFORMS.find(p => p[0] === k)[1]) : [] };
   };
-  const summary = q => `Quote request · ${q.cat} — ${q.name}\nSize: ${q.size} · Deadline: ${q.time}${q.extras.length ? "\nExtras: " + q.extras.join(", ") : ""}\nEstimate: €${q.low}–€${q.high} (${q.dur.toLowerCase()})${$("#qs-msg").value.trim() ? "\n\n" + $("#qs-msg").value.trim() : ""}`;
+  const summary = q => [
+    `Quote request (${q.lines.length} service${q.lines.length > 1 ? "s" : ""})`,
+    ...q.lines.map(l => `• ${l.cat} — ${l.name} · ${l.size}${l.it.qty > 1 ? ` ×${l.it.qty}` : ""} · €${l.low}–€${l.high}`),
+    q.plats.length ? `Platforms: ${q.plats.join(", ")}` : "",
+    `Extras: ${q.extras.join(", ") || "none"}`,
+    `Deadline: ${q.time}`,
+    `Estimate: €${q.low}–€${q.high}${q.monthly ? ` + €${q.monthly}/month` : ""} (${q.dur.toLowerCase()})`,
+    q.promo ? `Promo code: ${q.promo.code} (−${q.promo.pct}%)` : "",
+    qs.budget ? `Budget: €${qs.budget}` : "",
+    qs.links.trim() ? `Links: ${qs.links.trim()}` : "",
+    `Contact: ${qs.contact === "email" && qs.email.trim() ? "email " + qs.email.trim() : "Discord"}`,
+    qs.msg.trim() ? `\n${qs.msg.trim()}` : ""
+  ].filter(Boolean).join("\n");
   let shownLow = 0, shownHigh = 0;
   const countTo = (lo, hi) => {
     const el = $("#qs-price"), from = [shownLow, shownHigh], t0 = performance.now(), dur = reduce || !shownHigh ? 0 : 450;
     const tick = now => {
       const k = dur ? Math.min(1, (now - t0) / dur) : 1, e = 1 - Math.pow(1 - k, 3);
       const a = Math.round(from[0] + (lo - from[0]) * e), b = Math.round(from[1] + (hi - from[1]) * e);
-      el.innerHTML = `<b>${X.money(a)}</b><span>–</span><b>${X.money(b)}</b>`;
+      el.innerHTML = hi ? `<b>${X.money(a)}</b><span>–</span><b>${X.money(b)}</b>` : `<b class="qs-none">Pick a service</b>`;
       if (k < 1) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick); shownLow = lo; shownHigh = hi;
   };
+  const isPicked = (c, i) => qs.items.findIndex(it => it.cat === c && it.svc === i);
+  let justAdded = null;
   const renderQuote = () => {
-    $("#qs-cats").innerHTML = cats.map(([id, l]) => `<button type="button" aria-pressed="${id === qs.cat}" data-qcat="${id}">${l}</button>`).join("");
-    $("#qs-svcs").innerHTML = plans[qs.cat].map(([n, d, eur], i) => `<button type="button" class="qs-svc" role="radio" aria-checked="${i === qs.svc}" data-qsvc="${i}"><span class="radio"></span><span><b>${n}</b><small>${d}</small></span><span class="mono">from ${X.money(eur)}</span></button>`).join("");
-    $("#qs-size").innerHTML = SIZES.map(([k, l, h]) => `<button type="button" role="radio" aria-checked="${k === qs.size}" data-qsize="${k}"><b>${l}</b><small>${h}</small></button>`).join("");
-    $("#qs-time").innerHTML = TIMES.map(([k, l, h]) => `<button type="button" role="radio" aria-checked="${k === qs.time}" data-qtime="${k}"><b>${l}</b><small>${h}</small></button>`).join("");
-    $("#qs-extras").innerHTML = EXTRAS.map(([k, l, h]) => `<label class="qs-x"><input type="checkbox" data-qx="${k}"${qs.extras.has(k) ? " checked" : ""}><span class="qs-box"><i data-lucide="check"></i></span><span>${l}</span><small>${h}</small></label>`).join("");
-    paintQuote(); icons();
-  };
-  const paintQuote = () => {
+    $("#qs-cats").innerHTML = cats.map(([id, l]) => { const n = qs.items.filter(it => it.cat === id).length; return `<button type="button" aria-pressed="${id === qs.browse}" data-qcat="${id}">${l}${n ? `<span class="qs-badge">${n}</span>` : ""}</button>`; }).join("");
+    $("#qs-svcs").innerHTML = plans[qs.browse].map(([n, d, eur], i) => `<button type="button" class="qs-svc" role="checkbox" aria-checked="${isPicked(qs.browse, i) >= 0}" data-qsvc="${i}"><span class="qs-box"><i data-lucide="check"></i></span><span><b>${n}</b><small>${d}</small></span><span class="mono">from ${X.money(eur)}</span></button>`).join("");
     const q = quote();
-    countTo(q.low, q.high);
-    $("#qs-rbx").textContent = `≈ R$ ${fmtN(X.inCur(q.low, "rbx"))} – ${fmtN(X.inCur(q.high, "rbx"))}`;
-    $("#qs-days").textContent = q.dur;
-    $("#qs-sum").innerHTML = [["Service", `${q.cat} · ${q.name}`], ["Size", q.size], ["Deadline", q.time], ["Extras", q.extras.join(", ") || "None"]].map(([k, v]) => `<li><span>${k}</span><b>${esc(v)}</b></li>`).join("");
-    $("#qs-mail").href = `mailto:tomokari.pro@gmail.com?subject=${encodeURIComponent("Quote - " + q.name)}&body=${encodeURIComponent(summary(q))}`;
+    $("#qs-sel-n").textContent = q.lines.length ? `${q.lines.length} service${q.lines.length > 1 ? "s" : ""}` : "";
+    $("#qs-lines").innerHTML = q.lines.length ? q.lines.map((l, k) => `<div class="qs-line${justAdded === k ? " new" : ""}" data-line="${k}">
+        <div class="ql-info"><b>${esc(l.name)}</b><small>${esc(l.cat)} · from ${X.money(l.base)}</small></div>
+        <div class="ql-size" role="radiogroup" aria-label="Size of ${esc(l.name)}">${SIZES.map(([sk, sl]) => `<button type="button" role="radio" aria-checked="${sk === l.it.size}" data-lsize="${k}:${sk}" title="${sl}">${sl[0]}</button>`).join("")}</div>
+        <div class="ql-qty" aria-label="Quantity of ${esc(l.name)}"><button type="button" data-lqty="${k}:-1" aria-label="One less"${l.it.qty <= 1 ? " disabled" : ""}>−</button><span>${l.it.qty}</span><button type="button" data-lqty="${k}:1" aria-label="One more"${l.it.qty >= 20 ? " disabled" : ""}>+</button></div>
+        <span class="ql-price">${X.money(l.low)}–${X.money(l.high)}</span>
+        <button type="button" class="ql-rm" data-lrm="${k}" aria-label="Remove ${esc(l.name)}"><i data-lucide="x"></i></button></div>`).join("")
+      : `<div class="qs-empty"><i data-lucide="mouse-pointer-click"></i>Pick one or more services above to build your quote.</div>`;
+    justAdded = null;
+    $("#qs-plat-step").classList.toggle("muted", !hasPlat());
+    $("#qs-plat").innerHTML = PLATFORMS.map(([k, l, h, , ic]) => `<button type="button" role="checkbox" aria-checked="${qs.plat.includes(k)}" data-qplat="${k}"${k === "pc" ? ' disabled title="Always included"' : ""}><i data-lucide="${ic}"></i>${l}<small>${h}</small></button>`).join("");
+    $("#qs-time").innerHTML = TIMES.map(([k, l, h]) => `<button type="button" role="radio" aria-checked="${k === qs.time}" data-qtime="${k}"><b>${l}</b><small>${h}</small></button>`).join("");
+    $("#qs-extras").innerHTML = EXTRAS.map(([k, l, h, , d]) => `<label class="qs-x" title="${d}"><input type="checkbox" data-qx="${k}"${qs.extras.includes(k) ? " checked" : ""}><span class="qs-box"><i data-lucide="check"></i></span><span class="qs-x-t">${l}<em>${d}</em></span><small>${h}</small></label>`).join("");
+    $$("#qs-contact [data-qcontact]").forEach(b => b.setAttribute("aria-checked", b.dataset.qcontact === qs.contact));
+    $("#qs-email-wrap").hidden = qs.contact !== "email";
+    paintQuote(q); icons();
   };
+  const paintQuote = (q = quote()) => {
+    countTo(q.low, q.high);
+    $("#qs-count").textContent = q.lines.length ? `${q.lines.length} service${q.lines.length > 1 ? "s" : ""}` : "";
+    $("#qs-rbx").textContent = q.high ? `≈ R$ ${fmtN(X.inCur(q.low, "rbx"))} – ${fmtN(X.inCur(q.high, "rbx"))}${q.monthly ? ` · + ${X.money(q.monthly)}/month` : ""}` : "";
+    const pr = $("#qs-promo");
+    pr.hidden = !(q.promo && q.high);
+    if (q.promo && q.high) pr.innerHTML = `<span class="pb-code">${esc(q.promo.code)}</span>With your code: <b>${X.money(Math.round(q.low * (100 - q.promo.pct) / 100))}–${X.money(Math.round(q.high * (100 - q.promo.pct) / 100))}</b>`;
+    const fit = $("#qs-fit");
+    fit.hidden = !(qs.budget && q.high);
+    if (qs.budget && q.high) {
+      const [cls, ic, txt] = qs.budget >= q.high ? ["ok", "circle-check", "Fits your budget"] : qs.budget >= q.low ? ["mid", "circle-alert", "Close to your budget"] : ["off", "circle-x", "Above your budget · try a smaller size or a flexible timeline"];
+      fit.className = "qs-fit " + cls; fit.innerHTML = `<i data-lucide="${ic}"></i><span>${txt} (€${qs.budget})</span>`;
+    }
+    $("#qs-days").textContent = q.dur;
+    $("#qs-sum").innerHTML = q.lines.map(l => `<li><span>${esc(l.name)}${l.it.qty > 1 ? ` ×${l.it.qty}` : ""}</span><b>${X.money(l.low)}–${X.money(l.high)}</b></li>`).join("")
+      + (q.add && q.lines.length ? `<li><span>Fixed extras</span><b>${X.money(q.add)}</b></li>` : "")
+      + `<li class="qs-sum-sep"><span>Platforms</span><b>${esc(q.plats.join(", ") || "—")}</b></li><li><span>Extras</span><b>${esc(q.extras.join(", ") || "None")}</b></li><li><span>Deadline</span><b>${esc(q.time)}</b></li>`;
+    $("#qs-send").disabled = !q.lines.length; $("#qs-copy").disabled = !q.lines.length;
+    $("#qs-mail").href = `mailto:tomokari.pro@gmail.com?subject=${encodeURIComponent("Quote request")}&body=${encodeURIComponent(summary(q))}`;
+    icons();
+  };
+  const qAdd = (c, i, opts = {}) => {
+    qs.browse = c;
+    if (isPicked(c, i) < 0) { qs.items.push({ cat: c, svc: i, size: opts.size || "medium", qty: 1 }); justAdded = qs.items.length - 1; }
+    saveQ(); renderQuote();
+  };
+  const toQuote = () => $("#quote").scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
   $("#qs").addEventListener("click", e => {
-    const c = e.target.closest("[data-qcat]"); if (c) { qs.cat = c.dataset.qcat; qs.svc = 0; renderQuote(); return; }
-    const sv = e.target.closest("[data-qsvc]"); if (sv) { qs.svc = +sv.dataset.qsvc; $$("[data-qsvc]").forEach(b => b.setAttribute("aria-checked", b === sv)); paintQuote(); }
-    const sz = e.target.closest("[data-qsize]"); if (sz) { qs.size = sz.dataset.qsize; $$("[data-qsize]").forEach(b => b.setAttribute("aria-checked", b === sz)); paintQuote(); }
-    const tm = e.target.closest("[data-qtime]"); if (tm) { qs.time = tm.dataset.qtime; $$("[data-qtime]").forEach(b => b.setAttribute("aria-checked", b === tm)); paintQuote(); }
+    const c = e.target.closest("[data-qcat]"); if (c) { qs.browse = c.dataset.qcat; saveQ(); renderQuote(); return; }
+    const sv = e.target.closest("[data-qsvc]");
+    if (sv) { const i = +sv.dataset.qsvc, at = isPicked(qs.browse, i); if (at >= 0) qs.items.splice(at, 1); else { qs.items.push({ cat: qs.browse, svc: i, size: "medium", qty: 1 }); justAdded = qs.items.length - 1; } saveQ(); renderQuote(); return; }
+    const ls = e.target.closest("[data-lsize]"); if (ls) { const [k, v] = ls.dataset.lsize.split(":"); qs.items[+k].size = v; saveQ(); renderQuote(); return; }
+    const lq = e.target.closest("[data-lqty]"); if (lq) { const [k, v] = lq.dataset.lqty.split(":").map(Number); qs.items[k].qty = Math.max(1, Math.min(20, qs.items[k].qty + v)); saveQ(); renderQuote(); return; }
+    const lr = e.target.closest("[data-lrm]");
+    if (lr) {
+      const k = +lr.dataset.lrm, row = lr.closest(".qs-line");
+      const done = () => { qs.items.splice(k, 1); saveQ(); renderQuote(); };
+      if (reduce) done(); else row.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateX(24px)" }], { duration: 220, easing: "ease-in" }).finished.then(done);
+      return;
+    }
+    const pl = e.target.closest("[data-qplat]"); if (pl && !pl.disabled) { const k = pl.dataset.qplat; qs.plat = qs.plat.includes(k) ? qs.plat.filter(x => x !== k) : [...qs.plat, k]; saveQ(); renderQuote(); return; }
+    const tm = e.target.closest("[data-qtime]"); if (tm) { qs.time = tm.dataset.qtime; saveQ(); renderQuote(); return; }
+    const ct = e.target.closest("[data-qcontact]"); if (ct) { qs.contact = ct.dataset.qcontact; saveQ(); renderQuote(); if (qs.contact === "email") $("#qs-email").focus(); }
   });
-  $("#qs").addEventListener("change", e => { const x = e.target.closest("[data-qx]"); if (x) { x.checked ? qs.extras.add(x.dataset.qx) : qs.extras.delete(x.dataset.qx); paintQuote(); } });
-  $("#qs-msg").addEventListener("input", () => { clearTimeout(paintQuote.t); paintQuote.t = setTimeout(paintQuote, 300); });
-  $("#qs-copy").addEventListener("click", async e => {
-    const text = summary(quote());
-    try { await navigator.clipboard.writeText(text); toast("Copied · paste it in my Discord DMs (@zo7q)"); } catch (err) { toast("Couldn't copy, use Email instead"); }
+  $("#qs").addEventListener("change", e => { const x = e.target.closest("[data-qx]"); if (x) { qs.extras = x.checked ? [...new Set([...qs.extras, x.dataset.qx])] : qs.extras.filter(k => k !== x.dataset.qx); saveQ(); paintQuote(); } });
+  const budgetOut = () => { $("#qs-budget-out").textContent = qs.budget ? (qs.budget >= 2000 ? "€2,000+" : X.money(qs.budget)) : "No budget set"; };
+  $("#qs-budget").addEventListener("input", e => { qs.budget = +e.target.value; budgetOut(); saveQ(); paintQuote(); $("#qs-budget").style.setProperty("--v", (qs.budget / 20) + "%"); });
+  [["#qs-msg", "msg"], ["#qs-links", "links"], ["#qs-email", "email"]].forEach(([sel, k]) => { $(sel).value = qs[k] || ""; $(sel).addEventListener("input", e => { qs[k] = e.target.value; saveQ(); clearTimeout(paintQuote.t); paintQuote.t = setTimeout(() => paintQuote(), 300); }); });
+  $("#qs-budget").value = qs.budget; $("#qs-budget").style.setProperty("--v", (qs.budget / 20) + "%"); budgetOut();
+  $("#qs-copy").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(summary(quote())); toast("Copied · paste it in my Discord DMs (@zo7q)"); } catch (err) { toast("Couldn't copy, use Email instead"); }
+  });
+  $("#qs-reset").addEventListener("click", () => {
+    if (!confirm("Start your quote over?")) return;
+    qs = qDefault(); qs.items = []; saveQ();
+    ["#qs-msg", "#qs-links", "#qs-email"].forEach(sel => { $(sel).value = ""; });
+    $("#qs-budget").value = 0; $("#qs-budget").style.setProperty("--v", "0%"); budgetOut(); renderQuote(); toast("Quote cleared");
   });
   $("#qs-send").addEventListener("click", async e => {
     const A = UI.Account, q = quote(), btn = e.currentTarget;
+    if (!q.lines.length) return;
+    if (qs.contact === "email" && !/^\S+@\S+\.\S+$/.test(qs.email.trim())) { toast("Add your email, or pick Discord"); $("#qs-email").focus(); return; }
     if (!A.user) { toast("Sign in with Discord to send your request"); setTimeout(A.signIn, 900); return; }
     btn.disabled = true;
     try {
-      await A.api("/api/order", { method: "POST", body: JSON.stringify({
-        items: [{ title: `Quote · ${q.cat} — ${q.name} · ${q.size} · ${q.time}${q.extras.length ? " · " + q.extras.join(", ") : ""} (estimate €${q.low}–€${q.high})`, price: q.low, type: "quote" }],
-        currency: "€", source: "quote", note: $("#qs-msg").value.trim() }) });
-      toast("Request sent · I'll contact you on Discord"); $("#qs-msg").value = ""; UI.openOrders();
+      const items = q.lines.map(l => ({ title: `Quote · ${l.cat} — ${l.name} · ${l.size}${l.it.qty > 1 ? ` ×${l.it.qty}` : ""} (estimate €${l.low}–€${l.high})`, price: l.low, type: "quote" }));
+      if (q.add) items.push({ title: `Quote · fixed extras (${q.extras.filter(n => EXTRAS.some(x => x[1] === n && x[3].add)).join(", ")})`, price: q.add, type: "quote" });
+      await A.api("/api/order", { method: "POST", body: JSON.stringify({ items, currency: "€", source: "quote", note: summary(q).slice(0, 1000) }) });
+      toast("Request sent · I'll contact you soon"); qs.msg = ""; $("#qs-msg").value = ""; saveQ(); UI.openOrders();
     } catch (err) { toast(err.message); }
     btn.disabled = false;
   });
   renderQuote();
-  document.addEventListener("click", e => { const b = e.target.closest("[data-quote]"); if (!b) return; const [c, i] = b.dataset.quote.split(":"); qs.cat = c; qs.svc = +i; renderQuote(); });
+  document.addEventListener("promochange", () => paintQuote());
+  document.addEventListener("click", e => { const b = e.target.closest("[data-quote]"); if (!b) return; const [c, i] = b.dataset.quote.split(":"); qAdd(c, +i); toast("Added to your quote"); });
 
   /* Barre de commande : questions, projets, packs, services */
   UI.palette.add(() => [
@@ -940,8 +1158,230 @@
     ...projects.map((p, i) => ({ g: "Projects", label: p.t, hint: p.d, img: p.img, k: p.tech.join(" "), run: () => { showTab("projects"); $(`[data-proj="${i}"]`).click(); } })),
     ...packs.map((p, i) => ({ g: "Photos", label: p.name + " · photos", hint: p.desc, img: "img/" + p.imgs[0][0], run: () => { showTab("photos"); packIdx = i; renderPack(); $("#portfolio").scrollIntoView({ behavior: "smooth" }); } })),
     { g: "Go to", label: "Quote simulator", hint: "Get a price range for your project", icon: "calculator", k: "price estimate devis cost", run: () => $("#quote").scrollIntoView({ behavior: "smooth" }), top: true },
-    ...Object.entries(plans).flatMap(([c, list]) => list.map(([n, d, eur], i) => ({ g: "Services", label: n, hint: `${cats.find(x => x[0] === c)[1]} · from ${X.money(eur)}`, icon: "receipt", k: d + " price pricing service", run: () => { qs.cat = c; qs.svc = i; renderQuote(); $("#quote").scrollIntoView({ behavior: "smooth" }); } })))
+    ...Object.entries(plans).flatMap(([c, list]) => list.map(([n, d, eur], i) => ({ g: "Services", label: n, hint: `${cats.find(x => x[0] === c)[1]} · from ${X.money(eur)}`, icon: "receipt", k: d + " price pricing service", run: () => { qAdd(c, i); toQuote(); toast(`${n} added to your quote`); } })))
   ]);
+
+  /* Compteurs : les chiffres défilent quand on arrive dessus */
+  const countUp = el => {
+    const end = parseFloat(el.dataset.count), dec = +(el.dataset.dec || 0), suf = el.dataset.suffix || "";
+    if (reduce || !isFinite(end)) return;
+    const t0 = performance.now(), dur = 1400;
+    const tick = now => { const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 4); el.textContent = (end * e).toFixed(dec) + (k === 1 ? suf : ""); if (k < 1) requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+  };
+  const cIO = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { cIO.unobserve(e.target); countUp(e.target); } }), { threshold: .6 });
+  $$("[data-count]").forEach(el => cIO.observe(el));
+
+  /* Activité en direct : vraies commandes et vrais avis des 30 derniers jours, sans aucun nom */
+  const ago = ts => { const m = Math.round((Date.now() - ts) / 6e4); return m < 2 ? "just now" : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} day${Math.round(m / 1440) > 1 ? "s" : ""} ago`; };
+  const actText = ev => {
+    const prod = ev.productId && X.PRODUCTS.find(p => p.id === ev.productId), c = ev.country && countryOf(ev.country);
+    if (ev.kind === "order") return { icon: "shopping-bag", html: `Someone ordered <b>${esc(ev.title)}</b>${ev.more > 0 ? ` + ${ev.more} more` : ""}`, href: "shop.html" };
+    if (ev.kind === "quote") return { icon: "calculator", html: `Someone just requested a <b>quote</b>`, href: "#quote" };
+    if (ev.kind === "review") return { icon: "star", html: `New <b>${"★".repeat(ev.rating)}</b> review${c ? ` from <b>${esc(c[1])}</b>` : ""}`, href: "#contact" };
+    if (ev.kind === "rating" && prod) return { icon: "badge-check", html: `<b>${esc(prod.name)}</b> got a ${ev.rating}★ buyer rating`, href: "shop.html?product=" + prod.id };
+    return null;
+  };
+  (async () => {
+    let stop = false; try { stop = sessionStorage.getItem("exiozz-act-off") === "1"; } catch (e) {}
+    if (stop) return;
+    let events = [];
+    try { const r = await fetch(UI.Account.API + "/api/activity"); if (r.ok) events = (await r.json()).map(ev => ({ ev, t: actText(ev) })).filter(x => x.t); } catch (e) {}
+    if (!events.length) return;
+    const box = $("#act"); let i = 0, shown = 0, timer = null;
+    const hide = () => { box.classList.remove("open"); setTimeout(() => { if (!box.classList.contains("open")) box.hidden = true; }, 400); };
+    const show = () => {
+      if (document.hidden || shown >= 6 || document.querySelector(".drawer.open, .modal.open, .cmdk.open, .game.open")) { timer = setTimeout(show, 8000); return; }
+      const { ev, t } = events[i++ % events.length]; shown++;
+      box.innerHTML = `<a class="act-in" href="${t.href}"><span class="act-ic"><i data-lucide="${t.icon}"></i></span><span class="act-t"><span>${t.html}</span><small><span class="live">${ago(ev.ts)}</span></small></span></a><button class="act-x" aria-label="Hide live activity"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>`;
+      icons(); box.hidden = false; requestAnimationFrame(() => box.classList.add("open"));
+      setTimeout(hide, 6000);
+      if (shown < Math.min(6, events.length * 2)) timer = setTimeout(show, 16000);
+    };
+    box.addEventListener("click", e => { if (e.target.closest(".act-x")) { clearTimeout(timer); hide(); try { sessionStorage.setItem("exiozz-act-off", "1"); } catch (err) {} } });
+    timer = setTimeout(show, 9000);
+  })();
+
+  /* Calendrier de l'Avent */
+  if (window.Advent) {
+    const advEl = $("#advent");
+    Advent.mount(advEl, { onOpen: (n, r, d) => {
+      const codeOk = r.type === "code" && d.today;
+      const body = r.type === "code"
+        ? `<div class="adv-code"><span class="pb-code">${r.code}</span><button class="btn btn-o" data-adv-copy="${r.code}"><i data-lucide="copy"></i>Copy</button></div>
+           ${codeOk ? `<button class="btn btn-w wide" data-promo-now="${r.code}"><i data-lucide="ticket-percent"></i>Apply it now</button>` : `<p class="d-note">This code only works on December ${n}${d.today ? "" : " — " + (new Date() < new Date(d.iso + "T00:00:00") ? "come back that day" : "it has expired")}.</p>`}`
+        : r.type === "wallpaper" ? `<img class="adv-wall" src="${r.src}" alt="${esc(r.title)}"><a class="btn btn-w wide" href="${r.src}" download><i data-lucide="download"></i>Download the wallpaper</a>`
+        : r.type === "game" ? `<button class="btn btn-w wide" data-adv-game><i data-lucide="gamepad-2"></i>Play Brick Catch</button><p class="d-note">Your best so far: ${(() => { try { return +localStorage.getItem("exiozz-brick-best") || 0; } catch (e) { return 0; } })()} points.</p>`
+        : `<div class="adv-tip"><i data-lucide="code-xml"></i><span>Roblox dev tip</span></div>`;
+      $("#modal-in").className = "modal-in solo adv-modal";
+      $("#modal-in").innerHTML = `<div class="adv-gift"><span class="kicker">Day ${n} · December ${n}</span><h3>${esc(r.title)}</h3><p>${esc(r.text)}</p>${body}</div>`;
+      $("#modal").classList.add("open"); icons();
+      if (!reduce) confetti();
+    } });
+    if (Advent.inSeason) {
+      advEl.hidden = false;
+      $$(".rv", advEl).forEach(el => io.observe(el));
+      const nav = $(".links"), a = document.createElement("a"); a.href = "#advent"; a.textContent = "Advent"; a.className = "nav-adv";
+      nav.insertBefore(a, nav.querySelector('a[href="#portfolio"]')); links.push(a); secIO.observe(advEl);
+      a.addEventListener("click", () => $("#nav-in").classList.remove("open"));
+      UI.palette.add(() => [{ g: "Go to", label: "Advent calendar", hint: "A gift every day until Christmas", icon: "gift", k: "christmas noel gift", run: () => advEl.scrollIntoView({ behavior: "smooth" }), top: true }]);
+    }
+  }
+  document.addEventListener("click", async e => {
+    const c = e.target.closest("[data-adv-copy]"); if (c) { try { await navigator.clipboard.writeText(c.dataset.advCopy); toast("Code copied"); } catch (err) { toast(c.dataset.advCopy); } }
+    const pn = e.target.closest("[data-promo-now]"); if (pn) { const r = X.Promo.apply(pn.dataset.promoNow); toast(r.ok ? `Code ${r.code} applied · −${r.pct}%` : r.msg); if (r.ok) closeModal(); }
+    if (e.target.closest("[data-adv-game]")) { closeModal(); UI.game.open(); }
+  });
+  // Petits confettis quand on ouvre une case
+  function confetti() {
+    const layer = document.createElement("div"); layer.className = "confetti"; layer.setAttribute("aria-hidden", "true");
+    const colors = ["#ff5a1f", "#f5c542", "#3fcf74", "#5b9df5", "#f2f2f2", "#ff5d7a"];
+    for (let i = 0; i < 70; i++) { const p = document.createElement("i"); p.style.cssText = `left:${50 + (Math.random() - .5) * 30}%;background:${colors[i % colors.length]};--dx:${(Math.random() - .5) * 900}px;--dy:${-200 - Math.random() * 500}px;--r:${Math.random() * 720}deg;animation-delay:${Math.random() * .15}s`; layer.appendChild(p); }
+    document.body.appendChild(layer); setTimeout(() => layer.remove(), 2200);
+  }
+
+  /* Coulisses : avant / après et étapes de fabrication d'un pack */
+  const MAKING = [
+    { id: "stylized-forest-pack", name: "Stylized Forest Pack", before: "assets/forest-pack/planche.jpg", after: "assets/forest-pack/hero.jpg", labels: ["18 separate assets", "The finished scene"],
+      steps: [
+        ["One model at a time", "Each tree, rock and mushroom is modeled and painted on its own in Blender, in the same stylized look.", "img/forest-01.webp"],
+        ["The full set", "18 assets at the same scale, checked side by side so nothing looks out of place.", "assets/forest-pack/planche.jpg"],
+        ["Assembled together", "Everything goes into one scene to see how it reads together, like it would in a game.", "assets/forest-pack/hero.jpg"],
+        ["Ready for Roblox", "Exported as Roblox-ready FBX with baked Color and Normal maps, plus a presentation video.", "assets/forest-pack/presentation-poster.jpg", "assets/forest-pack/presentation.mp4"]] },
+    { id: "lava-mounts-pack", name: "Lava Mounts Pack", before: "assets/lava-mounts-pack/planche.jpg", after: "assets/lava-mounts-pack/hero.jpg", labels: ["The 4 models", "In a scene"],
+      steps: [
+        ["The dragon", "Modeled and textured with glowing lava cracks running through the scales.", "img/dragon-tete.webp"],
+        ["The whole pack", "Dragon, horse with saddle and harness, summoning bell and fire portal, in one consistent style.", "assets/lava-mounts-pack/planche.jpg"],
+        ["Rigged and posed", "The mounts are rigged so they can be animated and ridden in game.", "img/dragon-profil.webp"],
+        ["Ready for Roblox", "Exported as FBX with PBR textures, plus a presentation video.", "assets/lava-mounts-pack/presentation-poster.jpg", "assets/lava-mounts-pack/presentation.mp4"]] }
+  ];
+  let mk = 0;
+  const renderMaking = () => {
+    const m = MAKING[mk];
+    $("#mk-packs").innerHTML = MAKING.map((x, i) => `<button role="tab" aria-pressed="${i === mk}" data-mk="${i}">${x.name.replace(" Pack", "")}</button>`).join("");
+    $("#mk-cmp").style.setProperty("--pos", "50%");
+    $("#mk-cmp").innerHTML = `<img src="${m.after}" alt="${m.labels[1]}" loading="lazy"><img class="cmp-before" src="${m.before}" alt="${m.labels[0]}" loading="lazy"><span class="cmp-line"></span><span class="cmp-lbl" style="left:12px">${m.labels[0]}</span><span class="cmp-lbl" style="right:12px">${m.labels[1]}</span><input type="range" min="0" max="100" value="50" aria-label="Compare ${m.labels[0].toLowerCase()} with ${m.labels[1].toLowerCase()}">`;
+    $("#mk-steps").innerHTML = m.steps.map(([t, d, img, vid], i) => `<li class="mk-step" style="--i:${i}"><span class="mk-n">${String(i + 1).padStart(2, "0")}</span>
+      <div class="mk-img">${vid ? `<button class="mk-play" data-mk-video="${vid}" data-poster="${img}" aria-label="Play the presentation video"><img src="${img}" alt="" loading="lazy"><span><i data-lucide="play"></i></span></button>` : `<img src="${img}" alt="${esc(t)}" loading="lazy">`}</div>
+      <b>${esc(t)}</b><p>${esc(d)}</p></li>`).join("") + `<li class="mk-step mk-end"><span class="mk-n">→</span><div class="mk-cta"><b>Get the pack</b><p>${esc(m.name)}, ready to drop in your game.</p><a class="btn btn-w" href="shop.html?product=${m.id}">View in shop <i data-lucide="arrow-up-right"></i></a></div></li>`;
+    icons(); mkIO();
+  };
+  // L'étape apparaît et la ligne se remplit au scroll
+  const mkIO = () => { const o = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); o.unobserve(e.target); } }), { threshold: .3 }); $$(".mk-step").forEach(el => o.observe(el)); };
+  $("#mk-packs").addEventListener("click", e => { const b = e.target.closest("[data-mk]"); if (!b || +b.dataset.mk === mk) return; mk = +b.dataset.mk; renderMaking(); });
+  $("#mk-cmp").addEventListener("input", e => { $("#mk-cmp").style.setProperty("--pos", e.target.value + "%"); });
+  // Petit indice : le curseur glisse tout seul la première fois qu'on voit le bloc
+  new IntersectionObserver((es, o) => { if (!es[0].isIntersecting || reduce) return; o.disconnect(); const c = $("#mk-cmp"), t0 = performance.now();
+    const tick = now => { const k = Math.min(1, (now - t0) / 1600), v = 50 + Math.sin(k * Math.PI * 2) * 22; c.style.setProperty("--pos", v + "%"); const r = c.querySelector("input"); if (r) r.value = v; if (k < 1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }, { threshold: .6 }).observe($("#mk-cmp"));
+  document.addEventListener("click", e => {
+    const v = e.target.closest("[data-mk-video]"); if (!v) return;
+    $("#modal-in").className = "modal-in solo";
+    $("#modal-in").innerHTML = `<video class="lb-img" src="${v.dataset.mkVideo}" poster="${v.dataset.poster}" controls autoplay playsinline></video>`;
+    $("#modal").classList.add("open");
+  });
+  renderMaking();
+  // La vidéo s'arrête quand on ferme la fenêtre
+  $("#modal-close").addEventListener("click", () => $$("#modal video").forEach(x => x.pause()));
+  $("#modal").addEventListener("click", e => { if (e.target.id === "modal") $$("#modal video").forEach(x => x.pause()); });
+
+  /* Quiz : 3 questions → le bon service, pré-rempli dans le simulateur */
+  const QUIZ = [
+    ["What are you working on?", [["roblox", "A Roblox game", "gamepad-2"], ["web", "A website", "globe"], ["discord", "A Discord server", "message-circle"], ["gfx", "Visuals & branding", "palette"], ["3d", "3D models", "box"]]],
+    ["Where are you at?", [["idea", "Just an idea", "lightbulb"], ["started", "Already started", "hammer"], ["live", "It's live, needs work", "rocket"]]],
+    ["What matters most?", [["speed", "Getting it fast", "zap"], ["budget", "Keeping the budget low", "piggy-bank"], ["quality", "The best quality", "gem"]]]
+  ];
+  const quizPick = (what, stage) => ({
+    roblox: { idea: [1, "A full game, from concept to release"], started: [0, "A custom system to plug into what you have"], live: [2, "Maintenance: bugs, performance and new features"] },
+    web: { idea: [0, "A showcase site to get online quickly"], started: [1, "A full site with animations and content"], live: [2, "A backend: accounts, database, admin"] },
+    discord: { idea: [1, "A full server setup: channels, roles, bots"], started: [0, "A custom bot for your server"], live: [0, "A custom bot to level up your server"] },
+    gfx: { idea: [0, "A profile picture to start your brand"], started: [1, "A banner for your channel or group"], live: [2, "A thumbnail that gets more clicks"] },
+    "3d": { idea: [0, "A custom 3D model"], started: [0, "A custom 3D model to complete your set"], live: [0, "A custom 3D model for your live game"] }
+  }[what][stage]);
+  let qa = [];
+  const renderQuiz = () => {
+    const step = qa.length;
+    if (step < QUIZ.length) {
+      const [q, opts] = QUIZ[step];
+      $("#modal-in").innerHTML = `<div class="qz"><div class="qz-bar" aria-hidden="true">${QUIZ.map((_, i) => `<i class="${i <= step ? "on" : ""}"></i>`).join("")}</div>
+        <span class="kicker">Question ${step + 1} of ${QUIZ.length}</span><h3>${q}</h3>
+        <div class="qz-opts">${opts.map(([k, l, ic]) => `<button class="qz-opt" data-qa="${k}"><span class="qz-ic"><i data-lucide="${ic}"></i></span>${l}<i class="qz-go" data-lucide="arrow-right"></i></button>`).join("")}</div>
+        ${step ? `<button class="qz-back" data-qa-back><i data-lucide="arrow-left"></i>Back</button>` : ""}</div>`;
+    } else {
+      const [what, stage, prio] = qa, [svc, why] = quizPick(what, stage), plan = plans[what][svc];
+      const size = prio === "quality" ? "large" : prio === "speed" || prio === "budget" ? "small" : "medium";
+      const time = prio === "speed" ? "fast" : prio === "budget" ? "flex" : "std";
+      $("#modal-in").innerHTML = `<div class="qz qz-res"><div class="qz-bar" aria-hidden="true">${QUIZ.map(() => `<i class="on"></i>`).join("")}</div>
+        <span class="kicker">Your match</span><h3>${plan[0]}</h3><p>${why}. ${plan[1]}</p>
+        <div class="qz-tags"><span class="tag">${cats.find(c => c[0] === what)[1]}</span><span class="tag">${SIZES.find(x => x[0] === size)[1]} size</span><span class="tag">${TIMES.find(x => x[0] === time)[1]} timeline</span>${prio === "quality" ? '<span class="tag">UI & visual polish</span>' : ""}<span class="tag">from ${X.money(plan[2])}</span></div>
+        <div class="btns"><button class="btn btn-w" data-qa-use='${JSON.stringify({ what, svc, size, time, polish: prio === "quality" })}'><i data-lucide="calculator"></i>See my estimate</button><button class="btn btn-o" data-qa-redo><i data-lucide="rotate-ccw"></i>Start over</button></div>
+        ${what === "3d" ? `<p class="d-note">Looking for something ready-made? <a href="shop.html" style="text-decoration:underline">Browse the 3D packs in the shop</a>.</p>` : ""}</div>`;
+    }
+    icons();
+    const f = $("#modal-in .qz-opt, #modal-in [data-qa-use]"); f && f.focus({ preventScroll: true });
+  };
+  document.addEventListener("click", e => {
+    if (e.target.closest("[data-quiz]")) { qa = []; $("#modal-in").className = "modal-in solo qz-modal"; renderQuiz(); $("#modal").classList.add("open"); return; }
+    const o = e.target.closest("[data-qa]"); if (o) { qa.push(o.dataset.qa); renderQuiz(); return; }
+    if (e.target.closest("[data-qa-back]")) { qa.pop(); renderQuiz(); return; }
+    if (e.target.closest("[data-qa-redo]")) { qa = []; renderQuiz(); return; }
+    const u = e.target.closest("[data-qa-use]");
+    if (u) {
+      const r = JSON.parse(u.dataset.qaUse);
+      qs.browse = r.what; qs.items = [{ cat: r.what, svc: r.svc, size: r.size, qty: 1 }]; qs.time = r.time; qs.extras = r.polish ? ["polish"] : [];
+      saveQ(); closeModal(); renderQuote();
+      setTimeout(() => { $("#quote .qs").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }); $(".qs-res").animate([{ boxShadow: "0 0 0 0 rgba(255,90,31,.6)" }, { boxShadow: "0 0 0 14px rgba(255,90,31,0)" }], { duration: 1200, delay: 500 }); }, 150);
+    }
+  });
+  UI.palette.add(() => [{ g: "Actions", label: "Take the service quiz", hint: "3 questions to find what you need", icon: "sparkles", k: "quiz help choose", run: () => $("[data-quiz]").click() }]);
+
+  /* Badge perso : l'avatar Roblox du visiteur prend la place du mien */
+  const BADGE_KEY = "exiozz-badge";
+  const badgeImg = $("#badge .badge-photo img"), badgeName = $("#badge .badge-name"), badgeRole = $("#badge .badge-role");
+  const DEFAULT_BADGE = { img: badgeImg.getAttribute("src"), name: badgeName.textContent, role: badgeRole.innerHTML };
+  const fetchAvatar = async u => {
+    try { const r = await fetch(`${UI.Account.API}/api/roblox-avatar?u=${encodeURIComponent(u)}`); const d = await r.json().catch(() => ({})); if (r.ok) return d; if (r.status === 404 || r.status === 400) throw new Error(d.error ? "No Roblox player with this username" : "Not found"); } catch (e) { if (/Roblox player|Not found/.test(e.message)) throw e; }
+    // Repli : miroir public de l'API Roblox
+    const ur = await fetch("https://users.roproxy.com/v1/usernames/users", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ usernames: [u], excludeBannedUsers: true }) });
+    const user = ur.ok && ((await ur.json()).data || [])[0]; if (!user) throw new Error("No Roblox player with this username");
+    const t = ((await (await fetch(`https://thumbnails.roproxy.com/v1/users/avatar?userIds=${user.id}&size=420x420&format=Png&isCircular=false`)).json()).data || [])[0];
+    if (!t || !t.imageUrl) throw new Error("Avatar unavailable right now, try again");
+    return { id: user.id, name: user.name, displayName: user.displayName || user.name, img: t.imageUrl };
+  };
+  const setBadge = (d, kick) => {
+    if (d) { badgeImg.src = d.img; badgeName.textContent = d.displayName; badgeRole.textContent = "@" + d.name; $("#bm-av").src = d.img; $("#bm-in").value = d.name; }
+    else { badgeImg.src = DEFAULT_BADGE.img; badgeName.textContent = DEFAULT_BADGE.name; badgeRole.innerHTML = DEFAULT_BADGE.role; $("#bm-av").src = "img/avatar-bust.png"; $("#bm-in").value = ""; }
+    $("#badge").classList.toggle("visitor", !!d); $("#bm-acts").hidden = !d;
+    if (kick) kickBadge();
+  };
+  $("#bm-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const u = $("#bm-in").value.trim();
+    if (!/^[A-Za-z0-9_]{3,20}$/.test(u)) { toast("A Roblox username has 3 to 20 letters, numbers or _"); $("#bm-in").focus(); return; }
+    const btn = $("#bm-go"); btn.disabled = true; btn.classList.add("loading");
+    try {
+      const d = await fetchAvatar(u);
+      try { localStorage.setItem(BADGE_KEY, JSON.stringify(d)); } catch (err) {}
+      setBadge(d);
+      toast(`Looking good, ${d.displayName}!`);
+      $("#home").scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+      setTimeout(kickBadge, reduce ? 0 : 700);
+    } catch (err) { toast(err.message || "Couldn't load this avatar"); }
+    btn.disabled = false; btn.classList.remove("loading");
+  });
+  $("#bm-reset").addEventListener("click", () => { try { localStorage.removeItem(BADGE_KEY); } catch (e) {} setBadge(null, true); toast("Badge reset"); });
+  $("#bm-share").addEventListener("click", async () => {
+    const d = JSON.parse(localStorage.getItem(BADGE_KEY) || "null"); if (!d) return;
+    const url = `${location.origin}${location.pathname}?badge=${encodeURIComponent(d.name)}`;
+    try { await navigator.clipboard.writeText(url); toast("Link copied · your friends will see your avatar on the badge"); } catch (e) { toast(url); }
+  });
+  // Lien partagé (?badge=pseudo) en priorité, sinon le badge enregistré
+  {
+    const shared = new URLSearchParams(location.search).get("badge");
+    let saved = null; try { saved = JSON.parse(localStorage.getItem(BADGE_KEY) || "null"); } catch (e) {}
+    if (shared && /^[A-Za-z0-9_]{3,20}$/.test(shared)) fetchAvatar(shared).then(d => { setBadge(d); $("#bm-acts").hidden = true; toast(`${d.displayName} put their avatar on the badge · try yours at the bottom of the page`); }).catch(() => {});
+    else if (saved && saved.img) setBadge(saved);
+  }
+  UI.palette.add(() => [{ g: "Fun", label: "Put my avatar on the badge", hint: "Type your Roblox username", icon: "user-round", k: "roblox avatar badge username", run: () => { $("#badge-me").scrollIntoView({ behavior: "smooth" }); setTimeout(() => $("#bm-in").focus(), 500); } }]);
 
   icons();
 })();

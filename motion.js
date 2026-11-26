@@ -1,7 +1,7 @@
 /*
  * Exiozz — animations partagées par index.html et shop.html.
  * Titres révélés mot à mot, images dévoilées au scroll, lumière qui suit la souris sur les cartes,
- * cartes inclinées en 3D, boutons « aimantés », barre de progression, parallaxe.
+ * barre de progression, parallaxe.
  * Tout est coupé si le visiteur a demandé « moins d'animations » dans son système.
  */
 (() => {
@@ -59,7 +59,7 @@
   document.querySelectorAll(".split:not(.rv)").forEach(el => wIO.observe(el));
 
   /* Images : dévoilées par un rideau et un léger zoom arrière quand elles arrivent à l'écran */
-  const revealSel = ".pcard-img, .mk-img, .gallery > button, .d-gal-main";
+  const revealSel = ".pcard-img, .gallery > button, .d-gal-main";
   const iIO = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("shown"); iIO.unobserve(e.target); } }), { threshold: .15, rootMargin: "0px 0px -40px 0px" });
   const watchImgs = () => document.querySelectorAll(revealSel).forEach(el => { if (el.classList.contains("reveal")) return; el.classList.add("reveal"); iIO.observe(el); });
   watchImgs();
@@ -86,28 +86,4 @@
     el.classList.add("glow");
   }, { passive: true });
 
-  /* Cartes inclinées en 3D (projets, assets, tarifs) */
-  const tiltSel = ".pcard:not(.empty), .plan, .stat";
-  let tiltEl = null;
-  document.addEventListener("pointermove", e => {
-    const el = e.target.closest && e.target.closest(tiltSel);
-    if (tiltEl && tiltEl !== el) { tiltEl.style.transform = ""; tiltEl.classList.remove("tilting"); }
-    tiltEl = el; if (!el) return;
-    const r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
-    el.classList.add("tilting");
-    el.style.transform = `perspective(900px) rotateX(${(-y * 5).toFixed(2)}deg) rotateY(${(x * 6).toFixed(2)}deg) translateY(-4px)`;
-  }, { passive: true });
-  document.addEventListener("pointerleave", () => { if (tiltEl) { tiltEl.style.transform = ""; tiltEl.classList.remove("tilting"); tiltEl = null; } });
-
-  /* Boutons principaux « aimantés » : ils suivent un peu la souris */
-  const magSel = ".btn-w, .nav-shop, .c-pay";
-  let magEl = null;
-  document.addEventListener("pointermove", e => {
-    const el = e.target.closest && e.target.closest(magSel);
-    if (magEl && magEl !== el) { magEl.style.translate = ""; magEl = null; }
-    if (!el || el.disabled) return;
-    magEl = el;
-    const r = el.getBoundingClientRect(), x = e.clientX - (r.left + r.width / 2), y = e.clientY - (r.top + r.height / 2);
-    el.style.translate = `${(x * .18).toFixed(1)}px ${(y * .25).toFixed(1)}px`;
-  }, { passive: true });
 })();

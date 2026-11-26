@@ -148,6 +148,7 @@
   const ordersD = makeDrawer("orders-drawer", "My orders");
   const adminD = makeDrawer("admin-drawer", "Admin area", true);
   const chatD = makeDrawer("chat-drawer", "Messages");
+  const inboxD = makeDrawer("inbox-drawer", "Chat");
   chatD.classList.add("chat-drawer");
   let openD = null;
   // Le panier s'ouvre en carte sous l'icône du panier (ordi) ou en carte qui monte du bas (mobile)
@@ -316,10 +317,11 @@
     if (user) {
       btn.innerHTML = `<img class="acc-av" src="${esc(avatarOf(user))}" alt=""><span>${esc(user.name)}</span>${unreadN ? '<i class="acc-dot" aria-label="New messages"></i>' : ""}`;
       menu.innerHTML = `<div class="acc-head"><img src="${esc(avatarOf(user))}" alt=""><div><b>${esc(user.name)}</b><span>${isAdmin() ? "Admin" : "Signed in with Discord"}</span></div></div>
-        <button role="menuitem" data-open-orders><i data-lucide="package"></i>My orders${unreadN && !isAdmin() ? `<span class="m-dot">${unreadN}</span>` : ""}</button>
+        <button role="menuitem" data-open-inbox><i data-lucide="messages-square"></i>Chat${unreadN ? `<span class="m-dot">${unreadN}</span>` : ""}</button>
+        <button role="menuitem" data-open-orders><i data-lucide="package"></i>My orders</button>
         <button role="menuitem" data-open-cart><i data-lucide="shopping-cart"></i>My cart</button>
         <button role="menuitem" data-open-wish><i data-lucide="heart"></i>Wishlist</button>
-        ${isAdmin() ? `<button role="menuitem" data-open-admin><i data-lucide="lock"></i>Admin area${unreadN ? `<span class="m-dot">${unreadN}</span>` : ""}</button>` : ""}
+        ${isAdmin() ? `<button role="menuitem" data-open-admin><i data-lucide="lock"></i>Admin area</button>` : ""}
         <button role="menuitem" data-signout><i data-lucide="log-out"></i>Sign out</button>`;
     } else {
       btn.innerHTML = `<i data-lucide="log-in"></i><span>Sign in</span>`;
@@ -450,7 +452,7 @@
   function renderChat() {
     if (!chat) return;
     chatD.querySelector(".drawer-head b").textContent = "Messages";
-    chatD.querySelector(".drawer-body").innerHTML = `<button class="ch-back" data-chat-back><i data-lucide="arrow-left"></i>${isAdmin() ? "All orders" : "My orders"}</button><div class="ch-who"></div><div class="ch-list" aria-live="polite"></div>`;
+    chatD.querySelector(".drawer-body").innerHTML = `<button class="ch-back" data-chat-back><i data-lucide="arrow-left"></i>${chat.back === inboxD ? "All conversations" : isAdmin() ? "All orders" : "My orders"}</button><div class="ch-who"></div><div class="ch-list" aria-live="polite"></div>`;
     chatD.querySelector(".drawer-foot").innerHTML = `<form class="ch-form" data-chat-form><label class="sr" for="ch-in">Message</label><textarea id="ch-in" rows="1" maxlength="2000" placeholder="Write a message…" enterkeyhint="send"></textarea><button class="ch-send" aria-label="Send"><i data-lucide="arrow-up"></i></button></form>`;
     icons(); loading(chatD.querySelector(".ch-list"));
     chat.painted = false; chat.msgs = null;
@@ -479,10 +481,46 @@
     const c = e.target.closest("[data-chat]"); if (c) { e.preventDefault(); openChat(c.dataset.chat, openD); return; }
     if (e.target.closest("[data-chat-back]")) { clearInterval(chat && chat.timer); open(chat && chat.back && chat.back !== chatD ? chat.back : (isAdmin() ? adminD : ordersD)); }
   });
+  // Boîte de réception : toutes les conversations, les plus récentes en haut
+  const shortAgo = ts => { const m = Math.round((Date.now() - ts) / 6e4); return m < 1 ? "now" : m < 60 ? `${m}m` : m < 1440 ? `${Math.round(m / 60)}h` : m < 10080 ? `${Math.round(m / 1440)}d` : new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric" }); };
+  async function renderInbox() {
+    const body = inboxD.querySelector(".drawer-body");
+    inboxD.querySelector(".drawer-foot").innerHTML = "";
+    if (!user) { body.innerHTML = `<div class="d-empty"><i data-lucide="lock"></i><b>Sign in to chat</b><span>Your conversations are linked to your Discord account</span><button class="btn btn-w" data-signin>${discordSvg}Continue with Discord</button></div>`; icons(); return; }
+    loading(body);
+    try {
+      const all = isAdmin() ? await api("/api/admin/orders") : await api(`/api/orders/${encodeURIComponent(user.id)}`);
+      const last = o => (o.chat && o.chat.last ? o.chat.last.ts : 0);
+      const withMsg = all.filter(last).sort((a, b) => last(b) - last(a));
+      // le client voit aussi ses commandes sans message, pour pouvoir écrire en premier
+      const rest = isAdmin() ? [] : all.filter(o => !last(o));
+      const ref = o => "#" + esc(String(o.id).slice(-6).toUpperCase());
+      const row = o => {
+        const l = o.chat && o.chat.last, mine = l && l.from === (isAdmin() ? "admin" : "client");
+        const title = isAdmin() ? esc(o.customerName || "Client") : `Order ${ref(o)}`;
+        const sub = isAdmin() ? `${o.discordUsername ? "@" + esc(o.discordUsername) + " · " : ""}${ref(o)}` : esc((o.items || []).map(i => i.title).join(", "));
+        const av = isAdmin() ? (o.avatar ? `<img class="ib-av" src="${esc(o.avatar)}" alt="">` : `<span class="ib-av">${esc((o.customerName || "?").charAt(0).toUpperCase())}</span>`) : `<span class="ib-av brand"></span>`;
+        return `<button class="ib-row${o.unread ? " unread" : ""}" data-inbox-chat="${esc(o.id)}">${av}
+          <span class="ib-main"><span class="ib-top"><b>${title}</b>${l ? `<time>${shortAgo(l.ts)}</time>` : ""}</span>
+          <span class="ib-sub">${sub}</span>
+          <span class="ib-last">${l ? `${mine ? "You: " : ""}${esc(l.text)}` : "No messages yet · tap to write"}</span></span>
+          ${o.unread ? '<i class="ib-dot" aria-label="Unread"></i>' : ""}</button>`;
+      };
+      body.innerHTML = withMsg.length || rest.length
+        ? `<div class="ib-list">${withMsg.map(row).join("")}</div>${rest.length ? `<div class="ib-sep">Start a conversation</div><div class="ib-list">${rest.map(row).join("")}</div>` : ""}`
+        : `<div class="d-empty"><i data-lucide="messages-square"></i><b>No conversations yet</b><span>${isAdmin() ? "Open an order in the admin area and press Chat to write to a client." : "Place an order, then you can message Exiozz about it here."}</span>${isAdmin() ? "" : '<a class="btn btn-w" href="shop.html">Open the shop</a>'}</div>`;
+      icons();
+    } catch (e) { errorBox(body, e.message); }
+  }
+  document.addEventListener("click", e => {
+    if (e.target.closest("[data-open-inbox]")) { open(inboxD); return; }
+    const r = e.target.closest("[data-inbox-chat]"); if (r) openChat(r.dataset.inboxChat, inboxD);
+  });
+
   // Pastille « nouveau message » : vérifiée au chargement puis toutes les 60 s
   async function checkUnread() {
     if (!user) { if (unreadN) { unreadN = 0; paintAccount(); } return; }
-    try { const r = await api("/api/messages/unread"); if (r.count !== unreadN) { const more = r.count > unreadN; unreadN = r.count; paintAccount(); if (more && openD !== chatD) toast(isAdmin() ? "New message from a client" : "New message from Exiozz"); } } catch (e) {}
+    try { const r = await api("/api/messages/unread"); if (r.count !== unreadN) { const more = r.count > unreadN; unreadN = r.count; paintAccount(); if (openD === inboxD) renderInbox(); if (more && openD !== chatD) toast(isAdmin() ? "New message from a client" : "New message from Exiozz"); } } catch (e) {}
   }
   setTimeout(checkUnread, 1200);
   setInterval(() => { if (!document.hidden) checkUnread(); }, 60000);
@@ -1056,7 +1094,7 @@
   paintWish(); pullWish();
 
   const render = d => {
-    if (d === cartD) { renderCart(); icons(); } else if (d === ordersD) renderOrders(); else if (d === wishD) renderWish(); else if (d === chatD) renderChat(); else renderAdmin();
+    if (d === cartD) { renderCart(); icons(); } else if (d === ordersD) renderOrders(); else if (d === wishD) renderWish(); else if (d === chatD) renderChat(); else if (d === inboxD) renderInbox(); else renderAdmin();
   };
   const refresh = () => { if (openD === cartD) render(cartD); paintCount(); };
   const paintCount = () => document.querySelectorAll("[data-cart-count]").forEach(el => { const n = X.Cart.count(); el.textContent = n || ""; el.hidden = !n; });
@@ -1076,5 +1114,5 @@
 
   /* Accès au compte pour la page (avis) */
   const Account = { get user() { return user; }, isAdmin, signIn, signOut, api, API };
-  window.UI = { toast, bricks, icons, esc, openCart: () => open(cartD), openOrders: () => open(ordersD), openWish: () => open(wishD), openAdmin: () => open(adminD), setTheme: from => setTheme(root.dataset.theme === "light" ? "dark" : "light", from), Account, Wish };
+  window.UI = { toast, bricks, icons, esc, openCart: () => open(cartD), openOrders: () => open(ordersD), openWish: () => open(wishD), openAdmin: () => open(adminD), openInbox: () => open(inboxD), setTheme: from => setTheme(root.dataset.theme === "light" ? "dark" : "light", from), Account, Wish };
 })();

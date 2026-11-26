@@ -48,7 +48,10 @@ function safeEqual(a, b) {
 const newId = () => Date.now().toString(36) + Array.from(crypto.getRandomValues(new Uint8Array(4)), (b) => b.toString(16).padStart(2, '0')).join('');
 const clampStr = (s, max) => String(s == null ? '' : s).slice(0, max);
 const isHttps = (u) => /^https:\/\//i.test(u || '');
-const frontUrl = (env) => String(env.FRONT_URL || 'https://exiozz.github.io/portfolio').replace(/\/+$/, '');
+const frontUrl = (env) => String(env.FRONT_URL || 'https://exiozz.xyz').replace(/\/+$/, '');
+// Sites autorisés à appeler le serveur : le domaine exiozz.xyz (avec ou sans www) est toujours accepté,
+// l'ancienne adresse GitHub Pages aussi le temps que tout le monde passe sur le nouveau domaine
+const BASE_ORIGINS = ['https://exiozz.xyz', 'https://www.exiozz.xyz', 'https://exiozz.github.io'];
 
 class HttpError extends Error { constructor(status, message) { super(message); this.status = status; } }
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json; charset=utf-8' } });
@@ -341,9 +344,11 @@ async function route(request, env, ctx) {
     const user = await auth(env, request); adminOnly(user);
     const b = await readJson(request);
     const discordId = String(b.discordId || '').trim();
-    const customerName = clampStr(b.customerName, 80).trim();
     if (!/^\d{17,20}$/.test(discordId)) throw new HttpError(400, 'ID Discord invalide (17 à 20 chiffres).');
-    if (!customerName) throw new HttpError(400, 'Nom du client manquant.');
+    const prof = await discordUser(env, discordId);
+    // nom facultatif : sinon le nom Discord du compte (via le bot)
+    const customerName = clampStr(b.customerName, 80).trim() || (prof ? prof.name : '');
+    if (!customerName) throw new HttpError(400, 'Nom du client manquant (le bot n\'a pas trouvé ce compte Discord).');
     const items = (Array.isArray(b.items) ? b.items : []).slice(0, 30).map((it) => ({
       title: clampStr(it.title, 200).trim(),
       price: Math.max(0, +it.price || 0),
@@ -352,7 +357,6 @@ async function route(request, env, ctx) {
     })).filter((it) => it.title);
     if (!items.length) throw new HttpError(400, 'Ajoute au moins un article.');
     const status = ORDER_STATUSES.includes(b.status) ? b.status : 'Confirmée';
-    const prof = await discordUser(env, discordId);
     const order = {
       id: newId(), customerName, discordId, discordUsername: prof ? prof.username : undefined, avatar: prof ? prof.avatar || undefined : undefined, items,
       total: items.reduce((s, it) => s + it.price, 0),
@@ -1159,7 +1163,7 @@ async function route(request, env, ctx) {
 export default {
   async fetch(request, env, ctx) {
     const origin = request.headers.get('Origin');
-    const allowed = String(env.ALLOWED_ORIGINS || new URL(frontUrl(env)).origin).split(',').map((s) => s.trim());
+    const allowed = [...new Set([...String(env.ALLOWED_ORIGINS || new URL(frontUrl(env)).origin).split(',').map((s) => s.trim()), ...BASE_ORIGINS])];
     const cors = origin && allowed.includes(origin) ? {
       'Access-Control-Allow-Origin': origin,
       'Vary': 'Origin',

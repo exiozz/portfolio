@@ -1523,3 +1523,26 @@ html[data-theme="light"] .btn-w::after, html[data-theme="light"] .nav-shop::afte
 .a-pav { display: grid; place-items: center; background: var(--raised); font: 700 19px/1 var(--display); color: var(--ink-2); }
 .a-img-round img { border-radius: 50%; object-fit: cover; }
 .a-n { font: 400 11px/1 var(--mono); opacity: .55; margin-left: 2px; }
+
+/* ===== Choix de la note (avis) ===== */
+.stars-pick { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.sp-stars { display: inline-flex; gap: 2px; }
+.stars-pick button { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; font-size: 26px; line-height: 1; color: var(--line-2); transition: color .15s var(--ease), transform .15s var(--ease), background-color .15s var(--ease); }
+.stars-pick button:hover { background: var(--fill-2); }
+.stars-pick button.on { color: #ffc53d; text-shadow: 0 0 14px rgba(255, 197, 61, .35); }
+.stars-pick.hovering button { color: var(--line-2); text-shadow: none; }
+.stars-pick.hovering button.hov { color: #ffc53d; }
+.stars-pick button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.sp-lbl { font: 400 12px/1 var(--mono); color: var(--ink-3); }
+
+/* ===== Admin : nouvelle commande ===== */
+.a-newo { flex: none; height: 44px; }
+.no-items { display: grid; gap: 8px; }
+.no-row { display: grid; grid-template-columns: minmax(0, 1fr) 110px 34px; gap: 8px; align-items: center; }
+.no-row input { height: 42px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--card-2); color: var(--ink); font: inherit; font-size: 14px; min-width: 0; }
+.no-row input:focus { outline: 0; border-color: var(--accent); }
+.no-add { display: flex; flex-wrap: wrap; gap: 8px; }
+.no-add .btn { height: 38px; font-size: 13px; }
+.no-add .a-select { height: 38px; flex: 1; min-width: 200px; }
+.no-total { display: block; margin-top: 8px; font: 700 24px/1 var(--display); letter-spacing: -.02em; color: var(--ink); text-transform: none; }
+@media (max-width: 640px) { .a-searchrow { flex-wrap: wrap; } .a-newo { width: 100%; justify-content: center; } }

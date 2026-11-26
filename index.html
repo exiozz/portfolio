@@ -52,7 +52,7 @@
 <main>
 <section class="hero" id="home">
   <div class="wrap">
-    <div>
+    <div data-parallax=".12">
       <div class="avail rv" data-avail><i></i><span data-avail-text>Available for work</span></div>
       <h2 class="big rv">Roblox<span>Developer</span></h2>
       <div class="typing rv" id="typing" aria-live="polite"></div>
@@ -81,6 +81,8 @@
   </div>
   <a href="#about" class="scroll-hint">SCROLL <i data-lucide="arrow-down"></i></a>
 </section>
+
+<div class="marquee" data-marquee aria-hidden="true"><div class="mq-track"><span>Lua <i>✦</i> <em>Roblox Studio</em> <i>✦</i> Game systems <i>✦</i> <em>3D models</em> <i>✦</i> UI / UX <i>✦</i> <em>Websites</em> <i>✦</i> Discord bots <i>✦</i> <em>GFX</em> <i>✦</i></span></div></div>
 
 <section class="sec" id="about">
   <div class="wrap">
@@ -207,27 +209,37 @@
     </div>
     <div class="qs rv" id="qs">
       <div class="qs-form">
-        <div class="qs-step"><span class="qs-n">01</span><div><b>What do you need?</b>
+        <div class="qs-step"><span class="qs-n">01</span><div><b>What do you need? <small>pick as many as you want</small></b>
           <div class="cats qs-cats" id="qs-cats" role="group" aria-label="Category"></div>
-          <div class="qs-svcs" id="qs-svcs" role="radiogroup" aria-label="Service"></div></div></div>
-        <div class="qs-step"><span class="qs-n">02</span><div><b>How big is it?</b>
-          <div class="qs-seg" id="qs-size" role="radiogroup" aria-label="Size"></div></div></div>
-        <div class="qs-step"><span class="qs-n">03</span><div><b>Extras</b>
+          <div class="qs-svcs" id="qs-svcs" role="group" aria-label="Services"></div></div></div>
+        <div class="qs-step"><span class="qs-n">02</span><div><b>Your selection <small id="qs-sel-n"></small></b>
+          <p class="qs-help">Set the size and quantity of each piece. Several of the same (pages, thumbnails, systems…)? Use the quantity.</p>
+          <div class="qs-lines" id="qs-lines"></div></div></div>
+        <div class="qs-step" id="qs-plat-step"><span class="qs-n">03</span><div><b>Platforms <small>for Roblox work</small></b>
+          <div class="qs-chips" id="qs-plat" role="group" aria-label="Platforms"></div></div></div>
+        <div class="qs-step"><span class="qs-n">04</span><div><b>Extras <small>optional</small></b>
           <div class="qs-extras" id="qs-extras"></div></div></div>
-        <div class="qs-step"><span class="qs-n">04</span><div><b>When do you need it?</b>
+        <div class="qs-step"><span class="qs-n">05</span><div><b>When do you need it?</b>
           <div class="qs-seg" id="qs-time" role="radiogroup" aria-label="Deadline"></div></div></div>
-        <div class="qs-step"><span class="qs-n">05</span><div><b>Tell me more <small>optional</small></b>
-          <label class="field plain" style="margin:12px 0 0"><span class="sr">Your project in a few words</span><textarea id="qs-msg" maxlength="900" placeholder="Your idea in a few words: game genre, references, links…" style="min-height:84px"></textarea></label></div></div>
+        <div class="qs-step"><span class="qs-n">06</span><div><b>Your budget <small>optional</small></b>
+          <div class="qs-budget"><input type="range" id="qs-budget" min="0" max="2000" step="10" value="0" aria-label="Your budget in euros"><output id="qs-budget-out" for="qs-budget">No budget set</output></div></div></div>
+        <div class="qs-step"><span class="qs-n">07</span><div><b>Tell me more <small>optional</small></b>
+          <label class="field plain" style="margin:12px 0 8px"><span class="sr">Your project in a few words</span><textarea id="qs-msg" maxlength="900" placeholder="Your idea in a few words: game genre, style, what you already have…" style="min-height:84px"></textarea></label>
+          <label class="field plain" style="margin-bottom:12px"><span class="sr">Reference links</span><input id="qs-links" maxlength="300" placeholder="Reference links (game, Figma, Pinterest…)" autocomplete="off"></label>
+          <div class="qs-contact"><span class="qs-lbl">Contact me on</span><div class="qs-chips" id="qs-contact" role="radiogroup" aria-label="Preferred contact"><button type="button" role="radio" data-qcontact="discord"><i data-lucide="message-circle"></i>Discord</button><button type="button" role="radio" data-qcontact="email"><i data-lucide="mail"></i>Email</button></div>
+            <label class="field plain qs-email" id="qs-email-wrap" hidden><span class="sr">Your email</span><input id="qs-email" type="email" maxlength="120" placeholder="you@example.com" autocomplete="email"></label></div></div></div>
       </div>
       <aside class="qs-res" aria-live="polite">
-        <span class="kicker">Estimated price</span>
+        <div class="qs-res-top"><span class="kicker">Estimated price</span><span class="qs-count" id="qs-count"></span></div>
         <div class="qs-price" id="qs-price"></div>
         <div class="qs-rbx" id="qs-rbx"></div>
+        <div class="qs-promo" id="qs-promo" hidden></div>
+        <div class="qs-fit" id="qs-fit" hidden></div>
         <div class="qs-meta"><div><i data-lucide="clock"></i><span id="qs-days"></span></div><div class="avail" data-avail style="margin:0"><i></i><span data-avail-text>Taking new projects</span></div></div>
         <ul class="qs-sum" id="qs-sum"></ul>
         <button class="btn btn-w wide" id="qs-send"><i data-lucide="send"></i>Send this request</button>
-        <div class="qs-alt"><button class="btn btn-o" id="qs-copy" type="button"><i data-lucide="copy"></i>Copy for Discord</button><a class="btn btn-o" id="qs-mail" href="#"><i data-lucide="mail"></i>Email</a></div>
-        <p class="d-note"><i data-lucide="info" style="width:14px;height:14px;flex:none;margin-top:2px"></i>An estimate, not a final price. Sending it creates a request in “My orders”, then I contact you on Discord.</p>
+        <div class="qs-alt"><button class="btn btn-o" id="qs-copy" type="button"><i data-lucide="copy"></i>Copy</button><a class="btn btn-o" id="qs-mail" href="#"><i data-lucide="mail"></i>Email</a><button class="btn btn-o" id="qs-reset" type="button" aria-label="Start over"><i data-lucide="rotate-ccw"></i></button></div>
+        <p class="d-note"><i data-lucide="info" style="width:14px;height:14px;flex:none;margin-top:2px"></i>An estimate, not a final price. Sending it creates a request in “My orders”, then I contact you. Your choices are saved on this device.</p>
       </aside>
     </div>
   </div>
@@ -361,6 +373,7 @@
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script src="globe.js"></script>
+<script src="motion.js" defer></script>
 <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 <script>
 (() => {
@@ -377,7 +390,7 @@
   const intro = $("#intro");
   let seen = false;
   try { seen = sessionStorage.getItem("exiozz-intro") === "1"; sessionStorage.setItem("exiozz-intro", "1"); } catch (e) {}
-  const endIntro = () => intro.classList.add("out");
+  const endIntro = () => { intro.classList.add("out"); setTimeout(() => document.documentElement.classList.add("intro-done"), seen || reduce ? 0 : 350); };
   if (seen || reduce) endIntro(); else { setTimeout(endIntro, 4200); intro.addEventListener("click", endIntro); }
 
   /* Typing */
@@ -398,12 +411,13 @@
   /* Badge sur un cordon élastique : un poids au bout d'un ressort, calculé à pas fixe (fluide sur tous les écrans) */
   const lan = $("#lanyard"), wrap = $("#badge-wrap"), badge = $("#badge");
   const ropePath = $("#rope-path"), ropeEdge = $("#rope-edge");
-  const L = 400, GRAV = 1800, STRETCH = 38, AIR = .9, RADIAL = 5, FOLLOW = 16, DT = 1 / 120;
+  let L = 400; const GRAV = 1800, STRETCH = 38, AIR = .9, RADIAL = 5, DT = 1 / 120, MAX_PULL = 2.6;
   let anchor = { x: 0, y: -260 }, pos = { x: 0, y: 0 }, vel = { x: 0, y: 0 };
   let drag = null, ptr = { x: 0, y: 0 }, tilt = 0, tiltV = 0;
-  const place = () => { anchor = { x: lan.clientWidth / 2, y: -260 }; pos = { x: anchor.x + 90, y: anchor.y + L + 20 }; vel = { x: 0, y: 0 }; };
+  const place = () => { const small = innerWidth <= 960; L = small ? 230 : 400; anchor = { x: lan.clientWidth / 2, y: small ? -150 : -260 }; pos = { x: anchor.x + 90, y: anchor.y + L + 20 }; vel = { x: 0, y: 0 }; };
   place();
-  addEventListener("resize", place);
+  let lastW = innerWidth;
+  addEventListener("resize", () => { if (innerWidth !== lastW) { lastW = innerWidth; place(); } });
   // Petit coup sur le badge (quand un visiteur y met son avatar)
   const kickBadge = () => { if (reduce) return; vel.x += (Math.random() > .5 ? 1 : -1) * (700 + Math.random() * 300); vel.y -= 300; };
   const local = e => { const r = lan.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
@@ -417,7 +431,7 @@
   const release = () => {
     if (!drag) return;
     drag = null; badge.classList.remove("grabbing");
-    const v = Math.hypot(vel.x, vel.y), cap = 1400;
+    const v = Math.hypot(vel.x, vel.y), cap = 3200;
     if (v > cap) { vel.x *= cap / v; vel.y *= cap / v; }
   };
   addEventListener("pointerup", release);
@@ -425,11 +439,15 @@
   const step = dt => {
     let ax, ay;
     if (drag) {
+      // Tenu : le badge colle au doigt / à la souris, sans retard ; sa vitesse est gardée pour le lancer
       let tx = ptr.x - drag.ox, ty = ptr.y - drag.oy;
-      const dx = tx - anchor.x, dy = ty - anchor.y, d = Math.hypot(dx, dy), max = L * 1.45;
+      const dx = tx - anchor.x, dy = ty - anchor.y, d = Math.hypot(dx, dy), max = L * MAX_PULL;
       if (d > max) { tx = anchor.x + dx / d * max; ty = anchor.y + dy / d * max; }
-      ax = (tx - pos.x) * FOLLOW * FOLLOW - vel.x * 2 * FOLLOW;
-      ay = (ty - pos.y) * FOLLOW * FOLLOW - vel.y * 2 * FOLLOW;
+      vel.x += ((tx - pos.x) / dt - vel.x) * .35; vel.y += ((ty - pos.y) / dt - vel.y) * .35;
+      pos.x = tx; pos.y = ty;
+      const target = Math.max(-95, Math.min(95, -Math.atan2(pos.x - anchor.x, pos.y - anchor.y) * 180 / Math.PI)) + Math.max(-25, Math.min(25, vel.x * .012));
+      tiltV += ((target - tilt) * 90 - tiltV * 14) * dt; tilt += tiltV * dt;
+      return;
     } else {
       ax = -vel.x * AIR; ay = GRAV - vel.y * AIR;
       const dx = pos.x - anchor.x, dy = pos.y - anchor.y, len = Math.hypot(dx, dy) || 1;
@@ -440,6 +458,7 @@
       }
     }
     vel.x += ax * dt; vel.y += ay * dt;
+    if (!drag) { const sp = Math.hypot(vel.x, vel.y), lim = 4200; if (sp > lim) { vel.x *= lim / sp; vel.y *= lim / sp; } }
     pos.x += vel.x * dt; pos.y += vel.y * dt;
     const target = Math.max(-95, Math.min(95, -Math.atan2(pos.x - anchor.x, pos.y - anchor.y) * 180 / Math.PI));
     tiltV += ((target - tilt) * 70 - tiltV * 13) * dt;
@@ -914,79 +933,176 @@
     toast(`${name} added to cart`);
   });
 
-  /* Simulateur de devis : une fourchette de prix tout de suite, envoyée en demande sur le serveur */
+  /* Simulateur de devis : plusieurs services, chacun avec sa taille et sa quantité, puis plateformes,
+     options, délai, budget et contact. Les choix restent enregistrés sur l'appareil. */
   const SIZES = [["small", "Small", "A simple version", 1], ["medium", "Medium", "The usual scope", 1.8], ["large", "Large", "Big and detailed", 3]];
   const TIMES = [["flex", "Flexible", "No rush · −10%", .9, 1.4], ["std", "Standard", "Usual timeline", 1, 1], ["fast", "Fast", "+30%", 1.3, .7], ["rush", "Rush", "ASAP · +60%", 1.6, .5]];
-  const EXTRAS = [["polish", "UI & visual polish", "+25%", { pct: 25 }], ["rev", "Extra revisions", "+15%", { pct: 15 }], ["support", "30-day support", "+€10", { add: 10 }], ["doc", "Setup guide & docs", "+€5", { add: 5 }]];
-  const qs = { cat: "roblox", svc: 0, size: "medium", time: "std", extras: new Set() };
+  const PLATFORMS = [["pc", "PC", "Included", 0, "monitor"], ["mobile", "Mobile", "+15%", 15, "smartphone"], ["console", "Console", "+20%", 20, "gamepad-2"], ["vr", "VR", "+25%", 25, "glasses"]];
+  const PLAT_CATS = ["roblox", "script", "build", "uiux"];
+  const EXTRAS = [
+    ["polish", "UI & visual polish", "+25%", { pct: 25 }, "Extra care on visuals, animations and feel"],
+    ["rev", "Extra revisions", "+15%", { pct: 15 }, "More rounds of changes"],
+    ["priority", "Priority updates", "+10%", { pct: 10 }, "Daily progress updates on Discord"],
+    ["private", "Private / NDA", "+10%", { pct: 10 }, "Kept confidential, not shown in my portfolio"],
+    ["lang", "Multi-language", "+15%", { pct: 15 }, "Texts ready for several languages"],
+    ["support", "30-day support", "+€10", { add: 10 }, "Fixes and questions after delivery"],
+    ["doc", "Setup guide & docs", "+€5", { add: 5 }, "How to install, use and edit it"],
+    ["maint", "Monthly maintenance", "+€15/mo", { monthly: 15 }, "Updates and fixes every month"]
+  ];
+  const QKEY = "exiozz-quote-v2";
+  const qDefault = () => ({ browse: "roblox", items: [{ cat: "roblox", svc: 0, size: "medium", qty: 1 }], plat: ["pc"], extras: [], time: "std", budget: 0, msg: "", links: "", contact: "discord", email: "" });
+  let qs = (() => { try { const v = JSON.parse(localStorage.getItem(QKEY) || "null"); return v ? { ...qDefault(), ...v } : qDefault(); } catch (e) { return qDefault(); } })();
+  qs.items = (qs.items || []).filter(it => plans[it.cat] && plans[it.cat][it.svc]).map(it => ({ ...it, qty: Math.max(1, Math.min(20, +it.qty || 1)), size: SIZES.some(x => x[0] === it.size) ? it.size : "medium" }));
+  if (!plans[qs.browse]) qs.browse = "roblox";
+  const saveQ = () => { try { localStorage.setItem(QKEY, JSON.stringify(qs)); } catch (e) {} };
   const round5 = n => Math.max(5, Math.round(n / 5) * 5);
+  const catLabel = c => cats.find(x => x[0] === c)[1];
+  const hasPlat = () => qs.items.some(it => PLAT_CATS.includes(it.cat));
   const quote = () => {
-    const [name, , base] = plans[qs.cat][qs.svc];
-    const size = SIZES.find(x => x[0] === qs.size), time = TIMES.find(x => x[0] === qs.time);
-    let pct = 0, add = 0; qs.extras.forEach(k => { const e = EXTRAS.find(x => x[0] === k)[3]; pct += e.pct || 0; add += e.add || 0; });
-    const est = (base * size[3] * (1 + pct / 100) + add) * time[3];
-    const low = Math.max(base, round5(est * .9)), high = Math.max(low + 5, round5(est * 1.25));
-    const d = Math.max(1, Math.ceil(base * size[3] / 10 * time[4]));
-    const days = [d, Math.ceil(d * 1.6)];
-    const dur = days[1] > 14 ? `About ${Math.round(days[0] / 7) || 1}–${Math.ceil(days[1] / 7)} weeks` : days[1] <= 1 ? "About 1 day" : `About ${days[0]}–${days[1]} days`;
-    const cat = cats.find(c => c[0] === qs.cat)[1];
-    const extras = [...qs.extras].map(k => EXTRAS.find(x => x[0] === k)[1]);
-    return { name, cat, low, high, dur, size: size[1], time: time[1], extras };
+    const time = TIMES.find(x => x[0] === qs.time);
+    let pct = 0, add = 0, monthly = 0;
+    qs.extras.forEach(k => { const e = EXTRAS.find(x => x[0] === k); if (!e) return; pct += e[3].pct || 0; add += e[3].add || 0; monthly += e[3].monthly || 0; });
+    const platPct = hasPlat() ? qs.plat.reduce((s, k) => s + (PLATFORMS.find(p => p[0] === k) || [0, 0, 0, 0])[3], 0) : 0;
+    const lines = qs.items.map(it => {
+      const [name, , base] = plans[it.cat][it.svc], size = SIZES.find(x => x[0] === it.size);
+      const units = 1 + .8 * (it.qty - 1); // chaque exemplaire en plus compte pour 80 %
+      const est = base * size[3] * units * (1 + (PLAT_CATS.includes(it.cat) ? platPct : 0) / 100) * (1 + pct / 100) * time[3];
+      const low = Math.max(base, round5(est * .9)), high = Math.max(low + 5, round5(est * 1.25));
+      return { it, name, cat: catLabel(it.cat), size: size[1], base, low, high, days: Math.max(1, Math.ceil(base * size[3] * (1 + .5 * (it.qty - 1)) / 10)) };
+    });
+    const low = lines.reduce((s, l) => s + l.low, 0) + (lines.length ? add : 0), high = lines.reduce((s, l) => s + l.high, 0) + (lines.length ? add : 0);
+    // Délai : le plus long en entier, les autres à moitié (une partie se fait en parallèle)
+    const ds = lines.map(l => l.days).sort((a, b) => b - a);
+    const d = ds.length ? Math.max(1, Math.ceil((ds[0] + ds.slice(1).reduce((s, x) => s + x * .5, 0)) * time[4])) : 0;
+    const d2 = Math.ceil(d * 1.6);
+    const dur = !d ? "—" : d2 > 14 ? `About ${Math.max(1, Math.round(d / 7))}–${Math.ceil(d2 / 7)} weeks` : d2 <= 1 ? "About 1 day" : `About ${d}–${d2} days`;
+    const promo = X.Promo.active();
+    return { lines, low, high, add, monthly, dur, time: time[1], promo,
+      extras: qs.extras.map(k => (EXTRAS.find(x => x[0] === k) || [])[1]).filter(Boolean),
+      plats: hasPlat() ? qs.plat.map(k => PLATFORMS.find(p => p[0] === k)[1]) : [] };
   };
-  const summary = q => `Quote request · ${q.cat} — ${q.name}\nSize: ${q.size} · Deadline: ${q.time}${q.extras.length ? "\nExtras: " + q.extras.join(", ") : ""}\nEstimate: €${q.low}–€${q.high} (${q.dur.toLowerCase()})${$("#qs-msg").value.trim() ? "\n\n" + $("#qs-msg").value.trim() : ""}`;
+  const summary = q => [
+    `Quote request (${q.lines.length} service${q.lines.length > 1 ? "s" : ""})`,
+    ...q.lines.map(l => `• ${l.cat} — ${l.name} · ${l.size}${l.it.qty > 1 ? ` ×${l.it.qty}` : ""} · €${l.low}–€${l.high}`),
+    q.plats.length ? `Platforms: ${q.plats.join(", ")}` : "",
+    `Extras: ${q.extras.join(", ") || "none"}`,
+    `Deadline: ${q.time}`,
+    `Estimate: €${q.low}–€${q.high}${q.monthly ? ` + €${q.monthly}/month` : ""} (${q.dur.toLowerCase()})`,
+    q.promo ? `Promo code: ${q.promo.code} (−${q.promo.pct}%)` : "",
+    qs.budget ? `Budget: €${qs.budget}` : "",
+    qs.links.trim() ? `Links: ${qs.links.trim()}` : "",
+    `Contact: ${qs.contact === "email" && qs.email.trim() ? "email " + qs.email.trim() : "Discord"}`,
+    qs.msg.trim() ? `\n${qs.msg.trim()}` : ""
+  ].filter(Boolean).join("\n");
   let shownLow = 0, shownHigh = 0;
   const countTo = (lo, hi) => {
     const el = $("#qs-price"), from = [shownLow, shownHigh], t0 = performance.now(), dur = reduce || !shownHigh ? 0 : 450;
     const tick = now => {
       const k = dur ? Math.min(1, (now - t0) / dur) : 1, e = 1 - Math.pow(1 - k, 3);
       const a = Math.round(from[0] + (lo - from[0]) * e), b = Math.round(from[1] + (hi - from[1]) * e);
-      el.innerHTML = `<b>${X.money(a)}</b><span>–</span><b>${X.money(b)}</b>`;
+      el.innerHTML = hi ? `<b>${X.money(a)}</b><span>–</span><b>${X.money(b)}</b>` : `<b class="qs-none">Pick a service</b>`;
       if (k < 1) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick); shownLow = lo; shownHigh = hi;
   };
+  const isPicked = (c, i) => qs.items.findIndex(it => it.cat === c && it.svc === i);
+  let justAdded = null;
   const renderQuote = () => {
-    $("#qs-cats").innerHTML = cats.map(([id, l]) => `<button type="button" aria-pressed="${id === qs.cat}" data-qcat="${id}">${l}</button>`).join("");
-    $("#qs-svcs").innerHTML = plans[qs.cat].map(([n, d, eur], i) => `<button type="button" class="qs-svc" role="radio" aria-checked="${i === qs.svc}" data-qsvc="${i}"><span class="radio"></span><span><b>${n}</b><small>${d}</small></span><span class="mono">from ${X.money(eur)}</span></button>`).join("");
-    $("#qs-size").innerHTML = SIZES.map(([k, l, h]) => `<button type="button" role="radio" aria-checked="${k === qs.size}" data-qsize="${k}"><b>${l}</b><small>${h}</small></button>`).join("");
-    $("#qs-time").innerHTML = TIMES.map(([k, l, h]) => `<button type="button" role="radio" aria-checked="${k === qs.time}" data-qtime="${k}"><b>${l}</b><small>${h}</small></button>`).join("");
-    $("#qs-extras").innerHTML = EXTRAS.map(([k, l, h]) => `<label class="qs-x"><input type="checkbox" data-qx="${k}"${qs.extras.has(k) ? " checked" : ""}><span class="qs-box"><i data-lucide="check"></i></span><span>${l}</span><small>${h}</small></label>`).join("");
-    paintQuote(); icons();
-  };
-  const paintQuote = () => {
+    $("#qs-cats").innerHTML = cats.map(([id, l]) => { const n = qs.items.filter(it => it.cat === id).length; return `<button type="button" aria-pressed="${id === qs.browse}" data-qcat="${id}">${l}${n ? `<span class="qs-badge">${n}</span>` : ""}</button>`; }).join("");
+    $("#qs-svcs").innerHTML = plans[qs.browse].map(([n, d, eur], i) => `<button type="button" class="qs-svc" role="checkbox" aria-checked="${isPicked(qs.browse, i) >= 0}" data-qsvc="${i}"><span class="qs-box"><i data-lucide="check"></i></span><span><b>${n}</b><small>${d}</small></span><span class="mono">from ${X.money(eur)}</span></button>`).join("");
     const q = quote();
-    countTo(q.low, q.high);
-    $("#qs-rbx").textContent = `≈ R$ ${fmtN(X.inCur(q.low, "rbx"))} – ${fmtN(X.inCur(q.high, "rbx"))}`;
-    $("#qs-days").textContent = q.dur;
-    $("#qs-sum").innerHTML = [["Service", `${q.cat} · ${q.name}`], ["Size", q.size], ["Deadline", q.time], ["Extras", q.extras.join(", ") || "None"]].map(([k, v]) => `<li><span>${k}</span><b>${esc(v)}</b></li>`).join("");
-    $("#qs-mail").href = `mailto:tomokari.pro@gmail.com?subject=${encodeURIComponent("Quote - " + q.name)}&body=${encodeURIComponent(summary(q))}`;
+    $("#qs-sel-n").textContent = q.lines.length ? `${q.lines.length} service${q.lines.length > 1 ? "s" : ""}` : "";
+    $("#qs-lines").innerHTML = q.lines.length ? q.lines.map((l, k) => `<div class="qs-line${justAdded === k ? " new" : ""}" data-line="${k}">
+        <div class="ql-info"><b>${esc(l.name)}</b><small>${esc(l.cat)} · from ${X.money(l.base)}</small></div>
+        <div class="ql-size" role="radiogroup" aria-label="Size of ${esc(l.name)}">${SIZES.map(([sk, sl]) => `<button type="button" role="radio" aria-checked="${sk === l.it.size}" data-lsize="${k}:${sk}" title="${sl}">${sl[0]}</button>`).join("")}</div>
+        <div class="ql-qty" aria-label="Quantity of ${esc(l.name)}"><button type="button" data-lqty="${k}:-1" aria-label="One less"${l.it.qty <= 1 ? " disabled" : ""}>−</button><span>${l.it.qty}</span><button type="button" data-lqty="${k}:1" aria-label="One more"${l.it.qty >= 20 ? " disabled" : ""}>+</button></div>
+        <span class="ql-price">${X.money(l.low)}–${X.money(l.high)}</span>
+        <button type="button" class="ql-rm" data-lrm="${k}" aria-label="Remove ${esc(l.name)}"><i data-lucide="x"></i></button></div>`).join("")
+      : `<div class="qs-empty"><i data-lucide="mouse-pointer-click"></i>Pick one or more services above to build your quote.</div>`;
+    justAdded = null;
+    $("#qs-plat-step").classList.toggle("muted", !hasPlat());
+    $("#qs-plat").innerHTML = PLATFORMS.map(([k, l, h, , ic]) => `<button type="button" role="checkbox" aria-checked="${qs.plat.includes(k)}" data-qplat="${k}"${k === "pc" ? ' disabled title="Always included"' : ""}><i data-lucide="${ic}"></i>${l}<small>${h}</small></button>`).join("");
+    $("#qs-time").innerHTML = TIMES.map(([k, l, h]) => `<button type="button" role="radio" aria-checked="${k === qs.time}" data-qtime="${k}"><b>${l}</b><small>${h}</small></button>`).join("");
+    $("#qs-extras").innerHTML = EXTRAS.map(([k, l, h, , d]) => `<label class="qs-x" title="${d}"><input type="checkbox" data-qx="${k}"${qs.extras.includes(k) ? " checked" : ""}><span class="qs-box"><i data-lucide="check"></i></span><span class="qs-x-t">${l}<em>${d}</em></span><small>${h}</small></label>`).join("");
+    $$("#qs-contact [data-qcontact]").forEach(b => b.setAttribute("aria-checked", b.dataset.qcontact === qs.contact));
+    $("#qs-email-wrap").hidden = qs.contact !== "email";
+    paintQuote(q); icons();
   };
+  const paintQuote = (q = quote()) => {
+    countTo(q.low, q.high);
+    $("#qs-count").textContent = q.lines.length ? `${q.lines.length} service${q.lines.length > 1 ? "s" : ""}` : "";
+    $("#qs-rbx").textContent = q.high ? `≈ R$ ${fmtN(X.inCur(q.low, "rbx"))} – ${fmtN(X.inCur(q.high, "rbx"))}${q.monthly ? ` · + ${X.money(q.monthly)}/month` : ""}` : "";
+    const pr = $("#qs-promo");
+    pr.hidden = !(q.promo && q.high);
+    if (q.promo && q.high) pr.innerHTML = `<span class="pb-code">${esc(q.promo.code)}</span>With your code: <b>${X.money(Math.round(q.low * (100 - q.promo.pct) / 100))}–${X.money(Math.round(q.high * (100 - q.promo.pct) / 100))}</b>`;
+    const fit = $("#qs-fit");
+    fit.hidden = !(qs.budget && q.high);
+    if (qs.budget && q.high) {
+      const [cls, ic, txt] = qs.budget >= q.high ? ["ok", "circle-check", "Fits your budget"] : qs.budget >= q.low ? ["mid", "circle-alert", "Close to your budget"] : ["off", "circle-x", "Above your budget · try a smaller size or a flexible timeline"];
+      fit.className = "qs-fit " + cls; fit.innerHTML = `<i data-lucide="${ic}"></i><span>${txt} (€${qs.budget})</span>`;
+    }
+    $("#qs-days").textContent = q.dur;
+    $("#qs-sum").innerHTML = q.lines.map(l => `<li><span>${esc(l.name)}${l.it.qty > 1 ? ` ×${l.it.qty}` : ""}</span><b>${X.money(l.low)}–${X.money(l.high)}</b></li>`).join("")
+      + (q.add && q.lines.length ? `<li><span>Fixed extras</span><b>${X.money(q.add)}</b></li>` : "")
+      + `<li class="qs-sum-sep"><span>Platforms</span><b>${esc(q.plats.join(", ") || "—")}</b></li><li><span>Extras</span><b>${esc(q.extras.join(", ") || "None")}</b></li><li><span>Deadline</span><b>${esc(q.time)}</b></li>`;
+    $("#qs-send").disabled = !q.lines.length; $("#qs-copy").disabled = !q.lines.length;
+    $("#qs-mail").href = `mailto:tomokari.pro@gmail.com?subject=${encodeURIComponent("Quote request")}&body=${encodeURIComponent(summary(q))}`;
+    icons();
+  };
+  const qAdd = (c, i, opts = {}) => {
+    qs.browse = c;
+    if (isPicked(c, i) < 0) { qs.items.push({ cat: c, svc: i, size: opts.size || "medium", qty: 1 }); justAdded = qs.items.length - 1; }
+    saveQ(); renderQuote();
+  };
+  const toQuote = () => $("#quote").scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
   $("#qs").addEventListener("click", e => {
-    const c = e.target.closest("[data-qcat]"); if (c) { qs.cat = c.dataset.qcat; qs.svc = 0; renderQuote(); return; }
-    const sv = e.target.closest("[data-qsvc]"); if (sv) { qs.svc = +sv.dataset.qsvc; $$("[data-qsvc]").forEach(b => b.setAttribute("aria-checked", b === sv)); paintQuote(); }
-    const sz = e.target.closest("[data-qsize]"); if (sz) { qs.size = sz.dataset.qsize; $$("[data-qsize]").forEach(b => b.setAttribute("aria-checked", b === sz)); paintQuote(); }
-    const tm = e.target.closest("[data-qtime]"); if (tm) { qs.time = tm.dataset.qtime; $$("[data-qtime]").forEach(b => b.setAttribute("aria-checked", b === tm)); paintQuote(); }
+    const c = e.target.closest("[data-qcat]"); if (c) { qs.browse = c.dataset.qcat; saveQ(); renderQuote(); return; }
+    const sv = e.target.closest("[data-qsvc]");
+    if (sv) { const i = +sv.dataset.qsvc, at = isPicked(qs.browse, i); if (at >= 0) qs.items.splice(at, 1); else { qs.items.push({ cat: qs.browse, svc: i, size: "medium", qty: 1 }); justAdded = qs.items.length - 1; } saveQ(); renderQuote(); return; }
+    const ls = e.target.closest("[data-lsize]"); if (ls) { const [k, v] = ls.dataset.lsize.split(":"); qs.items[+k].size = v; saveQ(); renderQuote(); return; }
+    const lq = e.target.closest("[data-lqty]"); if (lq) { const [k, v] = lq.dataset.lqty.split(":").map(Number); qs.items[k].qty = Math.max(1, Math.min(20, qs.items[k].qty + v)); saveQ(); renderQuote(); return; }
+    const lr = e.target.closest("[data-lrm]");
+    if (lr) {
+      const k = +lr.dataset.lrm, row = lr.closest(".qs-line");
+      const done = () => { qs.items.splice(k, 1); saveQ(); renderQuote(); };
+      if (reduce) done(); else row.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateX(24px)" }], { duration: 220, easing: "ease-in" }).finished.then(done);
+      return;
+    }
+    const pl = e.target.closest("[data-qplat]"); if (pl && !pl.disabled) { const k = pl.dataset.qplat; qs.plat = qs.plat.includes(k) ? qs.plat.filter(x => x !== k) : [...qs.plat, k]; saveQ(); renderQuote(); return; }
+    const tm = e.target.closest("[data-qtime]"); if (tm) { qs.time = tm.dataset.qtime; saveQ(); renderQuote(); return; }
+    const ct = e.target.closest("[data-qcontact]"); if (ct) { qs.contact = ct.dataset.qcontact; saveQ(); renderQuote(); if (qs.contact === "email") $("#qs-email").focus(); }
   });
-  $("#qs").addEventListener("change", e => { const x = e.target.closest("[data-qx]"); if (x) { x.checked ? qs.extras.add(x.dataset.qx) : qs.extras.delete(x.dataset.qx); paintQuote(); } });
-  $("#qs-msg").addEventListener("input", () => { clearTimeout(paintQuote.t); paintQuote.t = setTimeout(paintQuote, 300); });
-  $("#qs-copy").addEventListener("click", async e => {
-    const text = summary(quote());
-    try { await navigator.clipboard.writeText(text); toast("Copied · paste it in my Discord DMs (@zo7q)"); } catch (err) { toast("Couldn't copy, use Email instead"); }
+  $("#qs").addEventListener("change", e => { const x = e.target.closest("[data-qx]"); if (x) { qs.extras = x.checked ? [...new Set([...qs.extras, x.dataset.qx])] : qs.extras.filter(k => k !== x.dataset.qx); saveQ(); paintQuote(); } });
+  const budgetOut = () => { $("#qs-budget-out").textContent = qs.budget ? (qs.budget >= 2000 ? "€2,000+" : X.money(qs.budget)) : "No budget set"; };
+  $("#qs-budget").addEventListener("input", e => { qs.budget = +e.target.value; budgetOut(); saveQ(); paintQuote(); $("#qs-budget").style.setProperty("--v", (qs.budget / 20) + "%"); });
+  [["#qs-msg", "msg"], ["#qs-links", "links"], ["#qs-email", "email"]].forEach(([sel, k]) => { $(sel).value = qs[k] || ""; $(sel).addEventListener("input", e => { qs[k] = e.target.value; saveQ(); clearTimeout(paintQuote.t); paintQuote.t = setTimeout(() => paintQuote(), 300); }); });
+  $("#qs-budget").value = qs.budget; $("#qs-budget").style.setProperty("--v", (qs.budget / 20) + "%"); budgetOut();
+  $("#qs-copy").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(summary(quote())); toast("Copied · paste it in my Discord DMs (@zo7q)"); } catch (err) { toast("Couldn't copy, use Email instead"); }
+  });
+  $("#qs-reset").addEventListener("click", () => {
+    if (!confirm("Start your quote over?")) return;
+    qs = qDefault(); qs.items = []; saveQ();
+    ["#qs-msg", "#qs-links", "#qs-email"].forEach(sel => { $(sel).value = ""; });
+    $("#qs-budget").value = 0; $("#qs-budget").style.setProperty("--v", "0%"); budgetOut(); renderQuote(); toast("Quote cleared");
   });
   $("#qs-send").addEventListener("click", async e => {
     const A = UI.Account, q = quote(), btn = e.currentTarget;
+    if (!q.lines.length) return;
+    if (qs.contact === "email" && !/^\S+@\S+\.\S+$/.test(qs.email.trim())) { toast("Add your email, or pick Discord"); $("#qs-email").focus(); return; }
     if (!A.user) { toast("Sign in with Discord to send your request"); setTimeout(A.signIn, 900); return; }
     btn.disabled = true;
     try {
-      await A.api("/api/order", { method: "POST", body: JSON.stringify({
-        items: [{ title: `Quote · ${q.cat} — ${q.name} · ${q.size} · ${q.time}${q.extras.length ? " · " + q.extras.join(", ") : ""} (estimate €${q.low}–€${q.high})`, price: q.low, type: "quote" }],
-        currency: "€", source: "quote", note: $("#qs-msg").value.trim() }) });
-      toast("Request sent · I'll contact you on Discord"); $("#qs-msg").value = ""; UI.openOrders();
+      const items = q.lines.map(l => ({ title: `Quote · ${l.cat} — ${l.name} · ${l.size}${l.it.qty > 1 ? ` ×${l.it.qty}` : ""} (estimate €${l.low}–€${l.high})`, price: l.low, type: "quote" }));
+      if (q.add) items.push({ title: `Quote · fixed extras (${q.extras.filter(n => EXTRAS.some(x => x[1] === n && x[3].add)).join(", ")})`, price: q.add, type: "quote" });
+      await A.api("/api/order", { method: "POST", body: JSON.stringify({ items, currency: "€", source: "quote", note: summary(q).slice(0, 1000) }) });
+      toast("Request sent · I'll contact you soon"); qs.msg = ""; $("#qs-msg").value = ""; saveQ(); UI.openOrders();
     } catch (err) { toast(err.message); }
     btn.disabled = false;
   });
   renderQuote();
-  document.addEventListener("click", e => { const b = e.target.closest("[data-quote]"); if (!b) return; const [c, i] = b.dataset.quote.split(":"); qs.cat = c; qs.svc = +i; renderQuote(); });
+  document.addEventListener("promochange", () => paintQuote());
+  document.addEventListener("click", e => { const b = e.target.closest("[data-quote]"); if (!b) return; const [c, i] = b.dataset.quote.split(":"); qAdd(c, +i); toast("Added to your quote"); });
 
   /* Barre de commande : questions, projets, packs, services */
   UI.palette.add(() => [
@@ -994,7 +1110,7 @@
     ...projects.map((p, i) => ({ g: "Projects", label: p.t, hint: p.d, img: p.img, k: p.tech.join(" "), run: () => { showTab("projects"); $(`[data-proj="${i}"]`).click(); } })),
     ...packs.map((p, i) => ({ g: "Photos", label: p.name + " · photos", hint: p.desc, img: "img/" + p.imgs[0][0], run: () => { showTab("photos"); packIdx = i; renderPack(); $("#portfolio").scrollIntoView({ behavior: "smooth" }); } })),
     { g: "Go to", label: "Quote simulator", hint: "Get a price range for your project", icon: "calculator", k: "price estimate devis cost", run: () => $("#quote").scrollIntoView({ behavior: "smooth" }), top: true },
-    ...Object.entries(plans).flatMap(([c, list]) => list.map(([n, d, eur], i) => ({ g: "Services", label: n, hint: `${cats.find(x => x[0] === c)[1]} · from ${X.money(eur)}`, icon: "receipt", k: d + " price pricing service", run: () => { qs.cat = c; qs.svc = i; renderQuote(); $("#quote").scrollIntoView({ behavior: "smooth" }); } })))
+    ...Object.entries(plans).flatMap(([c, list]) => list.map(([n, d, eur], i) => ({ g: "Services", label: n, hint: `${cats.find(x => x[0] === c)[1]} · from ${X.money(eur)}`, icon: "receipt", k: d + " price pricing service", run: () => { qAdd(c, i); toQuote(); toast(`${n} added to your quote`); } })))
   ]);
 
   /* Compteurs : les chiffres défilent quand on arrive dessus */
@@ -1163,8 +1279,8 @@
     const u = e.target.closest("[data-qa-use]");
     if (u) {
       const r = JSON.parse(u.dataset.qaUse);
-      qs.cat = r.what; qs.svc = r.svc; qs.size = r.size; qs.time = r.time; qs.extras = new Set(r.polish ? ["polish"] : []);
-      closeModal(); renderQuote();
+      qs.browse = r.what; qs.items = [{ cat: r.what, svc: r.svc, size: r.size, qty: 1 }]; qs.time = r.time; qs.extras = r.polish ? ["polish"] : [];
+      saveQ(); closeModal(); renderQuote();
       setTimeout(() => { $("#quote .qs").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }); $(".qs-res").animate([{ boxShadow: "0 0 0 0 rgba(255,90,31,.6)" }, { boxShadow: "0 0 0 14px rgba(255,90,31,0)" }], { duration: 1200, delay: 500 }); }, 150);
     }
   });

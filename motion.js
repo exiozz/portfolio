@@ -1,7 +1,7 @@
 /*
  * Exiozz — animations partagées par index.html et shop.html.
  * Titres révélés mot à mot, images dévoilées au scroll, lumière qui suit la souris sur les cartes,
- * cartes inclinées en 3D, boutons « aimantés », barre de progression, bandeau défilant, parallaxe.
+ * cartes inclinées en 3D, boutons « aimantés », barre de progression, parallaxe.
  * Tout est coupé si le visiteur a demandé « moins d'animations » dans son système.
  */
 (() => {
@@ -73,25 +73,6 @@
     para.forEach(el => { el.style.transform = `translate3d(0, ${(y * +el.dataset.parallax).toFixed(1)}px, 0)`; });
   }
   onScroll();
-
-  /* Bandeau défilant : accélère et penche selon la vitesse du scroll */
-  const marquees = [...document.querySelectorAll("[data-marquee]")];
-  if (marquees.length) {
-    marquees.forEach(m => { const t = m.querySelector(".mq-track"); t.innerHTML += t.innerHTML; });
-    let lastY = scrollY, vel = 0, off = 0, last = performance.now();
-    const loop = now => {
-      const dt = Math.min(.05, (now - last) / 1000); last = now;
-      const dy = scrollY - lastY; lastY = scrollY;
-      vel += (dy * 1.2 - vel) * .1;
-      off += (40 + Math.abs(vel) * 18) * dt;
-      marquees.forEach(m => {
-        const t = m.firstElementChild, w = t.scrollWidth / 2 || 1;
-        t.style.transform = `translate3d(${-(off % w)}px, 0, 0) skewX(${Math.max(-8, Math.min(8, -vel * .5)).toFixed(2)}deg)`;
-      });
-      requestAnimationFrame(loop);
-    };
-    requestAnimationFrame(loop);
-  }
 
   if (!fine) return;
 

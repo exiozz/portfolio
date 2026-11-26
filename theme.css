@@ -1218,3 +1218,11 @@ html[data-theme="light"] .btn-w::after, html[data-theme="light"] .nav-shop::afte
   .gb-side { display: none; }
 }
 @media (max-width: 520px) { .idea { grid-template-columns: 48px minmax(0, 1fr); } .idea-adm { grid-column: 1 / -1; justify-content: flex-end; } .gb-wall { columns: 2 140px; column-gap: 10px; } .note { padding: 18px 12px 12px; } }
+
+/* Admin : vitrine des clients */
+.a-shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.a-shot { margin: 0; display: grid; gap: 8px; padding: 10px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); }
+.a-shot img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 8px; display: block; }
+.a-shot b { display: block; font-size: 13px; }
+.a-shot span { font: 400 11px/1.4 var(--mono); color: var(--ink-4); }
+.a-shot .btn { height: 32px; justify-content: center; font-size: 12px; }

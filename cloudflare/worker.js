@@ -122,6 +122,9 @@ async function notifyAdmin(env, content) {
 const liveFiles = (order) => (order.files || []).filter((f) => f.expiresAt > Date.now());
 const publicOrder = (o) => ({ ...o, files: liveFiles(o).map((f) => ({ id: f.id, name: f.name, size: f.size, kind: f.url ? 'link' : 'file', expiresAt: f.expiresAt })) });
 const partKey = (id, i) => `file:${id}:${i}`;
+const shotKey = (id) => `shot:${id}`;           // captures de la vitrine des clients
+const SHOT_MAX_BYTES = 2 * 1048576;
+const fromB64 = (str) => Uint8Array.from(atob(str), (c) => c.charCodeAt(0));
 const libKey = (id, i) => `lib:${id}:${i}`;
 // Un fichier de commande peut pointer vers un fichier de la bibliothèque (champ lib)
 const fileKey = (f, i) => (f.lib ? libKey(f.lib, i) : partKey(f.id, i));
@@ -601,21 +604,63 @@ async function route(request, env, ctx) {
     const orders = await getVal(env, 'orders', []);
     const bought = orders.some((o) => o.discordId === user.id && o.status === 'Payée' && (o.items || []).some((it) => it.productId === productId));
     if (!bought && !user.isAdmin) throw new HttpError(403, 'Seuls les clients qui ont acheté cet asset peuvent le noter.');
+    // Capture d'écran facultative (vitrine « Made with this asset ») : envoyée en data URL, gardée dans KV
+    let image = null;
+    if (b.image) {
+      const mm = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(String(b.image));
+      if (!mm) throw new HttpError(400, 'Image invalide (JPEG, PNG ou WebP).');
+      const bytes = fromB64(mm[2]);
+      if (bytes.length > SHOT_MAX_BYTES) throw new HttpError(413, 'Image trop lourde (2 Mo max).');
+      if (!env.FILES) throw new HttpError(500, 'Stockage KV non lié (variable FILES).');
+      image = newId();
+      await env.FILES.put(shotKey(image), bytes, { metadata: { type: mm[1] } });
+    }
     const review = { discordId: user.id, name: user.name, avatar: user.avatar || '', rating, text, timestamp: Date.now() };
+    let oldImage = null;
     await updateVal(env, 'assetReviews', {}, (all) => {
+      const old = (all[productId] || []).find((r) => r.discordId === user.id);
+      if (old && old.image) { if (image || b.removeImage) oldImage = old.image; else review.image = old.image; }
+      if (image) review.image = image;
       all[productId] = [review, ...(all[productId] || []).filter((r) => r.discordId !== user.id)];
       return all;
     });
+    if (oldImage) await env.FILES.delete(shotKey(oldImage)).catch(() => {});
+    return json({ ok: true, review });
+  }
+  // Image de la vitrine (publique, mise en cache)
+  if ((m = /^\/api\/shots\/([a-z0-9]+)$/.exec(path)) && method === 'GET') {
+    if (!env.FILES) throw new HttpError(404, 'Image introuvable.');
+    const { value, metadata } = await env.FILES.getWithMetadata(shotKey(m[1]), 'arrayBuffer');
+    if (!value) throw new HttpError(404, 'Image introuvable.');
+    return new Response(value, { headers: { 'Content-Type': (metadata && metadata.type) || 'image/jpeg', 'Cache-Control': 'public, max-age=86400' } });
+  }
+  // Retirer seulement l'image d'une note (l'auteur ou l'admin)
+  if ((m = /^\/api\/asset-reviews\/([^/]+)\/([^/]+)\/image$/.exec(path)) && method === 'DELETE') {
+    const user = await auth(env, request);
+    const productId = decodeURIComponent(m[1]), discordId = decodeURIComponent(m[2]);
+    if (discordId !== user.id && !user.isAdmin) throw new HttpError(403, 'Accès refusé.');
+    let img = null;
+    await updateVal(env, 'assetReviews', {}, (all) => {
+      const r = (all[productId] || []).find((x) => x.discordId === discordId);
+      if (r && r.image) { img = r.image; delete r.image; }
+      return all;
+    });
+    if (!img) throw new HttpError(404, 'Pas d\'image sur cette note.');
+    await env.FILES.delete(shotKey(img)).catch(() => {});
     return json({ ok: true });
   }
   if ((m = /^\/api\/asset-reviews\/([^/]+)\/([^/]+)$/.exec(path)) && method === 'DELETE') {
     const user = await auth(env, request);
     const productId = decodeURIComponent(m[1]), discordId = decodeURIComponent(m[2]);
     if (discordId !== user.id && !user.isAdmin) throw new HttpError(403, 'Accès refusé.');
+    let img = null;
     await updateVal(env, 'assetReviews', {}, (all) => {
-      all[productId] = (all[productId] || []).filter((r) => r.discordId !== discordId);
+      const r = (all[productId] || []).find((x) => x.discordId === discordId);
+      if (r && r.image) img = r.image;
+      all[productId] = (all[productId] || []).filter((x) => x.discordId !== discordId);
       return all;
     });
+    if (img && env.FILES) await env.FILES.delete(shotKey(img)).catch(() => {});
     return json({ ok: true });
   }
 

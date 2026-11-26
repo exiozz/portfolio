@@ -61,7 +61,58 @@
 .custom { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: center; padding: 48px; border-radius: 24px; background: linear-gradient(150deg, var(--card-2), var(--card)); border: 1px solid var(--line); }
 .custom h2 { margin: 0 0 12px; font: 800 clamp(32px, 4vw, 52px)/1.02 var(--display); letter-spacing: -.03em; }
 .custom p { margin: 0; color: var(--ink-3); max-width: 34rem; line-height: 1.7; }
+.item .cat { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.rate { display: inline-flex; align-items: center; gap: 4px; font: 500 11px/1 var(--mono); letter-spacing: 0; color: var(--ink-2); text-transform: none; }
+.rate i { font-style: normal; color: #f5c542; }
+.rate small { color: var(--ink-4); font-size: 11px; }
+.bundle-strip { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; padding: 14px 18px; border-radius: 14px; background: linear-gradient(100deg, rgba(255, 90, 31, .10), transparent 70%), var(--card); border: 1px solid var(--line); font-size: 13px; color: var(--ink-2); }
+.bundle-strip > svg { width: 20px; height: 20px; color: var(--accent); flex: none; }
+.bundle-strip b { color: var(--ink); font-weight: 600; }
+.bundle-strip .bs-txt { flex: 1; }
+.bs-bar { display: flex; gap: 4px; flex: none; }
+.bs-bar i { width: 26px; height: 6px; border-radius: 3px; background: var(--line-2); transition: background-color .3s var(--ease); }
+.bs-bar i.on { background: var(--accent); }
+.bundle-strip.on { background: linear-gradient(100deg, rgba(74, 222, 128, .10), transparent 70%), var(--card); }
+.bundle-strip.on > svg, .bundle-strip.on .bs-bar i.on { color: #3fcf74; background-color: #3fcf74; }
+.bundle-strip.on > svg { background: none; }
+.d-gal-main { position: relative; }
+.d-gal-main video, .d-gal-main model-viewer { width: 100%; height: 100%; display: block; object-fit: cover; background: #0b0b0b; }
+.d-gal-main model-viewer { --poster-color: transparent; background: radial-gradient(circle at 50% 40%, #3a3d42, #16171a); }
+.zoomable { cursor: zoom-in; }
+.zoomable img { transition: transform .35s var(--ease); }
+.zoomable.zoom { cursor: zoom-out; }
+.zoomable.zoom img { transform: scale(2.4); transition: transform .35s var(--ease), transform-origin 0s; }
+.g-hint { position: absolute; right: 10px; bottom: 10px; display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 9px; border-radius: 7px; background: rgba(10,10,10,.72); color: #f2f2f2; font: 500 11px/1 var(--mono); backdrop-filter: blur(6px); pointer-events: none; }
+.g-hint svg { width: 13px; height: 13px; }
+.d-thumbs button { position: relative; }
+.d-thumbs .t-badge { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,.35); color: #fff; }
+.d-thumbs .t-badge svg { width: 18px; height: 18px; }
+.d-thumbs .t-badge.txt { font: 600 11px/1 var(--mono); }
+.cmp { position: relative; width: 100%; height: 100%; --pos: 50%; user-select: none; }
+.cmp img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cmp .cmp-before { clip-path: inset(0 calc(100% - var(--pos)) 0 0); }
+.cmp-line { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 2px; translate: -1px 0; background: #fff; pointer-events: none; }
+.cmp-line::after { content: "⟷"; position: absolute; top: 50%; left: 50%; translate: -50% -50%; width: 36px; height: 36px; border-radius: 18px; display: grid; place-items: center; background: #fff; color: #0a0a0a; font-size: 15px; box-shadow: 0 4px 16px rgba(0,0,0,.35); }
+.cmp-lbl { position: absolute; top: 10px; height: 24px; display: inline-flex; align-items: center; padding: 0 8px; border-radius: 6px; background: rgba(10,10,10,.72); color: #f2f2f2; font: 500 11px/1 var(--mono); pointer-events: none; }
+.cmp input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: ew-resize; margin: 0; }
+.d-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.ar { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
+.ar-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.ar-head b { font: 700 16px/1 var(--display); }
+.ar-list { display: grid; gap: 8px; }
+.ar .cmt { grid-template-columns: 32px 1fr auto; padding: 12px; }
+.ar .cmt .av { width: 32px; height: 32px; }
+.ar .cmt img.av { object-fit: cover; }
+.ar-form { display: grid; gap: 10px; margin-top: 12px; padding: 14px; border-radius: 12px; background: var(--fill); border: 1px solid var(--line); }
+.ar-form textarea { min-height: 70px; width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); font-size: 13px; resize: vertical; }
+.ar-lock { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: 12px; color: var(--ink-4); }
+.ar-lock svg { width: 15px; height: 15px; flex: none; }
+.ar-lock .btn { margin-left: auto; height: 34px; }
+.stars-pick { display: flex; gap: 2px; }
+.stars-pick button { font-size: 22px; line-height: 1; color: var(--ink-4); padding: 2px; }
+.stars-pick button.on { color: #f5c542; }
 @media (max-width: 960px) {
+  .bundle-strip { flex-wrap: wrap; }
   .s-hero { padding-top: 120px; }
   .s-hero-row, .custom { grid-template-columns: minmax(0, 1fr); }
   .items { grid-template-columns: minmax(0, 1fr); }
@@ -108,7 +159,7 @@
     <div class="s-hero-row">
       <div>
         <p class="lead rv" style="margin-bottom:22px">Ready-to-use Roblox assets, tested and documented — to launch your project faster. Personal or commercial license, in euros or Robux.</p>
-        <label class="search rv"><i data-lucide="search"></i><span class="sr">Search for an asset</span><input id="q" type="search" placeholder="Search an asset, a category, a tag" autocomplete="off"><span class="key">Ctrl K</span></label>
+        <label class="search rv"><i data-lucide="search"></i><span class="sr">Search for an asset</span><input id="q" type="search" placeholder="Search an asset, a category, a tag" autocomplete="off"><button class="key" type="button" data-open-cmdk aria-label="Open the command bar">Ctrl K</button></label>
       </div>
       <div class="s-stats">
         <div class="stat rv"><div class="stat-top"><span class="stat-ic"><i data-lucide="box"></i></span><b id="stat-count">4</b></div><div class="stat-bot"><span>Assets</span></div></div>
@@ -130,6 +181,7 @@
       </div>
       <div id="promo-form"></div>
     </div>
+    <div class="bundle-strip" id="bundle-strip" aria-live="polite"></div>
     <span class="count-label" id="count-label" aria-live="polite"></span>
     <div class="items" id="items"></div>
   </div>
@@ -144,7 +196,7 @@
       <div class="ask rv">
         <img src="img/avatar-bust.png" alt="" class="ask-av">
         <div><b>Another question?</b><span>Message me on Discord, <span class="live" style="display:inline-flex"><span data-discord="online">38</span>&nbsp;members online</span> right now.</span></div>
-        <div class="btns"><a class="btn btn-w" href="https://discord.gg/rGcdngHsCe"><i data-lucide="message-circle"></i>Discord</a><a class="btn btn-o" href="mailto:tomokari.pro@gmail.com"><i data-lucide="mail"></i>Email</a></div>
+        <div class="btns"><a class="btn btn-w" href="https://discord.gg/rGcdngHsCe"><i data-lucide="message-circle"></i>Discord</a><button class="btn btn-o copy-btn" data-copy-discord type="button"><i class="copy-ic" data-lucide="copy"></i><i class="copy-ok" data-lucide="check"></i><b style="font-weight:500">Copy @zo7q</b></button><a class="btn btn-o" href="mailto:tomokari.pro@gmail.com"><i data-lucide="mail"></i>Email</a></div>
       </div>
     </div>
     <div class="faq-list" id="faq-list"></div>
@@ -174,6 +226,7 @@
 
 <script src="promo.js"></script>
 <script src="ui.js"></script>
+<script src="extras.js"></script>
 <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 <script>
 (() => {
@@ -200,7 +253,23 @@
     return `<button aria-pressed="${id === cat}" data-cat="${id}">${label}<span class="n">${n}</span></button>`;
   }).join("");
   $("#sort-menu").innerHTML = sorts.map(([k, l]) => `<li><button role="option" aria-selected="${k === sort}" data-sort="${k}"><span><b>${l}</b></span><i class="tick" data-lucide="check"></i></button></li>`).join("");
+  /* Favoris, notes des acheteurs et pack groupé */
+  const A = UI.Account, esc = UI.esc;
+  const heartHTML = p => { const on = UI.Wish.has(p.id); return `<button class="heart" data-wish="${p.id}" aria-pressed="${on}" aria-label="${on ? "Remove from" : "Save to"} wishlist: ${p.name}"><i data-lucide="heart"></i></button>`; };
+  let ratings = {}, myOrders = null;
+  const avgOf = id => { const l = ratings[id] || []; return l.length ? { avg: l.reduce((s, r) => s + r.rating, 0) / l.length, n: l.length } : null; };
+  const rateHTML = id => { const a = avgOf(id); return a ? `<span class="rate" aria-label="Rated ${a.avg.toFixed(1)} out of 5 by ${a.n} buyer${a.n > 1 ? "s" : ""}"><i>★</i>${a.avg.toFixed(1)}<small>(${a.n})</small></span>` : ""; };
+  const loadRatings = async () => { try { const r = await fetch(A.API + "/api/asset-reviews"); if (r.ok) { ratings = await r.json() || {}; render(); renderDetails(); } } catch (e) {} };
+  const loadMyOrders = async () => { myOrders = null; if (!A.user) { renderDetails(); return; } try { myOrders = await A.api(`/api/orders/${encodeURIComponent(A.user.id)}`); } catch (e) { myOrders = []; } renderDetails(); };
+  const boughtIt = id => A.isAdmin() || (myOrders || []).some(o => o.status === "Payée" && (o.items || []).some(i => i.productId === id));
+  const renderBundle = () => {
+    const el = $("#bundle-strip"), B = X.BUNDLE; if (!B.pct) { el.hidden = true; return; }
+    const n = X.Cart.items().filter(i => i.kind === "asset").length, on = n >= B.min;
+    el.classList.toggle("on", on);
+    el.innerHTML = `<i data-lucide="${on ? "badge-check" : "gift"}"></i><span class="bs-txt">${on ? `<b>Bundle unlocked</b> · −${B.pct}% on every asset in your cart` : `<b>Bundle deal</b> · take ${B.min} assets or more, get <b>−${B.pct}%</b> on each${n ? ` · ${B.min - n} more to go` : ""}`}</span><span class="bs-bar" aria-hidden="true">${Array.from({ length: B.min }, (_, k) => `<i class="${k < n ? "on" : ""}"></i>`).join("")}</span>`;
+  };
   const render = () => {
+    renderBundle();
     const list = X.PRODUCTS.filter(p => cat === "all" || p.cat === cat)
       .filter(p => !q || norm([p.name, p.catLabel, p.desc, ...p.tags].join(" ")).includes(norm(q)))
       .sort(sorts.find(s => s[0] === sort)[2]);
@@ -209,10 +278,11 @@
       const inCart = X.Cart.has(p.id);
       return `<article class="pcard item">
         <div class="pcard-img" data-details="${p.id}" role="button" tabindex="0" aria-label="Details: ${p.name}"><span class="flag">${p.badge}</span><img src="${p.cover}" alt="${p.name}" loading="lazy"></div>
-        <div class="pcard-body"><span class="cat">${p.catLabel}</span><h3>${p.name}</h3><p>${p.desc}</p>
+        <div class="pcard-body"><span class="cat">${p.catLabel}${rateHTML(p.id)}</span><h3>${p.name}</h3><p>${p.desc}</p>
           <div class="tags">${p.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
           <div class="item-foot">${X.priceHTML(p.eur, cur, "", p.rbx)}
             <button class="btn ${inCart ? "in-cart" : "btn-w"}" data-add="${p.id}">${inCart ? '<i data-lucide="check"></i>In cart' : '<i data-lucide="plus"></i>Add'}</button>
+            ${heartHTML(p)}
             <button class="details" data-details="${p.id}">Details <i data-lucide="arrow-right"></i></button>
           </div></div></article>`;
     }).join("") : `<div class="empty-list"><b>Nothing in this category yet</b>It's coming soon. Need something specific? <a href="#custom" style="text-decoration:underline">Request a custom asset</a></div>`;
@@ -221,7 +291,6 @@
   $("#cats").addEventListener("click", e => { const b = e.target.closest("[data-cat]"); if (!b) return; cat = b.dataset.cat; $$("#cats button").forEach(x => x.setAttribute("aria-pressed", x === b)); render(); });
   $$("[data-cur]").forEach(b => b.addEventListener("click", () => { cur = b.dataset.cur; $$("[data-cur]").forEach(x => x.setAttribute("aria-pressed", x === b)); render(); renderDetails(); }));
   $("#q").addEventListener("input", e => { q = e.target.value.trim(); render(); });
-  addEventListener("keydown", e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $("#q").focus(); $("#q").scrollIntoView({ block: "center", behavior: "smooth" }); } });
 
   /* Tri (menu déroulant) */
   const sortDD = $("#sort"), sortBtn = $("#sort-btn");
@@ -234,18 +303,47 @@
   });
   document.addEventListener("click", e => { if (!e.target.closest("#sort")) setSort(false); });
 
-  /* Détails d'un asset */
+  /* Détails d'un asset : photos (zoom), vidéo, aperçu 3D, avant / après, notes des acheteurs */
   const modal = $("#modal");
-  let current = null, offer = "single", gal = 0;
+  let current = null, offer = "single", gal = 0, pick = 5;
+  const mediaOf = p => {
+    const imgs = p.gallery.map(([src, cap]) => ({ type: "img", src, thumb: src, cap }));
+    const extra = [
+      p.model && { type: "3d", src: p.model, thumb: p.cover, cap: "3D preview — drag to rotate" },
+      p.video && { type: "video", src: p.video.src, poster: p.video.poster, thumb: p.video.poster, cap: "Presentation video" },
+      p.compare && { type: "compare", ...p.compare, thumb: p.compare.after, cap: "Before / after" }
+    ].filter(Boolean);
+    return [imgs[0], ...extra, ...imgs.slice(1)];
+  };
+  let mvLoading = null;
+  const needModelViewer = () => mvLoading || (mvLoading = new Promise(res => { const sc = document.createElement("script"); sc.type = "module"; sc.src = "https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"; sc.onload = res; sc.onerror = res; document.head.appendChild(sc); }));
+  const mediaHTML = m => {
+    if (m.type === "video") return `<video src="${m.src}" poster="${m.poster || ""}" controls playsinline preload="none" aria-label="${m.cap}"></video>`;
+    if (m.type === "3d") { needModelViewer(); return `<model-viewer src="${m.src}" poster="${current.cover}" camera-controls auto-rotate shadow-intensity="1" touch-action="pan-y" alt="${m.cap}"></model-viewer><span class="g-hint"><i data-lucide="rotate-3d"></i>Drag to rotate</span>`; }
+    if (m.type === "compare") { const [lb, la] = m.labels || ["Before", "After"]; return `<div class="cmp"><img src="${m.after}" alt="${la}"><img class="cmp-before" src="${m.before}" alt="${lb}"><span class="cmp-line"></span><span class="cmp-lbl" style="left:10px">${lb}</span><span class="cmp-lbl" style="right:10px">${la}</span><input type="range" min="0" max="100" value="50" aria-label="Slide between ${lb.toLowerCase()} and ${la.toLowerCase()}" data-cmp></div>`; }
+    return `<div class="zoomable" data-zoom style="width:100%;height:100%"><img src="${m.src}" alt="${m.cap}"></div><span class="g-hint"><i data-lucide="zoom-in"></i>Click to zoom</span>`;
+  };
+  const thumbBadge = m => m.type === "video" ? `<span class="t-badge"><i data-lucide="play"></i></span>` : m.type === "3d" ? `<span class="t-badge txt">3D</span>` : m.type === "compare" ? `<span class="t-badge"><i data-lucide="split"></i></span>` : "";
+  const reviewsHTML = p => {
+    const list = ratings[p.id] || [], a = avgOf(p.id);
+    const mine = A.user && list.find(r => r.discordId === A.user.id);
+    const items = list.slice(0, 4).map(r => `<div class="cmt">${r.avatar ? `<img class="av" src="${esc(r.avatar)}" alt="">` : `<span class="av">${esc((r.name || "?").slice(0, 1).toUpperCase())}</span>`}<div><b>${esc(r.name || "Buyer")}</b> <span class="rate"><i>${"★".repeat(r.rating)}</i></span>${r.text ? `<p>${esc(r.text)}</p>` : ""}</div>${A.user && (r.discordId === A.user.id || A.isAdmin()) ? `<button class="like" data-ardel="${esc(r.discordId)}" aria-label="Delete this rating"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>` : "<span></span>"}</div>`).join("");
+    let form;
+    if (!A.user) form = `<div class="ar-lock"><i data-lucide="lock"></i><span>Bought it? Sign in to rate it.</span><button class="btn btn-o" data-signin>Sign in</button></div>`;
+    else if (myOrders === null) form = `<div class="ar-lock"><i data-lucide="loader"></i><span>Checking your purchases…</span></div>`;
+    else if (!boughtIt(p.id)) form = `<div class="ar-lock"><i data-lucide="shield-check"></i><span>Only verified buyers can rate this asset.</span></div>`;
+    else form = `<form class="ar-form" id="ar-form"><b style="font-size:13px">${mine ? "Update your rating" : "Rate this asset"}</b><div class="stars-pick" role="radiogroup" aria-label="Your rating">${[1, 2, 3, 4, 5].map(v => `<button type="button" role="radio" aria-checked="${v === pick}" aria-label="${v} star${v > 1 ? "s" : ""}" data-pick="${v}" class="${v <= pick ? "on" : ""}">★</button>`).join("")}</div><label class="sr" for="ar-text">Your review</label><textarea id="ar-text" name="text" maxlength="600" placeholder="What did you think? (optional)">${mine ? esc(mine.text || "") : ""}</textarea><button class="btn btn-w">Post rating</button></form>`;
+    return `<div class="ar"><div class="ar-head"><b>Buyer ratings</b>${a ? `<span class="rate"><i>★</i>${a.avg.toFixed(1)}<small>(${a.n})</small></span>` : `<span class="mono" style="font-size:11px;color:var(--ink-4)">No rating yet</span>`}</div>${items ? `<div class="ar-list">${items}</div>` : ""}${form}</div>`;
+  };
   const renderDetails = () => {
-    const p = current; if (!p) return;
-    const inCart = X.Cart.has(p.id);
+    const p = current; if (!p || !modal.classList.contains("open")) return;
+    const inCart = X.Cart.has(p.id), media = mediaOf(p), m = media[gal] || media[0];
     $("#modal-in").innerHTML = `<div>
-        <div class="d-gal-main"><img src="${p.gallery[gal][0]}" alt="${p.gallery[gal][1]}"></div>
-        ${p.gallery.length > 1 ? `<div class="d-thumbs">${p.gallery.map(([src, cap], i) => `<button data-gal="${i}" aria-current="${i === gal}" aria-label="${cap}"><img src="${src}" alt="" loading="lazy"></button>`).join("")}</div>` : ""}
+        <div class="d-gal-main">${mediaHTML(m)}</div>
+        ${media.length > 1 ? `<div class="d-thumbs">${media.map((x, i) => `<button data-gal="${i}" aria-current="${i === gal}" aria-label="${x.cap}"><img src="${x.thumb}" alt="" loading="lazy">${thumbBadge(x)}</button>`).join("")}</div>` : ""}
       </div>
       <div>
-        <span class="kicker">${p.catLabel} · ${p.badge}</span>
+        <div class="d-head"><span class="kicker">${p.catLabel} · ${p.badge}</span>${heartHTML(p)}</div>
         <h3>${p.name}</h3><p>${p.desc}</p>
         <div class="tags">${p.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
         <div class="offers" role="radiogroup" aria-label="Offer">
@@ -255,18 +353,35 @@
         ${offer === "pass" ? `<a class="btn btn-w wide" href="https://discord.gg/rGcdngHsCe">Request the Asset Pass on Discord</a>`
           : cur === "rbx" ? `<button class="btn btn-w wide" data-toast="Buy this asset's Game Pass on Roblox, then send your username on Discord">Pay with Robux</button>`
           : `<button class="btn wide ${inCart ? "in-cart" : "btn-w"}" data-add="${p.id}">${inCart ? "In cart · view cart" : "Add to cart"}</button>`}
-        <p class="d-note">Source files and documentation included · 14-day support</p>
+        <p class="d-note">Source files and documentation included · 14-day support${X.BUNDLE.pct ? ` · −${X.BUNDLE.pct}% when you take ${X.BUNDLE.min}+ assets` : ""}</p>
+        ${reviewsHTML(p)}
       </div>`;
     icons();
   };
-  const openDetails = id => { current = X.PRODUCTS.find(p => p.id === id); if (!current) return; offer = "single"; gal = 0; renderDetails(); modal.classList.add("open"); };
-  const closeModal = () => modal.classList.remove("open");
+  const openDetails = id => { current = X.PRODUCTS.find(p => p.id === id); if (!current) return; offer = "single"; gal = 0; pick = 5; modal.classList.add("open"); renderDetails(); };
+  const closeModal = () => { modal.classList.remove("open"); modal.querySelectorAll("video").forEach(v => v.pause()); };
   $("#modal-close").addEventListener("click", closeModal);
   modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
   addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
   $("#modal-in").addEventListener("click", e => {
     const g = e.target.closest("[data-gal]"); if (g) { gal = +g.dataset.gal; renderDetails(); }
     const o = e.target.closest("[data-offer]"); if (o) { offer = o.dataset.offer; renderDetails(); }
+    const z = e.target.closest("[data-zoom]");
+    if (z) { const on = z.classList.toggle("zoom"); if (on) zoomAt(z, e); }
+    const sp = e.target.closest("[data-pick]"); if (sp) { pick = +sp.dataset.pick; $$("[data-pick]").forEach(b => { b.classList.toggle("on", +b.dataset.pick <= pick); b.setAttribute("aria-checked", +b.dataset.pick === pick); }); }
+    const del = e.target.closest("[data-ardel]");
+    if (del && confirm("Delete this rating?")) A.api(`/api/asset-reviews/${encodeURIComponent(current.id)}/${encodeURIComponent(del.dataset.ardel)}`, { method: "DELETE" }).then(() => { toast("Rating deleted"); loadRatings(); }).catch(err => toast(err.message));
+  });
+  // Loupe : l'image s'agrandit autour du curseur
+  const zoomAt = (z, e) => { const r = z.getBoundingClientRect(), img = z.querySelector("img"); img.style.transformOrigin = `${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`; };
+  $("#modal-in").addEventListener("pointermove", e => { const z = e.target.closest(".zoomable.zoom"); if (z) zoomAt(z, e); });
+  $("#modal-in").addEventListener("input", e => { const c = e.target.closest("[data-cmp]"); if (c) c.parentElement.style.setProperty("--pos", c.value + "%"); });
+  $("#modal-in").addEventListener("submit", async e => {
+    if (e.target.id !== "ar-form") return;
+    e.preventDefault();
+    const btn = e.target.querySelector(".btn"); btn.disabled = true;
+    try { await A.api("/api/asset-reviews", { method: "POST", body: JSON.stringify({ productId: current.id, rating: pick, text: e.target.text.value }) }); toast("Thanks for your rating!"); await loadRatings(); }
+    catch (err) { toast(err.message); btn.disabled = false; }
   });
   document.addEventListener("click", e => {
     const d = e.target.closest("[data-details]"); if (d) openDetails(d.dataset.details);
@@ -278,6 +393,8 @@
   });
   document.addEventListener("keydown", e => { const d = e.target.closest && e.target.closest("[data-details]"); if (d && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openDetails(d.dataset.details); } });
   document.addEventListener("cartchange", () => { render(); renderDetails(); });
+  document.addEventListener("wishchange", () => { render(); renderDetails(); });
+  document.addEventListener("authchange", loadMyOrders);
   document.addEventListener("promochange", () => { render(); renderDetails(); });
 
   /* FAQ du shop */
@@ -299,7 +416,9 @@
     $$("#faq-list .qa").forEach((el, i) => { el.classList.toggle("open", i === open); $(".qa-q", el).setAttribute("aria-expanded", i === open); });
   });
 
-  render(); renderFaq();
+  render(); renderFaq(); loadRatings(); loadMyOrders();
+  window.ShopPage = { open: openDetails };
+  UI.palette.add(() => faq.map(([qq, a], i) => ({ g: "FAQ", label: qq, hint: a, icon: "circle-help", run: () => { open = i; renderFaq(); $("#faq").scrollIntoView({ behavior: "smooth" }); } })));
   const qs = new URLSearchParams(location.search), wanted = qs.get("product") || qs.get("produit");
   if (wanted) openDetails(wanted);
   icons();

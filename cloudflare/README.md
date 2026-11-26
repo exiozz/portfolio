@@ -5,7 +5,13 @@ Le serveur tient dans **un seul fichier** : `worker.js`. Il gère :
 - la **connexion Discord**, avec un jeton signé : personne ne peut se faire passer pour quelqu'un d'autre ;
 - les **commandes** : tout passe par toi, tu valides dans le panneau admin (shop → menu Discord → « Mes commandes ») ;
 - les **liens de téléchargement** : dans « Mes commandes » (admin), la **bibliothèque des assets** garde le lien de chaque asset (rangé une seule fois). Sur une commande, **« Envoyer les fichiers de l'asset »** donne ce lien au client en un clic, et **« Ajouter un lien »** permet d'en envoyer un à la main. Le client voit ses liens dans « Mes commandes » pendant **24 h** ; il est le seul (avec toi) à pouvoir les ouvrir ;
-- les **avis** de la page d'accueil.
+- les **avis** de la page d'accueil ;
+- les **notes des assets** (seuls les clients avec une commande « Payée » peuvent noter) ;
+- la **liste d'envies** de chaque client, gardée avec son compte Discord ;
+- tes **disponibilités** (« 2 places libres ce mois-ci »), réglées dans l'espace admin → onglet Availability ;
+- les **demandes de devis** du simulateur : elles arrivent comme des commandes, avec le message du client.
+
+> Après chaque mise à jour de `worker.js` dans ce dépôt, recolle-le dans Cloudflare (Edit code → Deploy).
 
 **Tes avis et tes commandes ne sont pas perdus** : à la première visite, le serveur les copie automatiquement depuis l'ancien serveur Replit, tant que celui-ci est encore en ligne.
 

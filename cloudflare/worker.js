@@ -6,7 +6,7 @@
  *  - Fichiers envoyés par l'admin sous une commande, supprimés au bout de 24 h
  *  - Bibliothèque des assets : les fichiers de chaque asset, rangés une fois,
  *    envoyés au client en un clic depuis une commande
- *  - Avis clients
+ *  - Avis clients, notes des assets, liste d'envies, disponibilités
  *  - Récupération automatique des avis et commandes de l'ancien serveur
  *
  * À coller tel quel dans l'éditeur Cloudflare (Workers → ton worker → Edit code).
@@ -277,10 +277,11 @@ async function route(request, env, ctx) {
       id: newId(), customerName: user.name, discordId: user.id, items,
       total: items.reduce((s, it) => s + it.price, 0),
       currency: clampStr(b.currency || '€', 5), source: clampStr(b.source || 'site', 20),
+      note: clampStr(b.note, 1000).trim() || undefined, // message du client (demande de devis)
       status: 'En attente de contact', timestamp: Date.now(), files: []
     };
     await updateVal(env, 'orders', [], (orders) => { orders.unshift(order); return orders; });
-    ctx.waitUntil(notifyAdmin(env, `🛒 Nouvelle commande de **${order.customerName}** (<@${order.discordId}>) — ${order.total} ${order.currency}\n` + items.map((it) => `• ${it.title} — ${it.price}`).join('\n')));
+    ctx.waitUntil(notifyAdmin(env, `🛒 Nouvelle commande de **${order.customerName}** (<@${order.discordId}>) — ${order.total} ${order.currency}\n` + items.map((it) => `• ${it.title} — ${it.price}`).join('\n') + (order.note ? `\n> ${order.note.slice(0, 500)}` : '')));
     return json({ ok: true, id: order.id });
   }
 
@@ -547,6 +548,65 @@ async function route(request, env, ctx) {
     if (discordId !== user.id && !user.isAdmin) throw new HttpError(403, 'Accès refusé.');
     await updateVal(env, 'reviews', [], (reviews) => reviews.filter((r) => r.discordId !== discordId));
     return json({ ok: true });
+  }
+
+  /* --- Liste d'envies : gardée avec le compte Discord --- */
+  if (path === '/api/wishlist' && method === 'GET') {
+    const user = await auth(env, request);
+    return json((await getVal(env, 'wishlists', {}))[user.id] || []);
+  }
+  if (path === '/api/wishlist' && method === 'POST') {
+    const user = await auth(env, request);
+    const b = await readJson(request);
+    const ids = [...new Set((Array.isArray(b.ids) ? b.ids : []).map((x) => clampStr(x, 100).trim()).filter(Boolean))].slice(0, 100);
+    await updateVal(env, 'wishlists', {}, (w) => { w[user.id] = ids; return w; });
+    return json({ ok: true, ids });
+  }
+
+  /* --- Notes des assets : seuls les clients dont la commande est « Payée » peuvent noter --- */
+  if (path === '/api/asset-reviews' && method === 'GET') {
+    return json(await getVal(env, 'assetReviews', {}));
+  }
+  if (path === '/api/asset-reviews' && method === 'POST') {
+    const user = await auth(env, request);
+    const b = await readJson(request);
+    const productId = clampStr(b.productId, 100).trim();
+    const rating = Math.round(+b.rating);
+    const text = clampStr(b.text, 600).trim();
+    if (!productId) throw new HttpError(400, 'Asset manquant.');
+    if (!(rating >= 1 && rating <= 5)) throw new HttpError(400, 'Note invalide.');
+    const orders = await getVal(env, 'orders', []);
+    const bought = orders.some((o) => o.discordId === user.id && o.status === 'Payée' && (o.items || []).some((it) => it.productId === productId));
+    if (!bought && !user.isAdmin) throw new HttpError(403, 'Seuls les clients qui ont acheté cet asset peuvent le noter.');
+    const review = { discordId: user.id, name: user.name, avatar: user.avatar || '', rating, text, timestamp: Date.now() };
+    await updateVal(env, 'assetReviews', {}, (all) => {
+      all[productId] = [review, ...(all[productId] || []).filter((r) => r.discordId !== user.id)];
+      return all;
+    });
+    return json({ ok: true });
+  }
+  if ((m = /^\/api\/asset-reviews\/([^/]+)\/([^/]+)$/.exec(path)) && method === 'DELETE') {
+    const user = await auth(env, request);
+    const productId = decodeURIComponent(m[1]), discordId = decodeURIComponent(m[2]);
+    if (discordId !== user.id && !user.isAdmin) throw new HttpError(403, 'Accès refusé.');
+    await updateVal(env, 'assetReviews', {}, (all) => {
+      all[productId] = (all[productId] || []).filter((r) => r.discordId !== discordId);
+      return all;
+    });
+    return json({ ok: true });
+  }
+
+  /* --- Disponibilités (places libres ce mois-ci), réglées depuis l'espace admin --- */
+  if (path === '/api/availability' && method === 'GET') {
+    return json(await getVal(env, 'availability', { slots: null, note: '', updatedAt: 0 }));
+  }
+  if (path === '/api/availability' && method === 'POST') {
+    const user = await auth(env, request); adminOnly(user);
+    const b = await readJson(request);
+    const slots = b.slots === null || b.slots === '' ? null : Math.max(0, Math.min(99, Math.round(+b.slots) || 0));
+    const value = { slots, note: clampStr(b.note, 140).trim(), updatedAt: Date.now() };
+    await setVal(env, 'availability', value);
+    return json({ ok: true, ...value });
   }
 
   return json({ error: 'Route inconnue.' }, 404);

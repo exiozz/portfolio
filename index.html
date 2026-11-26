@@ -355,12 +355,15 @@
           <div class="gb-row" id="gb-name-wrap"><label class="sr" for="gb-name">Your name</label><input id="gb-name" maxlength="24" placeholder="Your name or Roblox username" autocomplete="nickname"></div>
           <div class="gb-pick"><span class="qs-lbl">Emoji</span><div class="gb-emojis" id="gb-emojis" role="radiogroup" aria-label="Emoji"></div></div>
           <div class="gb-pick"><span class="qs-lbl">Color</span><div class="gb-colors" id="gb-colors" role="radiogroup" aria-label="Note color"></div></div>
-          <div class="gb-foot"><span class="cm-hint" id="gb-as"></span><span class="cm-hint" id="gb-left">140</span><button class="btn btn-w"><i data-lucide="pin"></i>Pin it</button></div>
+          <div class="gb-foot"><span class="cm-hint" id="gb-as"></span><span class="cm-hint" id="gb-left">140</span><button class="btn btn-w"><i data-lucide="pin"></i>Place it on the board</button></div>
         </div>
         <div class="gb-side" aria-hidden="true"><span class="qs-lbl">Preview</span><figure class="note gb-prev c-sun" id="gb-preview"><span class="note-pin"></span><span class="note-e" id="gb-prev-e">👋</span><blockquote id="gb-prev-t">Your message…</blockquote><figcaption><b id="gb-prev-n">Visitor</b><span>just now</span></figcaption></figure></div>
       </form>
-      <div class="cm-bar" style="margin-top:28px"><b class="cm-wall-t">The wall</b><span class="mono cm-count" id="gb-count"></span></div>
-      <div class="gb-wall" id="gb-wall"><div class="cm-empty"><i data-lucide="loader"></i><span>Loading the wall…</span></div></div>
+      <div class="cm-bar" style="margin-top:28px"><b class="cm-wall-t">The board</b><span class="mono cm-count" id="gb-count"></span></div>
+      <div class="gb-place" id="gb-place" hidden role="status"><span>📌 <b>Drag your post-it</b> anywhere on the board, then pin it</span><div class="btns"><button type="button" class="btn btn-o" data-gb-cancel>Cancel</button><button type="button" class="btn btn-w" data-gb-pin><i data-lucide="pin"></i>Pin it here</button></div></div>
+      <p class="gb-swipe" aria-hidden="true">← Swipe the board to see every post-it →</p>
+      <div class="gb-scroll" id="gb-scroll"><div class="gb-board" id="gb-wall"><div class="gb-empty"><span>📌</span><b>Loading the board…</b></div></div></div>
+      <p class="d-note gb-tip"><i data-lucide="move" style="width:14px;height:14px;flex:none;margin-top:2px"></i>Your own post-its stay movable: drag them, or select one and use the arrow keys.</p>
     </div>
   </div>
 </section>

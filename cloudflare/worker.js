@@ -811,8 +811,29 @@ async function route(request, env, ctx) {
   /* --- Livre d'or : un petit mot ou un emoji, sans être client --- */
   const GB_EMOJIS = ['👋', '🔥', '❤️', '🎮', '🧱', '⭐', '🚀', '😎'];
   const GB_COLORS = ['sun', 'mint', 'sky', 'rose', 'lilac', 'peach'];
+  // Position sur le tableau, en % (0 à 100) : le post-it se place où on veut
+  const pos = (v) => (Number.isFinite(+v) ? Math.max(0, Math.min(100, Math.round(+v * 10) / 10)) : null);
   if (path === '/api/guestbook' && method === 'GET') {
-    return json((await getVal(env, 'guestbook', [])).map(({ ip, cid, ...e }) => e));
+    // ?cid= (facultatif) : indique les post-its de ce navigateur, qu'il peut déplacer
+    const raw = url.searchParams.get('cid'); const me = raw ? await anonId(raw).catch(() => null) : null;
+    const user = await optUser();
+    return json((await getVal(env, 'guestbook', [])).map(({ ip, cid, ...e }) => ({ ...e, mine: (!!me && cid === me) || (!!user && (user.isAdmin || e.discordId === user.id)) })));
+  }
+  if ((m = /^\/api\/guestbook\/([^/]+)$/.exec(path)) && method === 'PATCH') {
+    const b = await readJson(request);
+    const user = await optUser();
+    const me = b.cid ? await anonId(b.cid).catch(() => null) : null;
+    const x = pos(b.x), y = pos(b.y);
+    if (x === null || y === null) throw new HttpError(400, 'Position invalide.');
+    let found = false;
+    await updateVal(env, 'guestbook', [], (list) => {
+      const e = list.find((n) => n.id === decodeURIComponent(m[1])); if (!e) return list;
+      const allowed = (me && e.cid === me) || (user && (user.isAdmin || e.discordId === user.id));
+      if (!allowed) throw new HttpError(403, 'Tu ne peux déplacer que ton post-it.');
+      e.x = x; e.y = y; found = true; return list;
+    });
+    if (!found) throw new HttpError(404, 'Message introuvable.');
+    return json({ ok: true, x, y });
   }
   if (path === '/api/guestbook' && method === 'POST') {
     const b = await readJson(request);
@@ -826,11 +847,11 @@ async function route(request, env, ctx) {
     let entry = null;
     await updateVal(env, 'guestbook', [], (list) => {
       if (!(user && user.isAdmin) && list.some((e) => (e.ip === ip || e.cid === me) && now - e.timestamp < 5 * 60e3)) throw new HttpError(429, 'Doucement ! Un message toutes les 5 minutes.');
-      entry = { id: newId(), name, text, emoji, color, verified: !!user, avatar: user ? user.avatar || '' : '', discordId: user ? user.id : undefined, ip, cid: me, timestamp: now };
+      entry = { id: newId(), name, text, emoji, color, verified: !!user, avatar: user ? user.avatar || '' : '', discordId: user ? user.id : undefined, x: pos(b.x) ?? undefined, y: pos(b.y) ?? undefined, ip, cid: me, timestamp: now };
       return [entry, ...list].slice(0, 150);
     });
     const { ip: _i, cid: _c, ...pub } = entry;
-    return json({ ok: true, entry: pub });
+    return json({ ok: true, entry: { ...pub, mine: true } });
   }
   if ((m = /^\/api\/guestbook\/([^/]+)$/.exec(path)) && method === 'DELETE') {
     const user = await auth(env, request);

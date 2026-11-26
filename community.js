@@ -117,59 +117,137 @@
     btn.disabled = false;
   });
 
-  /* ============================ Livre d'or ============================ */
+  /* ============================ Livre d'or : un tableau où l'on épingle son post-it où l'on veut ============================ */
   const EMOJIS = ["👋", "🔥", "❤️", "🎮", "🧱", "⭐", "🚀", "😎"];
   const COLORS = ["sun", "mint", "sky", "rose", "lilac", "peach"];
-  let notes = [], gbEmoji = "👋", gbColor = "sun";
-  const noteHTML = (n, k, fresh) => {
-    const canDel = A.user && (A.isAdmin() || n.discordId === A.user.id);
-    return `<figure class="note c-${esc(n.color)}${fresh ? " fresh" : ""}" style="--i:${k};--r:${((k * 37) % 7) - 3}deg">
+  let notes = [], gbEmoji = "👋", gbColor = "sun", draft = null;
+  const board = () => $("#gb-wall");
+  // Place par défaut d'un ancien post-it sans position : répartie, mais toujours la même
+  const hash = str => { let h = 2166136261; for (const c of String(str)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
+  const spot = n => (typeof n.x === "number" && typeof n.y === "number") ? [n.x, n.y] : [(hash(n.id) % 1000) / 10, (hash(n.id + "y") % 1000) / 10];
+  const rot = n => ((hash(n.id + "r") % 9) - 4);
+  const noteHTML = (n, fresh) => {
+    const canDel = A.user && (A.isAdmin() || n.discordId === A.user.id), [x, y] = spot(n);
+    return `<figure class="note pinned c-${esc(n.color)}${n.mine ? " movable" : ""}${fresh ? " fresh" : ""}" data-note="${esc(n.id)}" style="--x:${x};--y:${y};--r:${rot(n)}deg"${n.mine ? ` tabindex="0" aria-label="Your post-it. Drag it, or use the arrow keys, to move it"` : ""}>
       <span class="note-pin" aria-hidden="true"></span>
       <span class="note-e" aria-hidden="true">${n.emoji}</span>
       ${n.text ? `<blockquote>${esc(n.text)}</blockquote>` : ""}
       <figcaption>${n.verified ? avatar(n.avatar, n.name) : ""}<b>${esc(n.name)}</b>${n.verified ? '<span class="note-ok" title="Signed in with Discord">✓</span>' : ""}<span>${ago(n.timestamp)}</span></figcaption>
+      ${n.mine ? '<span class="note-move" aria-hidden="true">⠿ move</span>' : ""}
       ${canDel ? `<button class="note-x" data-note-del="${esc(n.id)}" aria-label="Delete this message">×</button>` : ""}
     </figure>`;
   };
   const renderNotes = freshId => {
     $("#gb-count").textContent = `${notes.length} message${notes.length === 1 ? "" : "s"}`;
-    $("#gb-wall").innerHTML = notes.length ? notes.map((n, k) => noteHTML(n, k, n.id === freshId)).join("")
-      : `<div class="cm-empty"><i data-lucide="sticky-note"></i><b>The wall is empty</b><span>Leave the very first message</span></div>`;
+    // Les plus anciens d'abord : les nouveaux passent par-dessus
+    const list = notes.slice().sort((a, b) => a.timestamp - b.timestamp);
+    board().innerHTML = (list.length ? list.map(n => noteHTML(n, n.id === freshId)).join("") : `<div class="gb-empty"><span>📌</span><b>The board is empty</b><small>Write a message above, then pin it anywhere</small></div>`) + (draft ? draftHTML() : "");
     icons();
   };
+  const draftHTML = () => `<figure class="note pinned movable draft c-${gbColor}" id="gb-draft" style="--x:${draft.x};--y:${draft.y};--r:-2deg" tabindex="0" aria-label="Your new post-it. Drag it, or use the arrow keys, then pin it">
+      <span class="note-pin" aria-hidden="true"></span><span class="note-e" aria-hidden="true">${gbEmoji}</span><blockquote>${esc(draft.text)}</blockquote>
+      <figcaption><b>${esc(draft.name)}</b><span>now</span></figcaption><span class="note-move" aria-hidden="true">⠿ drag me</span></figure>`;
   const renderGbForm = () => {
     $("#gb-name-wrap").hidden = signedIn();
     $("#gb-as").innerHTML = signedIn() ? `Posting as <b>${esc(A.user.name)}</b> <span class="note-ok">✓</span>` : `No account needed · <button type="button" class="cm-link" data-signin>sign in</button> to get a ✓`;
     $("#gb-emojis").innerHTML = EMOJIS.map(e => `<button type="button" role="radio" aria-checked="${e === gbEmoji}" data-gbe="${e}" aria-label="${e}">${e}</button>`).join("");
     $("#gb-colors").innerHTML = COLORS.map(c => `<button type="button" role="radio" aria-checked="${c === gbColor}" data-gbc="${c}" class="sw c-${c}" aria-label="${c} note"></button>`).join("");
     $("#gb-preview").className = "note gb-prev c-" + gbColor; $("#gb-prev-e").textContent = gbEmoji;
+    const d = $("#gb-draft"); if (d) { d.className = `note pinned movable draft c-${gbColor}`; d.querySelector(".note-e").textContent = gbEmoji; }
   };
-  const loadNotes = async () => { try { notes = await (await fetch(A.API + "/api/guestbook")).json(); if (!Array.isArray(notes)) notes = []; } catch (e) { notes = []; } renderNotes(); };
+  const loadNotes = async () => {
+    try { notes = A.user ? await A.api(`/api/guestbook?cid=${encodeURIComponent(UI.cid)}`) : await (await fetch(`${A.API}/api/guestbook?cid=${encodeURIComponent(UI.cid)}`)).json(); if (!Array.isArray(notes)) notes = []; } catch (e) { notes = []; }
+    renderNotes();
+  };
+
+  /* Déplacer un post-it : souris, doigt ou flèches du clavier */
+  const posFrom = (el, cx, cy, off) => {
+    const r = board().getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight;
+    const x = ((cx - off.x - r.left) / Math.max(1, r.width - w)) * 100, y = ((cy - off.y - r.top) / Math.max(1, r.height - h)) * 100;
+    return [Math.max(0, Math.min(100, x)), Math.max(0, Math.min(100, y))];
+  };
+  const setPos = (el, x, y) => { el.style.setProperty("--x", x.toFixed(1)); el.style.setProperty("--y", y.toFixed(1)); };
+  const savePos = async (id, x, y) => {
+    const n = notes.find(v => v.id === id); if (!n) return;
+    const before = [n.x, n.y]; n.x = +x.toFixed(1); n.y = +y.toFixed(1);
+    try {
+      const res = await fetch(`${A.API}/api/guestbook/${encodeURIComponent(id)}`, { method: "PATCH", headers: { "Content-Type": "application/json", ...(A.user ? { Authorization: "Bearer " + A.user.token } : {}) }, body: JSON.stringify({ x: n.x, y: n.y, cid: UI.cid }) });
+      const d = await res.json(); if (!res.ok) throw new Error(d.error || "Couldn't move it");
+    } catch (err) { [n.x, n.y] = before; renderNotes(); toast(err.message); }
+  };
+  let drag = null;
+  root.addEventListener("pointerdown", e => {
+    const el = e.target.closest(".note.movable"); if (!el || e.target.closest(".note-x") || e.button > 0) return;
+    const r = el.getBoundingClientRect();
+    drag = { el, id: el.dataset.note, off: { x: e.clientX - r.left, y: e.clientY - r.top }, sx: e.clientX, sy: e.clientY, moved: false };
+    el.setPointerCapture(e.pointerId); el.classList.add("dragging");
+  });
+  root.addEventListener("pointermove", e => {
+    if (!drag) return;
+    if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 4) return;
+    drag.moved = true;
+    const [x, y] = posFrom(drag.el, e.clientX, e.clientY, drag.off); setPos(drag.el, x, y);
+    if (drag.el.id === "gb-draft") { draft.x = x; draft.y = y; }
+  });
+  const endDrag = () => {
+    if (!drag) return;
+    const { el, id, moved } = drag; drag = null; el.classList.remove("dragging");
+    if (!moved) return;
+    el.animate([{ transform: `rotate(var(--r)) scale(1.06)` }, { transform: `rotate(var(--r)) scale(1)` }], { duration: 300, easing: "cubic-bezier(.34, 1.56, .64, 1)" });
+    if (id) savePos(id, +el.style.getPropertyValue("--x"), +el.style.getPropertyValue("--y"));
+  };
+  root.addEventListener("pointerup", endDrag); root.addEventListener("pointercancel", endDrag);
+  root.addEventListener("keydown", e => {
+    const el = e.target.closest && e.target.closest(".note.movable"); if (!el) return;
+    const d = { ArrowLeft: [-2, 0], ArrowRight: [2, 0], ArrowUp: [0, -3], ArrowDown: [0, 3] }[e.key]; if (!d) return;
+    e.preventDefault();
+    const x = Math.max(0, Math.min(100, +el.style.getPropertyValue("--x") + d[0])), y = Math.max(0, Math.min(100, +el.style.getPropertyValue("--y") + d[1]));
+    setPos(el, x, y);
+    if (el.id === "gb-draft") { draft.x = x; draft.y = y; return; }
+    clearTimeout(el._t); el._t = setTimeout(() => savePos(el.dataset.note, x, y), 500);
+  });
+
+  /* Nouveau post-it : on écrit, puis on le pose où on veut sur le tableau */
+  const placing = on => {
+    $("#gb-place").hidden = !on; root.classList.toggle("gb-placing", on);
+    $("#gb-form .btn-w").hidden = on;
+  };
   root.addEventListener("click", async e => {
     const em = e.target.closest("[data-gbe]"); if (em) { gbEmoji = em.dataset.gbe; renderGbForm(); return; }
     const co = e.target.closest("[data-gbc]"); if (co) { gbColor = co.dataset.gbc; renderGbForm(); return; }
+    if (e.target.closest("[data-gb-cancel]")) { draft = null; placing(false); renderNotes(); return; }
+    if (e.target.closest("[data-gb-pin]")) { pinDraft(e.target.closest("[data-gb-pin]")); return; }
     const d = e.target.closest("[data-note-del]");
     if (d) {
       if (!confirm("Delete this message?")) return;
       try { await A.api(`/api/guestbook/${encodeURIComponent(d.dataset.noteDel)}`, { method: "DELETE" }); notes = notes.filter(n => n.id !== d.dataset.noteDel); renderNotes(); toast("Message deleted"); } catch (err) { toast(err.message); }
     }
   });
-  $("#gb-text").addEventListener("input", e => { $("#gb-prev-t").textContent = e.target.value || "Your message…"; $("#gb-left").textContent = 140 - e.target.value.length; });
-  $("#gb-name").addEventListener("input", e => { $("#gb-prev-n").textContent = e.target.value || "Visitor"; });
-  $("#gb-form").addEventListener("submit", async e => {
+  $("#gb-text").addEventListener("input", e => { $("#gb-prev-t").textContent = e.target.value || "Your message…"; $("#gb-left").textContent = 140 - e.target.value.length; if (draft) { draft.text = e.target.value; const q = $("#gb-draft blockquote"); if (q) q.textContent = e.target.value; } });
+  $("#gb-name").addEventListener("input", e => { $("#gb-prev-n").textContent = e.target.value || "Visitor"; if (draft) { draft.name = e.target.value || "Visitor"; const b2 = $("#gb-draft figcaption b"); if (b2) b2.textContent = draft.name; } });
+  $("#gb-form").addEventListener("submit", e => {
     e.preventDefault();
-    const text = $("#gb-text").value.trim(), name = $("#gb-name").value.trim(), btn = e.target.querySelector(".btn");
+    const text = $("#gb-text").value.trim();
     if (!text) { toast("Write a little message first"); $("#gb-text").focus(); return; }
+    // Le brouillon apparaît au milieu de la partie visible du tableau
+    const sc = $("#gb-scroll"), bw = board().offsetWidth, vis = sc.scrollLeft + sc.clientWidth / 2;
+    draft = { text, name: signedIn() ? A.user.name : ($("#gb-name").value.trim() || "Visitor"), x: Math.max(0, Math.min(100, (vis - 100) / Math.max(1, bw - 200) * 100)), y: 35 };
+    renderNotes(); placing(true);
+    board().scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+    setTimeout(() => { const d = $("#gb-draft"); d && d.focus({ preventScroll: true }); }, reduce ? 0 : 500);
+  });
+  async function pinDraft(btn) {
+    if (!draft) return;
     btn.disabled = true;
     try {
-      const res = await fetch(A.API + "/api/guestbook", { method: "POST", headers: { "Content-Type": "application/json", ...(A.user ? { Authorization: "Bearer " + A.user.token } : {}) }, body: JSON.stringify({ text, name, emoji: gbEmoji, color: gbColor, cid: UI.cid }) });
-      const d = await res.json(); if (!res.ok) throw new Error(d.error || "Couldn't post your message");
-      notes.unshift(d.entry); renderNotes(d.entry.id);
+      const res = await fetch(A.API + "/api/guestbook", { method: "POST", headers: { "Content-Type": "application/json", ...(A.user ? { Authorization: "Bearer " + A.user.token } : {}) }, body: JSON.stringify({ text: draft.text, name: draft.name, emoji: gbEmoji, color: gbColor, x: +draft.x.toFixed(1), y: +draft.y.toFixed(1), cid: UI.cid }) });
+      const d = await res.json(); if (!res.ok) throw new Error(d.error || "Couldn't pin your message");
+      draft = null; placing(false); notes.push(d.entry); renderNotes(d.entry.id);
       $("#gb-text").value = ""; $("#gb-prev-t").textContent = "Your message…"; $("#gb-left").textContent = 140;
-      toast("Pinned on the wall · thanks!");
+      toast("Pinned · you can still move it");
     } catch (err) { toast(err.message); }
     btn.disabled = false;
-  });
+  }
 
   const refreshAuth = () => { renderIdeaForm(); renderGbForm(); loadIdeas(); renderNotes(); };
   document.addEventListener("authchange", refreshAuth);

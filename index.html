@@ -13,13 +13,66 @@
 </head>
 <body>
 
-<div class="intro" id="intro" aria-hidden="true">
+<div class="intro" id="intro" role="status" aria-live="polite" aria-label="Loading the site">
+  <div class="ld-cols" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
   <div class="intro-in">
-    <div class="intro-icons"><span><i data-lucide="code-xml"></i></span><span><i data-lucide="user"></i></span><span><i data-lucide="globe"></i></span></div>
-    <h1>Welcome to my<br>portfolio</h1>
+    <div class="ld-stage" aria-hidden="true"><div class="ld-plate"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div>
+    <h1 class="ld-title"><span><span>Welcome</span></span> <span><span>to</span></span> <span><span>my</span></span><br><span><span>portfolio</span></span></h1>
+    <div class="ld-meta"><span class="ld-status" id="ld-status">Loading the site</span><span class="ld-pct"><b id="ld-pct">0</b>%</span></div>
+    <div class="ld-bar" aria-hidden="true"><i id="ld-bar"></i></div>
     <span class="pill">exiozz.github.io/portfolio</span>
   </div>
 </div>
+<script>
+/* Écran de chargement : attend que le site soit vraiment chargé (images, polices, page complète),
+   au moins 3 secondes, puis s'ouvre en volets. Au plus 10 secondes si une image traîne. */
+(function () {
+  var MIN = 3000, MAX = 10000, t0 = performance.now(), root = document.documentElement;
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var intro = document.getElementById("intro"), pctEl = document.getElementById("ld-pct"), barEl = document.getElementById("ld-bar"), stEl = document.getElementById("ld-status");
+  var bricks = intro.querySelectorAll(".ld-plate span");
+  var seen = false; try { seen = sessionStorage.getItem("exiozz-intro") === "1"; sessionStorage.setItem("exiozz-intro", "1"); } catch (e) {}
+  var done, gate = new Promise(function (r) { done = r; });
+  window.IntroGate = gate;
+  if (seen) { intro.remove(); root.classList.add("intro-done"); done(); return; }
+  root.classList.add("loading");
+  var parts = { dom: 0, imgs: 0, fonts: 0, load: 0 }, real = 0, shown = 0, finished = false;
+  var calc = function () { real = parts.dom * 15 + parts.imgs * 55 + parts.fonts * 15 + parts.load * 15; };
+  var trackImgs = function () {
+    var list = [].slice.call(document.images).filter(function (i) { return i.loading !== "lazy" && !i.closest("#intro"); });
+    if (!list.length) { parts.imgs = 1; calc(); return; }
+    var n = 0, step = function () { n++; parts.imgs = n / list.length; calc(); };
+    list.forEach(function (i) { if (i.complete) step(); else { i.addEventListener("load", step, { once: true }); i.addEventListener("error", step, { once: true }); } });
+  };
+  document.addEventListener("DOMContentLoaded", function () { parts.dom = 1; calc(); trackImgs(); (document.fonts ? document.fonts.ready : Promise.resolve()).then(function () { parts.fonts = 1; calc(); }); });
+  addEventListener("load", function () { parts.load = 1; parts.imgs = 1; parts.fonts = 1; calc(); });
+  var STATUS = [[0, "Loading the site"], [30, "Loading images"], [60, "Polishing the details"], [88, "Almost there"]];
+  var frame = function (now) {
+    var t = now - t0, ready = (real >= 100 && t >= MIN) || t >= MAX;
+    // Le compteur suit le vrai chargement, sans dépasser ce que permet le temps minimum
+    var cap = ready ? 100 : Math.min(99, real, 100 * Math.min(1, t / MIN) + (real >= 100 ? 0 : -1));
+    shown += (Math.max(shown, cap) - shown) * (ready ? .25 : .08);
+    if (ready && shown > 99.5) shown = 100;
+    var v = Math.floor(shown);
+    pctEl.textContent = v; barEl.style.transform = "scaleX(" + (shown / 100) + ")";
+    for (var k = 0; k < bricks.length; k++) bricks[k].classList.toggle("on", v >= (k + 1) * (100 / bricks.length) - .5);
+    var st = STATUS[0][1]; STATUS.forEach(function (s) { if (v >= s[0]) st = s[1]; });
+    stEl.textContent = v >= 100 ? "Ready" : st;
+    if (v >= 100 && !finished) { finished = true; return leave(); }
+    requestAnimationFrame(frame);
+  };
+  function leave() {
+    intro.classList.add("ready");
+    setTimeout(function () {
+      intro.classList.add("out");
+      root.classList.remove("loading");
+      setTimeout(function () { root.classList.add("intro-done"); done(); }, reduce ? 0 : 420);
+      setTimeout(function () { intro.remove(); }, reduce ? 300 : 1500);
+    }, reduce ? 150 : 650);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
 
 <header class="nav">
   <div class="nav-in" id="nav-in">
@@ -385,11 +438,8 @@
   const fmtN = n => Number(n).toLocaleString("en-US");
 
   /* Intro, une fois par visite */
-  const intro = $("#intro");
-  let seen = false;
-  try { seen = sessionStorage.getItem("exiozz-intro") === "1"; sessionStorage.setItem("exiozz-intro", "1"); } catch (e) {}
-  const endIntro = () => { intro.classList.add("out"); setTimeout(() => document.documentElement.classList.add("intro-done"), seen || reduce ? 0 : 350); };
-  if (seen || reduce) endIntro(); else { setTimeout(endIntro, 4200); intro.addEventListener("click", endIntro); }
+  // L'écran de chargement (en haut de la page) gère tout seul l'intro ; le texte qui s'écrit attend qu'il soit parti
+  const introGate = window.IntroGate || Promise.resolve();
 
   /* Typing */
   const words = ["Lua Scripter", "Game Developer", "Web Developer", "GFX Designer"];
@@ -404,7 +454,7 @@
     else { del = false; wi = (wi + 1) % words.length; }
     setTimeout(type, del ? 45 : 85);
   };
-  if (reduce) tEl.textContent = words[0]; else setTimeout(type, 4400);
+  if (reduce) tEl.textContent = words[0]; else introGate.then(() => setTimeout(type, 700));
 
   /* Badge sur un cordon élastique : un poids au bout d'un ressort, calculé à pas fixe (fluide sur tous les écrans) */
   const lan = $("#lanyard"), wrap = $("#badge-wrap"), badge = $("#badge");

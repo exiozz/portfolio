@@ -1275,3 +1275,22 @@ html[data-theme="light"] .btn-w::after, html[data-theme="light"] .nav-shop::afte
 .a-local summary { cursor: pointer; margin-bottom: 10px; font: 400 12px/1.4 var(--mono); }
 @media (max-width: 640px) { .a-grid2, .a-grid3 { grid-template-columns: minmax(0, 1fr); } .a-promo { grid-template-columns: auto minmax(0, 1fr); } }
 .a-inline input::placeholder { text-transform: none; }
+
+/* ===== Mobile : corrections d'affichage ===== */
+@media (max-width: 960px) {
+  /* iPhone zoome (et reste zoomé) sur un champ dont le texte fait moins de 16 px */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), textarea, select { font-size: 16px !important; }
+  .score { white-space: nowrap; }
+  .s-stats .stat-bot { letter-spacing: .1em; font-size: 10px; }
+}
+/* Raccourci clavier inutile sur écran tactile */
+@media (hover: none), (max-width: 640px) { .search .key { display: none; } }
+@media (max-width: 640px) {
+  .toolbar #promo-form, .price-bar #promo-form { width: 100%; }
+  .toolbar #promo-form .promo-form, .price-bar #promo-form .promo-form { width: 100%; }
+  .toolbar #promo-form .promo-in, .price-bar #promo-form .promo-in { flex: 1; width: auto; }
+}
+/* Onglets de l'espace admin : une seule ligne, on fait défiler sur petit écran */
+.a-tabs { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.a-tabs::-webkit-scrollbar { display: none; }
+.a-tabs button { flex: none; white-space: nowrap; }

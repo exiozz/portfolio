@@ -580,7 +580,24 @@
     </article>`;
   }
   /* Espace admin (réservé à ton compte Discord : le serveur le vérifie à chaque appel) */
-  let adminTab = "orders", adminOrders = null;
+  let adminTab = "orders", adminOrders = null, adminQuery = "";
+  // Recherche : n° de commande (#XYZ789 ou id complet), ID Discord, nom ou @pseudo
+  const matchOrder = (o, q) => {
+    const t = q.trim().toLowerCase().replace(/^[#@]/, ""); if (!t) return true;
+    const id = String(o.id).toLowerCase();
+    if (id === t || id.endsWith(t)) return true;
+    if (/^\d{3,}$/.test(t) && String(o.discordId || "").includes(t)) return true;
+    return [o.customerName, o.discordUsername].some(v => v && String(v).toLowerCase().includes(t));
+  };
+  function paintOrderList() {
+    const list = $("#a-olist"); if (!list || !adminOrders) return;
+    const hits = adminOrders.filter(o => matchOrder(o, adminQuery));
+    list.innerHTML = hits.length ? hits.map(orderCard).join("")
+      : `<div class="d-empty"><i data-lucide="search-x"></i><b>No order found</b><span>Nothing matches “${esc(adminQuery.trim())}”. Try the 6 characters after #, the full Discord ID, or a name.</span></div>`;
+    const c = $("#a-ocount"); if (c) c.textContent = adminQuery.trim() ? `${hits.length} result${hits.length === 1 ? "" : "s"}` : "";
+    icons();
+  }
+  document.addEventListener("input", e => { if (e.target.id === "a-osearch") { adminQuery = e.target.value; paintOrderList(); } });
   async function renderAdmin() {
     const body = adminD.querySelector(".drawer-body");
     adminD.querySelector(".drawer-foot").innerHTML = `<a class="btn btn-o wide" href="admin.html"><i data-lucide="folder-cog"></i>Full admin panel · files, asset library, new order</a>`;
@@ -595,9 +612,10 @@
         const pending = adminOrders.filter(o => o.status === "En attente de contact").length;
         const paid = adminOrders.filter(o => o.status === "Payée").reduce((s, o) => s + (o.currency === "R$" ? 0 : o.total || 0), 0);
         box.innerHTML = `<div class="a-stats"><div><b>${adminOrders.length}</b><span>Orders</span></div><div><b>${pending}</b><span>To contact</span></div><div><b>${X.money(Math.round(paid * 100) / 100)}</b><span>Paid (€)</span></div></div>` +
-          (adminOrders.length ? `<div class="a-table">${adminOrders.map(orderCard).join("")}</div>`
+          (adminOrders.length ? `<div class="a-searchrow"><label class="a-search"><i data-lucide="search"></i><span class="sr">Search orders</span><input type="search" id="a-osearch" placeholder="Order #, Discord ID, name or @username" value="${esc(adminQuery)}" autocomplete="off" spellcheck="false" enterkeyhint="search"></label><span class="a-ocount" id="a-ocount" aria-live="polite"></span></div><div class="a-table" id="a-olist"></div>`
             : `<div class="d-empty"><i data-lucide="inbox"></i><b>No orders yet</b><span>They show up here as soon as a client orders</span></div>`);
         icons();
+        paintOrderList();
       } catch (e) { errorBox(box, e.message); }
     } else if (adminTab === "avail") {
       body.innerHTML = head + `<div id="a-avail"></div>`; const box = $("#a-avail");

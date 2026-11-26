@@ -1475,3 +1475,16 @@ html[data-theme="light"] .btn-w::after, html[data-theme="light"] .nav-shop::afte
 .ib-rc { display: inline-flex; vertical-align: -1px; margin-right: 5px; color: var(--ink-4); }
 .ib-rc svg { width: 15px; height: 10px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .ib-rc.seen { color: var(--accent); }
+
+/* ===== Admin : onglets sur plusieurs lignes (ordi) + recherche des commandes ===== */
+@media (min-width: 641px) {
+  .a-tabs { display: flex; flex-wrap: wrap; overflow: visible; }
+}
+.a-searchrow { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.a-search { flex: 1; display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px; border-radius: 12px; background: var(--card); border: 1px solid var(--line-2); transition: border-color .2s var(--ease); }
+.a-search:focus-within { border-color: var(--accent); }
+.a-search svg { width: 16px; height: 16px; flex: none; color: var(--ink-4); }
+.a-search input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: none; color: var(--ink); font: inherit; font-size: 15px; }
+.a-search input::placeholder { color: var(--ink-4); }
+.a-ocount { flex: none; font: 400 11px/1 var(--mono); color: var(--ink-4); }
+.a-ocount:empty { display: none; }
